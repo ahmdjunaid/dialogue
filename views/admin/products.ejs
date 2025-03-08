@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialogue Digital - Products</title>
+    <link rel="stylesheet" href="/css/admin/brands.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <%-include("../../views/partials/admin/aside")%>
+
+        <!-- Main content area -->
+        <div class="main-content">
+            <!-- Header with search -->
+            <div class="header">
+                <div class="search-container">
+                    <form action="/admin/products" method="GET">
+                        <input class="search-input" type="text" name="search" id="searchInput"
+                            placeholder="Search for Products">
+                        <button type="submit" id="searchBtn" class="btn btn-success">Search</button>
+                        <button type="button" class="btn btn-secondary" onclick="clearSearch()">Clear</button>
+                    </form>
+                </div>
+                <div class="user-avatar"></div>
+            </div>
+
+            <!-- Categories section -->
+            <div class="categories-container">
+
+                <div class="categories-header">
+                    <div class="categories-title">Products</div>
+                    <a href="/admin/addproduct">
+                        <button class="add-category-btn" button type="button" data-bs-toggle="modal"
+                            data-bs-target="#addBrand">ADD PRODUCTS +</button>
+                    </a>
+                </div>
+
+                <table class="categories-table">
+                    <thead>
+                        <tr>
+                            <th>IMAGE</th>
+                            <th>PRODUCT NAME</th>
+                            <th>BRAND</th>
+                            <th>CATEGORY</th>
+                            <th>STOCK</th>
+                            <th>PRICE</th>
+                            <th>LAST UPDATED</th>
+                            <!-- <th>LISTING</th> -->
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="justify-content-center">
+                        <%for(let i=0; i < products.length; i++ ){%>
+                            <tr>
+                                <td>
+                                    <img src="../uploads/<%= products[i].productImage[0] %>" alt="" height="40em">
+                                </td>
+                                <td>
+                                    <%= products[i].productName %>
+                                </td>
+                                <td>
+                                    <%= products[i].brand %>
+                                </td>
+                                <td>
+                                    <%= products[i].category %>
+                                </td>
+                                <td>
+                                    <%= products[i].stock %>
+                                </td>
+                                <td>
+                                    <%= products[i].salePrice %>
+                                </td>
+                                <td>
+                                    <%= products[i].updatedAt.toLocaleDateString('en-US', { year: 'numeric' ,
+                                        month: 'short' , day: 'numeric' }) %>
+                                </td>
+
+                                <!-- <td>
+                                    <% if(products[i].isDeleted==false) { %>
+                                        <a href="/admin/listcategory?id=<%= products[i]._id %>"
+                                            style="text-decoration: none; color: white;"><button
+                                                class="block-btn btn btn-success">LIST</button></a>
+                                        <% } else { %>
+                                            <a href="/admin/unlistcategory?id=<%= products[i]._id %>"
+                                                style="text-decoration: none; color: white;"><button
+                                                    class="block-btn btn btn-danger">UNLIST</button></a>
+                                            <% } %>
+                                </td> -->
+                                <td>
+                                    <a href="/admin/editproduct/<%= products[i]._id %>" class="btn btn-success">EDIT</a>
+                                    <button onclick="deleteProduct('<%= products[i]._id %>')"
+                                        class="btn btn-danger">DELETE</button>
+                                </td>
+                            </tr>
+                            <% } %>
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <div class="page-numbers">
+                        <div class="page-nav"></div>
+                        <% for (let j=1; j <=totalPages; j++) { %>
+                            <a href="?page=<%= j %>" style="text-decoration: none;">
+                                <button class="page-button <%= (j === currentPage) ? 'active' : '' %>">
+                                    <%= j %>
+                                </button>
+                            </a>
+                            <% } %>
+                                <div class="page-nav"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="message" value="<%= message %>">
+
+        <!-- deleteModal -->
+        <div class="modal fade" id="deleteProduct" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" style="background-color: #292d38;">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Product</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-container">
+                            <h6>Are you sure want to delete this Product ?</h6>
+                            <form method="post" action="/admin/deleteproduct">
+                                <input type="hidden" id="delete_id" name="id">
+                                <div class="button-container">
+                                    <button type="submit" class="btn btn-danger">DELETE PRODUCT</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+
+        <script>
+            let message = document.getElementById('message').value;
+            if (message) {
+                swal.fire(message)
+            }
+
+
+            function clearSearch() {
+                document.getElementById("searchInput").value = "";
+                document.getElementById('searchBtn').click();
+
+            }
+
+            function deleteProduct(productId) {
+                document.getElementById('delete_id').value = productId
+
+                var modal = new bootstrap.Modal(document.getElementById('deleteProduct'))
+                modal.show()
+            }
+        </script>

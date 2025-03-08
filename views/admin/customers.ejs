@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialogue Digital - Users</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/admin/customer.css">
+</head>
+
+<body>
+  <!-- Overlay for mobile menu background -->
+  <div class="overlay"></div>
+  <%-include("../../views/partials/admin/aside")%>
+
+    <main class="main-content">
+      <div class="header">
+        <button class="mobile-menu-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <form action="/admin/users" method="GET">
+            <input type="text" name="search" id="searchInput" placeholder="Search for User Name">
+            <button type="submit" id="searchBtn" class="btn btn-success">Search</button>
+            <button type="button" class="btn btn-secondary" onclick="clearSearch()">Clear</button>
+          </form>
+        </div>
+        <div class="user-profile">
+          <img src="/api/placeholder/36/36" alt="User Profile">
+        </div>
+      </div>
+
+      <!-- Users Table -->
+      <div class="users-table">
+        <table>
+          <thead>
+            <tr>
+              <th>USER IMAGE</th>
+              <th>USER NAME</th>
+              <th>EMAIL</th>
+              <th>MOBILE</th>
+              <th>DATE OF CREATION</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for(let i=0; i < data.length; i++) { %>
+              <tr>
+                <td>
+                  <div class="user-img">
+                    <i class="fas fa-user"></i>
+                  </div>
+                </td>
+                <td>
+                  <%= data[i].username %>
+                </td>
+                <td>
+                  <%= data[i].email %>
+                </td>
+                <td>
+                  <%= data[i].phone %>
+                </td>
+                <td>
+                  <%= data[i].createdOn.toLocaleDateString('en-US', { year: 'numeric' , month: 'short' , day: 'numeric'
+                    }) %>
+                </td>
+                <td>
+                  <% if(data[i].isBlocked==false) { %>
+                    <button class="block-btn btn btn-danger" onclick="return blockUser('<%= data[i]._id %>')">BLOCK</button>
+                    <% } else { %>
+                      <a href="/admin/unblockUser?id=<%= data[i]._id %>"
+                        style="text-decoration: none; color: white;"><button
+                          class="block-btn btn btn-success">UNBLOCK</button></a>
+                      <% } %>
+                </td>
+              </tr>
+              <% } %>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div class="pagination-controls">
+            <% for (let j=1; j <= totalPages; j++) { %>
+              <a href="?page=<%= j %>" style="text-decoration: none;">
+                <button class="page-button <%= (j === currentPage) ? 'active' : '' %>">
+                  <%= j %>
+                </button>
+              </a>
+              <% } %>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Block modal -->
+    <div class="modal fade" id="blockUser" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content" style="background-color: #292d38;">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">USERS</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-container">
+              <h6>Are you sure want to block this User ?</h6>
+              <form  action="/admin/blockUser">
+                <input type="hidden" id="block_id" name="id">
+                <div class="button-container">
+                  <button type="submit" class="btn btn-danger">BLOCK</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script>
+      // Toggle mobile menu
+      const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.querySelector('.overlay');
+
+      mobileMenuToggle.addEventListener('click', function () {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+      });
+
+      // Close sidebar when clicking on overlay
+      overlay.addEventListener('click', function () {
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+      });
+
+
+      function clearSearch() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById('searchBtn').click();
+
+      }
+
+      function blockUser(userId){
+        document.getElementById('block_id').value = userId
+
+        var modal = new bootstrap.Modal(document.getElementById('blockUser'))
+        modal.show()
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"></script>
+</body>
+
+</html>

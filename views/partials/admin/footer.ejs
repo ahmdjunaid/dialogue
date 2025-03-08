@@ -1,0 +1,19 @@
+</main>
+<script>
+    // Toggle mobile menu
+    document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
+        document.querySelector('.sidebar').classList.toggle('active');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        const sidebar = document.querySelector('.sidebar');
+        const toggle = document.querySelector('.mobile-menu-toggle');
+        
+        if (!sidebar.contains(event.target) && !toggle.contains(event.target) && window.innerWidth <= 768) {
+            sidebar.classList.remove('active');
+        }
+    });
+</script>
+</body>
+</html>

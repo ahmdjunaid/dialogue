@@ -1,0 +1,239 @@
+<%- include("../../views/partials/user/header") %>
+
+<link rel="stylesheet" href="/css/user/prodList.css">
+  <div class="hero-wrap hero-bread" style="background-image: url();">
+    <div class="container">
+      <div class="row no-gutters slider-text align-items-center justify-content-center">
+        <div class="col-md-9 ftco-animate text-center">
+          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Product</span></p>
+          <h1 class="mb-0 bread">
+            <%= product.productName %>
+          </h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="ftco-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 mb-5 ftco-animate zoom-container" id="prod-image">
+          <% if (product.productImage && product.productImage.length> 0) { %>
+            <% product.productImage.forEach((image)=> { %>
+              <a href="../../uploads/<%= image %>" class="image-popup prod-img-bg">
+                <img src="../../uploads/<%= image %>" class="img-fluid w-100 mb-2 zoom-image"
+                  style="height: 650px; object-fit: cover;" alt="<%= product.productName %>" id="image-sec">
+              </a>
+              <div class="zoom-lens"></div>
+              <% }); %>
+                <% } else { %>
+                  Default Image When No Product Image Exists
+                  <img src="../../uploads/default.jpg" class="img-fluid w-100"
+                    style="height: 650px; object-fit: cover;" alt="No Image Available">
+                  <% } %>
+        </div>
+
+        <div class="col-lg-6 product-details pl-md-5 ftco-animate">
+          <h3>
+            <%= product.productName %>
+          </h3>
+          <div class="rating d-flex">
+            <p class="text-left mr-4">
+              <a href="#" class="mr-2">5.0</a>
+              <a href="#"><span class="ion-ios-star-outline"></span></a>
+              <a href="#"><span class="ion-ios-star-outline"></span></a>
+              <a href="#"><span class="ion-ios-star-outline"></span></a>
+              <a href="#"><span class="ion-ios-star-outline"></span></a>
+              <a href="#"><span class="ion-ios-star-outline"></span></a>
+            </p>
+          </div>
+          <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
+          <p>
+            <%= product.description %>
+          </p>
+          <div class="row mt-4">
+            <div class="w-100"></div>
+            <div class="input-group col-md-6 d-flex mb-3">
+              <span class="input-group-btn mr-2">
+                <button type="button" class="quantity-left-minus btn" data-type="minus" data-field="">
+                  <i class="ion-ios-remove"></i>
+                </button>
+              </span>
+              <input type="text" id="quantity" name="quantity" class="quantity form-control input-number" value="1"
+                min="1" max="<%= product.stock %>">
+              <span class="input-group-btn ml-2">
+                <button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
+                  <i class="ion-ios-add"></i>
+                </button>
+              </span>
+            </div>
+            <div class="w-100"></div>
+            <div class="col-md-12">
+              <p style="color: #000;">
+                <%= product.stock %> pieces available
+              </p>
+              <p style="color: #0f4f0b;">
+                <%if(product.regularPrice - product.salePrice >= 500){%>
+                Save upto ₹<%= product.regularPrice - product.salePrice %>
+                <%}%>
+              </p>
+            </div>
+          </div>
+          <p>
+            <%if( product.stock <=0){%>
+              <a href="/cart/add/<%= product._id %>" class="btn btn-warning py-3 px-5 mr-2">STOCK OUT</a>
+              <%}else{%>
+                <a href="/cart/add/<%= product._id %>" class="btn btn-black py-3 px-5 mr-2">Add to Cart</a>
+                <a href="/checkout/<%= product._id %>" class="btn btn-primary py-3 px-5">Buy now</a>
+                <%}%>
+          </p>
+          <div class="mt-4">
+            <p><strong>Brand:</strong>
+              <%= product.brand %>
+            </p>
+            <p><strong>Storage:</strong>
+              <%= product.storage %>
+            </p>
+            <p><strong>RAM:</strong>
+              <%= product.ram %>
+            </p>
+            <p><strong>Camera:</strong>
+              <%= product.camera %> MP
+            </p>
+            <p><strong>CPU:</strong>
+              <%= product.cpu %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-5">
+        <div class="col-md-12 nav-link-wrap">
+          <div class="nav nav-pills d-flex text-center" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <a class="nav-link ftco-animate active mr-lg-1" id="v-pills-1-tab" data-toggle="pill" href="#v-pills-1"
+              role="tab" aria-controls="v-pills-1" aria-selected="true">Description</a>
+            <a class="nav-link ftco-animate mr-lg-1" id="v-pills-2-tab" data-toggle="pill" href="#v-pills-2" role="tab"
+              aria-controls="v-pills-2" aria-selected="false">Specifications</a>
+            <a class="nav-link ftco-animate" id="v-pills-3-tab" data-toggle="pill" href="#v-pills-3" role="tab"
+              aria-controls="v-pills-3" aria-selected="false">Reviews</a>
+          </div>
+        </div>
+        <div class="col-md-12 tab-wrap">
+          <div class="tab-content bg-light" id="v-pills-tabContent">
+            <div class="tab-pane fade show active" id="v-pills-1" role="tabpanel" aria-labelledby="v-pills-1-tab">
+              <div class="p-4">
+                <h3 class="mb-4">
+                  <%= product.productName %>
+                </h3>
+                <p>
+                  <%= product.description %>
+                </p>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-2" role="tabpanel" aria-labelledby="v-pills-2-tab">
+              <div class="p-4">
+                <h3 class="mb-4">Product Specifications</h3>
+                <ul>
+                  <li><strong>Brand:</strong>
+                    <%= product.brand %>
+                  </li>
+                  <li><strong>Storage:</strong>
+                    <%= product.storage %>
+                  </li>
+                  <li><strong>RAM:</strong>
+                    <%= product.ram %>
+                  </li>
+                  <li><strong>Camera:</strong>
+                    <%= product.camera %> MP
+                  </li>
+                  <li><strong>CPU:</strong>
+                    <%= product.cpu %>
+                  </li>
+                  <li><strong>Stock:</strong>
+                    <%= product.stock %>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="v-pills-3" role="tabpanel" aria-labelledby="v-pills-3-tab">
+              <div class="row p-4">
+                <div class="col-md-7">
+                  <h3 class="mb-4">Reviews</h3>
+                  <div class="review">
+                    <div class="user-img" style="background-image: url(/images/person_1.jpg)"></div>
+                    <div class="desc">
+                      <h4>
+                        <!-- <span class="text-left">Jacob Webb</span>
+                        <span class="text-right">14 March 2018</span> -->
+                      </h4>
+                      <p class="star">
+                        <span>
+                          <i class="ion-ios-star-outline"></i>
+                          <i class="ion-ios-star-outline"></i>
+                          <i class="ion-ios-star-outline"></i>
+                          <i class="ion-ios-star-outline"></i>
+                          <i class="ion-ios-star-outline"></i>
+                        </span>
+                        <span class="text-right"><a href="#" class="reply"><i class="icon-reply"></i></a></span>
+                      </p>
+                      <!-- <p>When she reached the first hills of the Italic Mountains...</p> -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include("../../views/partials/user/footer") %>
+
+    <script>
+      $(document).ready(function () {
+        var quantitiy = 0;
+        $('.quantity-right-plus').click(function (e) {
+          e.preventDefault();
+          var quantity = parseInt($('#quantity').val());
+          if (quantity < <%= product.stock %>) {
+          $('#quantity').val(quantity + 1);
+        }
+      });
+
+      $('.quantity-left-minus').click(function (e) {
+        e.preventDefault();
+        var quantity = parseInt($('#quantity').val());
+        if (quantity > 1) {
+          $('#quantity').val(quantity - 1);
+        }
+      });
+      });
+
+      document.querySelectorAll('.zoom-container').forEach(container => {
+        const img = container.querySelector('.zoom-image');
+        const lens = container.querySelector('.zoom-lens');
+
+        container.addEventListener('mousemove', (e) => {
+          const { left, top, width, height } = container.getBoundingClientRect();
+
+          const posX = e.clientX - left;
+          const posY = e.clientY - top;
+
+
+          const lensX = posX - (lens.offsetWidth / 2);
+          const lensY = posY - (lens.offsetHeight / 2);
+          lens.style.left = `${lensX}px`;
+          lens.style.top = `${lensY}px`;
+
+          const zoomedImgUrl = img.src;
+          lens.style.backgroundImage = `url(${zoomedImgUrl})`;
+          lens.style.backgroundSize = `${img.width * 2}px ${img.height * 2}px`;
+          lens.style.backgroundPosition = `-${posX * 2}px -${posY * 2}px`;
+        });
+      });
+
+    </script>
+    </body>
+
+    </html>

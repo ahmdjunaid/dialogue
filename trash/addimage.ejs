@@ -1,0 +1,81 @@
+<div class="card mb-2">
+    <div class="card-header">
+        <h4>Choose images</h4>
+    </div>
+    <div class="border row">
+        <div id="addedImagesContainer" class="thumbnails-container"></div>
+    </div>
+    <div class="row">
+        <div class="card-body align-items-center" style="margin-bottom: 20px;">
+            <img src="" alt="" id="imgView1">
+            <input class="form-control" type="file" name="images" id="input1" accept="image/png, image/jpeg, image/jpg"
+                onchange="viewImage1(event), viewImage(event, 1)">
+            <div id="images-error" class="error-message"></div>
+        </div>
+        <div class="image-cropper d-flex align-items-center"
+            style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+            <img src="" id="croppedImg1" alt="">
+            <button type="button" id="saveButton1" class="btn-sm btn-primary">Save</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="card-body align-items-center" style="margin-bottom: 20px;">
+            <img src="" alt="" id="imgView2">
+
+
+            <input class="form-control" type="file" name="images" id="input2" accept="image/png, image/jpeg, image/jpg"
+                onchange="viewImage2(event),viewImage(event, 2)">
+        </div>
+        <div class="image-cropper d-flex align-items-center"
+            style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+            <img src="" id="croppedImg2" alt="">
+            <button type="button" id="saveButton2" class="btn-sm btn-primary">Save</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="card-body align-items-center" style="margin-bottom: 20px;">
+            <img src="" alt="" id="imgView3">
+
+
+            <input class="form-control" type="file" name="images" id="input3" accept="image/png, image/jpeg, image/jpg"
+                onchange="viewImage3(event),viewImage(event, 3)">
+        </div>
+        <div class="image-cropper d-flex align-items-center"
+            style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+            <img src="" id="croppedImg3" alt="">
+            <button type="button" id="saveButton3" class="btn-sm btn-primary">Save</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="card-body align-items-center" style="margin-bottom: 20px;">
+            <img src="" alt="" id="imgView4">
+
+
+
+            <input class="form-control" type="file" name="images" id="input4" accept="image/png, image/jpeg, image/jpg"
+                onchange="viewImage4(event),viewImage(event, 4)">
+        </div>
+        <div class="image-cropper d-flex align-items-center"
+            style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+            <img src="" id="croppedImg4" alt="">
+            <button type="button" id="saveButton4" class="btn-sm btn-primary">Save</button>
+        </div>
+    </div>
+
+</div>
+<div>
+    <button class="btn btn-md rounded font-sm hover-up" type="button" onclick="validateAndSubmit()
+">Publish</button>
+</div>
+
+
+          <!-- <div class="col-lg-6 mb-5 ftco-animate">
+            <a href="/uploads/productImages/<%= product.productImage[0] %>" class="image-popup prod-img-bg">
+                <img src="/uploads/productImages/<%= product.productImage[0] %>" 
+                class="img-fluid w-100" 
+                style="height: 650px; object-fit: cover;" 
+                alt="<%= product.productName %>">            </a>
+          </div> -->

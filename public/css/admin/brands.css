@@ -1,0 +1,281 @@
+/* Main styles - excluding sidebar */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1d25;
+    color: #fff;
+}
+
+.main-content {
+    padding: 20px;
+    margin-left: 205px;
+    /* Space for sidebar, adjust as needed */
+}
+
+/* Header with search */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #1a1d25;
+}
+
+.brand {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.search-container {
+    position: relative;
+    flex-grow: 1;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.search-input {
+    width: 75%;
+    padding: 10px 15px;
+    padding-left: 35px;
+    border-radius: 5px;
+    border: none;
+    background-color: #292d38;
+    color: #fff;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c7293;
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #f98a3f;
+    margin-left: 20px;
+}
+
+/* Categories section */
+.categories-container {
+    background-color: #1a1d25;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.categories-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+}
+
+.categories-title {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.add-category-btn {
+    background-color: #9deca2;
+    color: #000;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Table styles */
+.categories-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.categories-table th {
+    text-align: left;
+    padding: 15px 20px;
+    color: #6c7293;
+    font-weight: normal;
+    border-bottom: 1px solid #292d38;
+}
+
+.categories-table td {
+    padding: 15px 20px;
+    border-bottom: 1px solid #292d38;
+}
+
+.edit-button,
+.delete-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6c7293;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    color: #6c7293;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.page-number {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.page-number.active {
+    background-color: #673ab7;
+    color: white;
+}
+
+.page-nav {
+    cursor: pointer;
+    color: #6c7293;
+}
+
+/* form */
+
+/* Modal Styling to match dashboard theme */
+.modal-content {
+    background-color: #121418;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #292d38;
+    padding: 15px 20px;
+}
+
+.modal-title {
+    color: #fff;
+    font-weight: bold;
+}
+
+.btn-close {
+    color: #fff;
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+    opacity: 0.7;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    border-top: 1px solid #292d38;
+    padding: 15px 20px;
+}
+
+/* Form elements inside modal */
+.form-container {
+    width: 100%;
+}
+
+.form-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: #fff;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 5px;
+    border: none;
+    background-color: #fff;
+    font-size: 16px;
+}
+
+textarea.form-input {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.submit-button {
+    background-color: #9deca2;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+/* Modal footer buttons */
+.btn-secondary {
+    background-color: #292d38;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: #9deca2;
+    color: #000;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* Fade animation enhancement */
+.modal.fade .modal-dialog {
+    transition: transform .3s ease-out;
+    transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+    transform: none;
+}
+
+/* Make modal responsive */
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+}

@@ -1,0 +1,249 @@
+
+body {
+    background-color: #1a1a1a;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+.main-content {
+    padding: 20px;
+    background-color: #1a1a1a;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a1a1a;
+    padding: 15px;
+    border-bottom: 1px solid #333;
+}
+
+.header h1 {
+    color: #fff;
+    margin: 0;
+}
+
+.user-profile img {
+    border-radius: 50%;
+    border: 2px solid #28a745;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    background-color: #1a1a1a;
+    padding: 20px;
+}
+
+.form-section {
+    width: 48%;
+    background-color: #222;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin: 10px 0 5px;
+    color: #fff;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background: #2d2d2d;
+    color: #fff;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+textarea {
+    height: 100px;
+    resize: none;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    height: 40px;
+}
+
+.button-container button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background: #28a745;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.button-container button:hover {
+    background: #218838;
+}
+
+.image-upload-container {
+    width: 100%;
+    margin-top: 20px;
+    background-color: #222;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.image-upload-container h4 {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+.image-preview {
+    max-width: 300px;
+    max-height: 300px;
+    margin: 10px 0;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 5px;
+    background: #2d2d2d;
+}
+
+.existing-image {
+    max-width: 200px;
+    max-height: 200px;
+    margin: 10px 0;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 5px;
+    background: #2d2d2d;
+}
+
+.cropper-container {
+    margin: 15px 0;
+}
+
+.cropper-wrapper {
+    max-width: 100%;
+    height: 500px;
+    margin-bottom: 20px;
+    border: 1px solid #444;
+    overflow: hidden;
+    background: #2d2d2d;
+}
+
+.cropper-controls {
+    margin: 15px 0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.image-item {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #2d2d2d;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: none;
+}
+
+.zoom-controls,
+.aspect-ratio-controls {
+    margin: 10px 0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.zoom-controls button,
+.aspect-ratio-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    background-color: #2d2d2d;
+    border: 1px solid #444;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zoom-controls button:hover,
+.aspect-ratio-btn:hover:not(.active) {
+    background-color: #3d3d3d;
+    border-color: #555;
+}
+
+.aspect-ratio-btn.active {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.preview-container,
+.crop-result-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.preview-title,
+.crop-result-container h5 {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .form-section {
+        width: 100%;
+    }
+
+    .image-upload-container {
+        width: 100%;
+    }
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+}
+
+.pagination a {
+    padding: 8px 12px;
+    background: #2d2d2d;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.pagination a.active {
+    background: #28a745;
+    border-color: #28a745;
+}
+
+.pagination a:hover {
+    background: #3d3d3d;
+    border-color: #555;
+}

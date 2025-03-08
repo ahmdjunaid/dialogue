@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialogue Digital - Edit Product</title>
+
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/editprod.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+    <%- include("../../views/partials/admin/aside") %>
+
+        <div class="main-content">
+            <div class="header">
+                <h1 class="text-white">Edit Product</h1>
+                <div class="user-profile">
+                    <img src="/api/placeholder/36/36" alt="User Profile">
+                </div>
+            </div>
+
+            <form action="/admin/editproduct/<%= product._id %>" method="post" enctype="multipart/form-data"
+                onsubmit="return validateForm()">
+                <div class="container">
+                    <!-- Left Form Section -->
+                    <div class="form-section">
+                        <h3 class="text-white mb-4">Product Details</h3>
+                        <div class="form-group">
+                            <label for="productName">Product Name:</label>
+                            <input type="text" id="productName" name="productName" class="form-control"
+                                value="<%= product.productName %>">
+                            <div id="productName-error" class="error-message"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productDescription">Product Description:</label>
+                            <textarea id="productDescription" value="<%= product.description %>"
+                                name="productDescription" class="form-control"
+                                rows="4"><%= product.description %></textarea>
+                            <div id="description-error" class="error-message"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="brandId">Brand:</label>
+                            <select name="brandId" class="form-control" id="brandId">
+                                <option value="" disabled>Select Brand</option>
+                                <% for(let i=0; i < brand.length; i++) { %>
+                                    <option value="<%= brand[i].name %>" <%=product.brand===brand[i].name ? 'selected'
+                                        : '' %>>
+                                        <%= brand[i].name %>
+                                    </option>
+                                    <% } %>
+                            </select>
+                            <div id="brandName-error" class="error-message"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="categoryId">Category:</label>
+                            <select name="categoryId" class="form-control" id="categoryId">
+                                <option value="" disabled>Select Category</option>
+                                <% for(let i=0; i < category.length; i++) { %>
+                                    <option value="<%= category[i].name %>" <%=product.category===category[i].name
+                                        ? 'selected' : '' %>>
+                                        <%= category[i].name %>
+                                    </option>
+                                    <% } %>
+                            </select>
+                            <div id="category-error" class="error-message"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productAmount">Product Price:</label>
+                            <input type="number" id="productAmount" name="productAmount" class="form-control"
+                                value="<%= product.regularPrice %>">
+                            <div id="regularPrice-error" class="error-message"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="offerAmount">Offer Price:</label>
+                            <input type="number" id="offerAmount" name="offerAmount" class="form-control"
+                                value="<%= product.salePrice || '' %>">
+                            <div id="offerPrice-error" class="error-message"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="stockCount">Stock Count:</label>
+                            <input type="number" id="stockCount" name="stockCount" class="form-control"
+                                value="<%= product.stock %>">
+                            <div id="quantity-error" class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Form Section -->
+                    <div class="form-section">
+                        <h3 class="text-white mb-4">Product Specifications</h3>
+                        <div class="form-group">
+                            <label for="storage">Storage:</label>
+                            <select class="form-control" id="storage" name="storage">
+                                <option value="" disabled>Select Storage</option>
+                                <option value="32GB" <%=product.storage==='32GB' ? 'selected' : '' %>>32GB</option>
+                                <option value="64GB" <%=product.storage==='64GB' ? 'selected' : '' %>>64GB</option>
+                                <option value="128GB" <%=product.storage==='128GB' ? 'selected' : '' %>>128GB</option>
+                                <option value="256GB" <%=product.storage==='256GB' ? 'selected' : '' %>>256GB</option>
+                                <option value="512GB" <%=product.storage==='512GB' ? 'selected' : '' %>>512GB</option>
+                                <option value="1TB" <%=product.storage==='1TB' ? 'selected' : '' %>>1TB</option>
+                            </select>
+                            <div id="storage-error" class="error-message"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ram">RAM:</label>
+                            <select class="form-control" id="ram" name="ram">
+                                <option value="" disabled>Select RAM</option>
+                                <option value="4GB" <%=product.ram==='4GB' ? 'selected' : '' %>>4GB</option>
+                                <option value="6GB" <%=product.ram==='6GB' ? 'selected' : '' %>>6GB</option>
+                                <option value="8GB" <%=product.ram==='8GB' ? 'selected' : '' %>>8GB</option>
+                                <option value="12GB" <%=product.ram==='12GB' ? 'selected' : '' %>>12GB</option>
+                                <option value="16GB" <%=product.ram==='16GB' ? 'selected' : '' %>>16GB</option>
+                            </select>
+                            <div id="ram-error" class="error-message"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="camera">Camera:</label>
+                            <input type="text" name="camera" id="camera" class="form-control"
+                                value="<%= product.camera %>">
+                            <div id="camera-error" class="error-message"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cpu">CPU:</label>
+                            <input type="text" id="cpu" name="cpu" class="form-control" value="<%= product.cpu %>">
+                            <div id="cpu-error" class="error-message"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="image-upload-container">
+                    <h4 class="text-white">Product Images</h4>
+                    <% for (let i=1; i <=4; i++) { %>
+                        <div class="form-group image-item" id="imageContainer<%= i %>">
+                            <label for="image<%= i %>" class="text-white">Image <%= i %></label>
+                            <% if (product.productImage && product.productImage[i-1]) { %>
+                                <div class="existing-image-container mb-3">
+                                    <img src="../../uploads/<%= product.productImage[i-1] %>" class="existing-image"
+                                        alt="Existing Image <%= i %>">
+                                    <button type="button" class="btn btn-danger btn-sm mt-2"
+                                        onclick="removeImage('<%= product._id %>', <%= i-1 %>)">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </div>
+                                <% } %>
+                                    <input type="file" name="image<%= i %>" id="image<%= i %>" class="form-control"
+                                        accept="image/*" onchange="previewImage(event, <%= i %>)">
+
+                                    <!-- Cropping Section -->
+                                    <div class="cropper-container" id="cropperContainer<%= i %>" style="display: none;">
+                                        <h5 class="text-white">Crop Image</h5>
+                                        <div class="cropper-wrapper">
+                                            <img id="cropperImg<%= i %>" alt="Image to crop">
+                                        </div>
+
+                                        <!-- Aspect Ratio Selection -->
+                                        <div class="aspect-ratio-controls">
+                                            <span class="text-white me-2">Aspect Ratio:</span>
+                                            <button type="button" class="aspect-ratio-btn active" data-index="<%= i %>"
+                                                data-ratio="free" onclick="setAspectRatio(<%= i %>, 'free')">
+                                                Free
+                                            </button>
+                                            <button type="button" class="aspect-ratio-btn" data-index="<%= i %>"
+                                                data-ratio="30:37" onclick="setAspectRatio(<%= i %>, 30/37)">
+                                                Fit image
+                                            </button>
+                                        </div>
+
+                                        <div class="cropper-controls">
+                                            <button type="button" class="btn btn-primary" onclick="cropImage(<%= i %>)">
+                                                <i class="fas fa-check"></i> Apply Crop
+                                            </button>
+                                            <button type="button" class="btn btn-secondary"
+                                                onclick="cancelCrop(<%= i %>)">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Result Preview -->
+                                    <div class="crop-result-container" id="previewContainer<%= i %>"
+                                        style="display: none;">
+                                        <h5 class="text-white">Final Image</h5>
+                                        <img id="preview<%= i %>" src="#" alt="Image preview" class="image-preview">
+                                        <button type="button" class="btn btn-outline-light btn-sm mt-2"
+                                            onclick="recropImage(<%= i %>)">
+                                            <i class="fas fa-crop-alt"></i> Re-crop Image
+                                        </button>
+                                    </div>
+
+                                    <div id="image<%= i %>-error" class="error-message"></div>
+                        </div>
+                        <% } %>
+                </div>
+
+                <div class="button-container">
+                    <button type="submit" class="add-btn">Update Product</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Scripts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+
+        <script>
+            let croppers = {};
+            let originalImages = {};
+
+            document.addEventListener('DOMContentLoaded', function () {
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById(`image${i}`).addEventListener('change', function (event) {
+                        previewImage(event, i);
+                    });
+                }
+            });
+
+            function previewImage(event, index) {
+                const input = event.target;
+                const previewContainer = document.getElementById(`previewContainer${index}`);
+                const cropperContainer = document.getElementById(`cropperContainer${index}`);
+                const cropperImg = document.getElementById(`cropperImg${index}`);
+
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        originalImages[index] = e.target.result;
+                        cropperImg.src = e.target.result;
+                        cropperContainer.style.display = 'block';
+                        previewContainer.style.display = 'none';
+
+                        if (croppers[index]) {
+                            croppers[index].destroy();
+                        }
+
+                        croppers[index] = new Cropper(cropperImg, {
+                            viewMode: 1,
+                            dragMode: 'crop',
+                            responsive: true,
+                            restore: false,
+                            center: true,
+                            highlight: true,
+                            background: true,
+                            autoCrop: true,
+                            autoCropArea: 0.8,
+                            movable: true,
+                            rotatable: false,
+                            scalable: true,
+                            zoomable: true,
+                            zoomOnTouch: true,
+                            zoomOnWheel: true,
+                            aspectRatio: NaN,
+                            crop: function (event) {
+                                // Optional: real-time crop dimensions
+                            }
+                        });
+
+                        setActiveAspectRatioButton(index, 'free');
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+
+            function setAspectRatio(index, ratio) {
+                if (croppers[index]) {
+                    if (ratio === 'free') {
+                        croppers[index].setAspectRatio(NaN);
+                    } else {
+                        croppers[index].setAspectRatio(ratio);
+                    }
+                    setActiveAspectRatioButton(index, ratio);
+                }
+            }
+
+            function setActiveAspectRatioButton(index, ratio) {
+                const ratioButtons = document.querySelectorAll(`.aspect-ratio-btn[data-index="${index}"]`);
+                ratioButtons.forEach(button => button.classList.remove('active'));
+                const activeButton = document.querySelector(`.aspect-ratio-btn[data-index="${index}"][data-ratio="${ratio}"]`);
+                if (activeButton) activeButton.classList.add('active');
+            }
+
+            function recropImage(index) {
+                const previewContainer = document.getElementById(`previewContainer${index}`);
+                const cropperContainer = document.getElementById(`cropperContainer${index}`);
+                const cropperImg = document.getElementById(`cropperImg${index}`);
+
+                if (originalImages[index]) {
+                    cropperImg.src = originalImages[index];
+                    if (croppers[index]) croppers[index].destroy();
+                    croppers[index] = new Cropper(cropperImg, {
+                        viewMode: 1,
+                        dragMode: 'crop',
+                        responsive: true,
+                        background: true,
+                        autoCropArea: 0.8,
+                        movable: true,
+                        rotatable: false,
+                        scalable: true,
+                        zoomable: true,
+                        guides: true,
+                        aspectRatio: NaN,
+                        ready: function () { this.cropper.crop(); }
+                    });
+                    setActiveAspectRatioButton(index, 'free');
+                    cropperContainer.style.display = 'block';
+                    previewContainer.style.display = 'none';
+                }
+            }
+
+            function cropImage(index) {
+                const cropper = croppers[index];
+                const preview = document.getElementById(`preview${index}`);
+                const cropperContainer = document.getElementById(`cropperContainer${index}`);
+                const previewContainer = document.getElementById(`previewContainer${index}`);
+
+                if (cropper) {
+                    const cropData = cropper.getData();
+                    if (cropData.width < 10 || cropData.height < 10) {
+                        alert("Please select a larger area to crop.");
+                        return;
+                    }
+                    const croppedCanvas = cropper.getCroppedCanvas({
+                        minWidth: 256,
+                        minHeight: 256,
+                        maxWidth: 4096,
+                        maxHeight: 4096,
+                        fillColor: '#fff',
+                        imageSmoothingEnabled: true,
+                        imageSmoothingQuality: 'high',
+                    });
+                    preview.src = croppedCanvas.toDataURL('image/jpeg', 0.9);
+                    previewContainer.style.display = 'block';
+                    croppedCanvas.toBlob((blob) => {
+                        const fileInput = document.getElementById(`image${index}`);
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(new File([blob], `cropped_image_${index}.jpg`, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        }));
+                        fileInput.files = dataTransfer.files;
+                    }, 'image/jpeg', 0.9);
+                    cropperContainer.style.display = 'none';
+                }
+            }
+
+            function cancelCrop(index) {
+                const cropperContainer = document.getElementById(`cropperContainer${index}`);
+                const previewContainer = document.getElementById(`previewContainer${index}`);
+                if (croppers[index]) {
+                    croppers[index].destroy();
+                    delete croppers[index];
+                }
+                cropperContainer.style.display = 'none';
+                previewContainer.style.display = 'none';
+                document.getElementById(`image${index}`).value = '';
+            }
+
+            function removeImage(productId, imageIndex) {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This image will be permanently removed!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Yes, remove it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/remove-product-image/${productId}/${imageIndex}`, {
+                            method: "DELETE"
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: "success",
+                                        title: "Image removed successfully!",
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: "Failed to remove the image!"
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error removing image:", error);
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Error!",
+                                    text: "An error occurred while removing the image."
+                                });
+                            });
+                    }
+                });
+            }
+
+
+            function validateForm() {
+                clearErrorMessages();
+                const name = document.getElementById('productName').value;
+                const description = document.getElementById('productDescription').value;
+                const price = document.getElementById('productAmount').value;
+                const offerprice = document.getElementById('offerAmount').value;
+                const stock = document.getElementById('stockCount').value;
+                const brand = document.getElementById('brandId').value;
+                const category = document.getElementById('categoryId').value;
+                const storage = document.getElementById('storage').value;
+                const ram = document.getElementById('ram').value;
+                const camera = document.getElementById('camera').value;
+                const cpu = document.getElementById('cpu').value;
+
+                let isValid = true;
+
+                if (name.trim() === "") {
+                    displayErrorMessage('productName-error', 'Please enter a product name.');
+                    isValid = false;
+                }
+
+                if (description.trim() === "") {
+                    displayErrorMessage('description-error', 'Please enter a product description.');
+                    isValid = false;
+                }
+
+                if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
+                    displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+                    isValid = false;
+                }
+
+                if (offerprice && (!/^\d+(\.\d{1,2})?$/.test(offerprice) || parseFloat(offerprice) < 0)) {
+                    displayErrorMessage('offerPrice-error', 'Please enter a valid non-negative offer price.');
+                    isValid = false;
+                }
+
+                if (stock <= 1) {
+                    displayErrorMessage('quantity-error', 'Please enter a valid stock (more than 1).');
+                    isValid = false;
+                }
+
+                if (brand.trim() === "") {
+                    displayErrorMessage('brandName-error', 'Please select a brand.');
+                    isValid = false;
+                }
+
+                if (category.trim() === "") {
+                    displayErrorMessage('category-error', 'Please select a Category.');
+                    isValid = false;
+                }
+
+                if (storage.trim() === "") {
+                    displayErrorMessage('storage-error', 'Please select a storage size.');
+                    isValid = false;
+                }
+
+                if (ram.trim() === "") {
+                    displayErrorMessage('ram-error', 'Please select a RAM capacity.');
+                    isValid = false;
+                }
+
+                if (camera.trim() === "") {
+                    displayErrorMessage('camera-error', 'Please enter camera details.');
+                    isValid = false;
+                }
+
+                if (cpu.trim() === "") {
+                    displayErrorMessage('cpu-error', 'Please specify CPU model.');
+                    isValid = false;
+                }
+
+                return isValid;
+            }
+
+            function displayErrorMessage(elementId, message) {
+                const errorElement = document.getElementById(elementId);
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.style.display = 'block';
+                }
+            }
+
+            function clearErrorMessages() {
+                const errorElements = document.getElementsByClassName('error-message');
+                for (let i = 0; i < errorElements.length; i++) {
+                    errorElements[i].textContent = '';
+                    errorElements[i].style.display = 'none';
+                }
+            }
+        </script>
+</body>
+
+</html>
