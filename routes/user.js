@@ -4,6 +4,8 @@ const passport = require('passport')
 const userController = require('../controller/userController')
 const { userAuth } = require('../middlewares/auth')
 
+//homepage
+
 router.get('/', userAuth, userController.loadHome);
 
 //user authentication
@@ -54,7 +56,7 @@ router.get("/auth/google/callback",
 router.get('/pagenotfound', userController.loadError)
 
 
-//homepage and shoppage
+//shop-page & details page
 
 router.get("/shop", userAuth, userController.loadShoppingPage);
 

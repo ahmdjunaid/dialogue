@@ -29,6 +29,7 @@ const loadAddProduct = async (req, res) => {
         res.render('admin/addproduct', { brand, category, message })
 
     } catch (error) {
+        console.error(error)
         res.redirect('/admin/loaderror')
     }
 }
@@ -89,7 +90,7 @@ const addProduct = async (req, res) => {
 
     } catch (error) {
         console.error('Error adding product:', error);
-        return res.redirect('/admin/loaderror?error=' + encodeURIComponent(error.message));
+        return res.redirect('/admin/loaderror');
     }
 };
 
@@ -149,7 +150,8 @@ const loadProduct = async (req, res) => {
         })
 
     } catch (error) {
-
+        console.error(error)
+        res.redirect('/admin/loaderror')
     }
 }
 
@@ -233,7 +235,8 @@ const updateProduct = async (req, res) => {
 
     } catch (error) {
         console.error('Error updating product:', error);
-        res.status(500).render('error', { message: 'Server error occurred while updating product' });
+        req.session.admMsg = 'Error updating product'
+        return res.redirect('/admin/products');
     }
 };
 

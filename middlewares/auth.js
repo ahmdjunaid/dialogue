@@ -24,19 +24,19 @@ const userAuth = async (req, res, next) => {
 };
 
 
-const adminAuth = async (req,res,next)=>{
-    await userModel.findOne({isAdmin:true})
-    .then(data=>{
-        if(data){
-            next()
-        }else{
-            res.redirect('/admin/login')
-        }
-    })
-    .catch(error=>{
-        console.log('Error in admin auth middleware')
-        res.redirect('/admin/loaderror')
-    })
+const adminAuth = async (req, res, next) => {
+    await userModel.findOne({ isAdmin: true })
+        .then(data => {
+            if (data) {
+                next()
+            } else {
+                res.redirect('/admin/login')
+            }
+        })
+        .catch(error => {
+            console.log('Error in admin auth middleware')
+            res.redirect('/admin/loaderror')
+        })
 }
 
 

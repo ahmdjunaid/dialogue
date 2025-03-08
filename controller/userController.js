@@ -7,6 +7,8 @@ const env = require('dotenv').config()
 const bcrypt = require('bcrypt')
 const saltRounds = 10;
 
+// loding homepage
+
 const loadHome = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -25,33 +27,30 @@ const loadHome = async (req, res) => {
 
 
         const products = await productModel.find({
-            category: { $in: listedCategories.map(cat => cat.name) },
-            brand: { $in: listedBrands.map(brand => brand.name) },
+            category: { $in: listedCategories.map(cat => cat.name) }, //only showing listed category
+            brand: { $in: listedBrands.map(brand => brand.name) }, //only showing listed brand
         })
             .sort({ createdAt: -1 })
             .limit(8);
-
-
-        console.log('Loaded products:', products.length);
 
 
         res.render('user/landing', {
             products,
             user: userData,
             findUser: userData
-        });
+        }); //while rendering home page passing userdata, 8 latest products.
 
     } catch (error) {
         console.error('Error in loadHome:', error);
-        res.status(500).redirect('/pagenotfound');
+        res.status(500).redirect('/pagenotfound'); //if any error occured redirect into errorpage
     }
 };
 
 function generateOtp() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    return Math.floor(100000 + Math.random() * 900000).toString(); //generating 6 digit random number for Otp
 }
 
-async function sentVerificationEmail(email, otp) {
+async function sentVerificationEmail(email, otp) { //Generated otp sent to  user using node mailer
     try {
 
         const transporter = nodemailer.createTransport({
@@ -79,8 +78,12 @@ async function sentVerificationEmail(email, otp) {
 
     } catch (error) {
         console.log("Error while sending email", error);
+        res.redirect('/pagenotfound')
+        return;
     }
 }
+
+//signup function, here checking regex and removing spaces using trim.
 
 const signup = async (req, res) => {
     try {
@@ -124,9 +127,9 @@ const signup = async (req, res) => {
             return res.redirect('/signup')
         }
 
-        const otp = generateOtp()
+        const otp = generateOtp() // if all the validation is passed generating Otp.
 
-        const emailSent = await sentVerificationEmail(email, otp)
+        const emailSent = await sentVerificationEmail(email, otp) // after generating otp sent to user;
 
         if (!emailSent) {
             req.session.userMsg = "Error while sending email!"
@@ -149,6 +152,7 @@ const signup = async (req, res) => {
     }
 }
 
+//verifying entered otp
 const verifyOtp = async (req, res) => {
     try {
         const { otp } = req.body;
@@ -206,6 +210,7 @@ const verifyOtp = async (req, res) => {
     }
 };
 
+//If otp timeout, resend otp
 const resendOtp = async (req, res) => {
     try {
 
@@ -218,6 +223,7 @@ const resendOtp = async (req, res) => {
 
         const otp = generateOtp()
 
+        //if session have reset data, otp will be stored to forgotOtp. otherwise otp stored to userOtp.
         if(req.session.resetData){
             req.session.forgotOtp = otp
         }else{
@@ -242,6 +248,7 @@ const resendOtp = async (req, res) => {
     }
 }
 
+// loading loginpage
 const loadLogin = async (req, res) => {
 
     try {
@@ -260,15 +267,19 @@ const loadLogin = async (req, res) => {
         }
 
     } catch (error) {
+        console.error(error)
         res.redirect('/pagenotfound')
     }
 }
 
+
+//login function, checking username and password.
 const login = async (req, res) => {
     try {
         const { email, password } = req.body
 
-        const findUser = await userModel.findOne({ isAdmin: 0, email: email })
+        //confirming whether admin or user
+        const findUser = await userModel.findOne({ isAdmin: 0, email: email }) 
 
         if (!findUser) {
             req.session.userMsg = 'User does not exist!'
@@ -280,11 +291,13 @@ const login = async (req, res) => {
             return res.redirect('/login')
         }
 
-        if (findUser.isBlocked) {
+        //if user is blocked by admin, a message will displayed
+        if (findUser.isBlocked) { 
             req.session.userMsg = 'Action restriced by Admin!'
             return res.redirect('/login')
         }
 
+        //checking entered password and database password
         const isMatch = await bcrypt.compare(password, findUser.password);
 
         if (!isMatch) {
@@ -308,11 +321,14 @@ const login = async (req, res) => {
 
 }
 
+
+//logout function
 const logout = async (req, res) => {
     req.session.user = null
     res.redirect('/')
 }
 
+//rendering signup page.
 const loadSignup = async (req, res) => {
 
     if(req.session.user){
@@ -330,10 +346,11 @@ const loadSignup = async (req, res) => {
         return;
     } catch (error) {
         console.error(error);
-
+        res.redirect('/pagenotfound')
     }
 }
 
+//rendering error page
 const loadError = async (req, res) => {
     try {
         res.render('user/404error')
@@ -342,15 +359,17 @@ const loadError = async (req, res) => {
     }
 }
 
+//rendering forgot page.
 const loadForgot = async (req, res) => {
     try {
-        
+        res.render('user/forgot')
     } catch (error) {
-        
+        console.error(error)
+        res.redirect('/pagenotfound')
     }
-    res.render('user/forgot')
 }
 
+//forgot password function.
 const forgot = async (req, res) => {
     try {
 
@@ -530,8 +549,8 @@ const productDetails = async (req, res) => {
         const userData = await userModel.findById(userId);
         const productId = req.params.id;
         const product = await productModel.findById(productId)
-        console.log("productId", productId)
-        const productOffer = product.productOffer || 0;
+        // console.log("productId", productId)
+        // const productOffer = product.productOffer || 0;
 
 
 
@@ -551,7 +570,7 @@ const productDetails = async (req, res) => {
         })
     } catch (error) {
         console.error("Error fetching product details:", error);
-        res.redirect('/404');
+        res.redirect('/pagenotfound');
     }
 };
 
