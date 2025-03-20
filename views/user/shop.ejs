@@ -25,16 +25,17 @@
       color: #fff;
       border: 1px solid transparent;
     }
-    .minmax{
-    margin-bottom: 1em;
-    width: 13em;
-    border-style: solid;
-    border-radius: 5em;
-    padding: .2em;
-    border-color: rgb(199, 209, 199);
+
+    .minmax {
+      margin-bottom: 1em;
+      width: 13em;
+      border-style: solid;
+      border-radius: 5em;
+      padding: .2em;
+      border-color: rgb(199, 209, 199);
     }
   </style>
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <div class="hero-wrap hero-bread" style="background-image: url('/images/bg_6.jpg');">
     <div class="container">
       <div class="row no-gutters slider-text align-items-center justify-content-center">
@@ -83,11 +84,11 @@
                       <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
                     </div>
                     <p class="bottom-area d-flex px-3">
-                      <a href="/cart/add/<%= product._id %>" class="add-to-cart text-center py-2 mr-1">
+                      <a href="/addtocart?productId=<%= product._id %>&quantity=1" class="add-to-cart text-center py-2 mr-1">
                         <span>Add to cart <i class="ion-ios-add ml-1"></i></span>
                       </a>
                       <a href="/checkout/<%= product._id %>" class="buy-now text-center py-2">
-                        <span>Buy now<i class="ion-ios-cart ml-1"></i></span>
+                        <span>Wishlist<i class="ion-ios-heart ml-1"></i></span>
                       </a>
                     </p>
                   </div>
@@ -98,13 +99,13 @@
           <div class="row mt-5">
             <div class="col text-center">
               <div class="block-27">
-                  <% for (let j=1; j <=totalPages; j++) { %>
-                    <a href="?page=<%= j %>" style="text-decoration: none;">
-                      <button class="page-button-shop <%= (j === currentPage) ? 'active' : '' %>">
-                        <%= j %>
-                      </button>
-                    </a>
-                    <% } %>
+                <% for (let j=1; j <=totalPages; j++) { %>
+                  <a href="?page=<%= j %>" style="text-decoration: none;">
+                    <button class="page-button-shop <%= (j === currentPage) ? 'active' : '' %>">
+                      <%= j %>
+                    </button>
+                  </a>
+                  <% } %>
               </div>
             </div>
           </div>
@@ -117,14 +118,14 @@
             <form action="/shop" method="get">
               <div class="sidebar-box-2">
                 <h6>Search</h6>
-                <input name="search" type="text" class="selector">
+                <input name="search" type="text" class="selector" value="<%= search || '' %>">
               </div>
               <div class="sidebar-box-2">
                 <h6>Categories</h6>
                 <select name="categoryf" id="" class="selector">
-                  <option value="" disabled selected>Select</option>
+                  <option value="" <%=category.name==='' ? 'selected' : '' %>>Select</option>
                   <% category.forEach((category)=>{%>
-                    <option value="<%= category.name %>">
+                    <option value="<%= category.name %>" <%=category.name==categoryf ? 'selected' : '' %>>
                       <%= category.name %>
                     </option>
                     <%})%>
@@ -133,9 +134,9 @@
               <div class="sidebar-box-2">
                 <h6>Brands</h6>
                 <select name="brandf" id="" class="selector">
-                  <option value="" disabled selected>Select</option>
+                  <option value="" <%=brand.name==='' ? 'selected' : '' %>>Select</option>
                   <% brand.forEach((brand)=>{ %>
-                    <option value="<%= brand.name %>">
+                    <option value="<%= brand.name %>" <%=brand.name==brandf ? 'selected' : '' %>>
                       <%= brand.name %>
                     </option>
                     <%})%>
@@ -144,11 +145,13 @@
               <div class="sidebar-box-2">
                 <h6>Sort By</h6>
                 <select name="sort" id="" class="selector">
-                  <option value="" disabled selected>Select</option>
-                  <option value="A-Z">A-Z</option>
-                  <option value="Z-A">Z-A</option>
-                  <option value="Price : low - high">Price : low - high</option>
-                  <option value="Price : high - low">Price : high - low</option>
+                  <option value="" <%=sort==='' ? 'selected' : '' %>>Select</option>
+                  <option value="A-Z" <%=sort==='A-Z' ? 'selected' : '' %>>A-Z</option>
+                  <option value="Z-A" <%=sort==='Z-A' ? 'selected' : '' %>>Z-A</option>
+                  <option value="Price : low - high" <%=sort==='Price : low - high' ? 'selected' : '' %>>Price : low -
+                    high</option>
+                  <option value="Price : high - low" <%=sort==='Price : high - low' ? 'selected' : '' %>>Price : high -
+                    low</option>
                 </select>
               </div>
               <div class="sidebar-box-2">
@@ -164,17 +167,24 @@
       </div>
     </div>
   </section>
+  <input type="hidden" value="<%= message %>" id="err">
   <script>
+    const message = document.getElementById('err').value
+    if(message){
+      swal.fire(message)
+    }
+
     function clearFilters() {
-      document.getElementsByName('search').value = ''
-      document.getElementsByName('categoryf').value = ''
-      document.getElementsByName('brandf').value = ''
-      document.getElementsByName('sort').value = ''
-      document.getElementsByName('minValue').value = ''
-      document.getElementsByName('maxValue').value = ''
+      // For single elements, use querySelector
+      document.querySelector('input[name="search"]').value = '';
+      document.querySelector('select[name="categoryf"]').value = '';
+      document.querySelector('select[name="brandf"]').value = '';
+      document.querySelector('select[name="sort"]').value = '';
+      document.querySelector('input[name="minValue"]').value = '';
+      document.querySelector('input[name="maxValue"]').value = '';
 
+      // Submit the form
       document.getElementById('submitbtn').click();
-
     }
   </script>
 

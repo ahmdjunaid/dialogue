@@ -38,7 +38,21 @@
                 <a href="/signup">Create Account</a>
             </div>
         </div>
+        <input type="hidden" value="<%= message %>" id="error">
+        <input type="hidden" value="<%= email %>" id="foremail">
     </div>
+    <script>
+        let message = document.getElementById('error').value;
+        let email = document.getElementById('foremail').value;
+        if(email){
+            let foremail  = document.getElementById('email')
+            foremail.value = email
+            foremail.readOnly = true;
+        }
+        if(message){
+            swal.fire(message)
+        }
+    </script>
 </body>
 
 </html>

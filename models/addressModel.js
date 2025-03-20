@@ -22,23 +22,23 @@ const addressSchema = new Schema({
         },
         landmark:{
             type:String,
-            required:true
+            required:false
         },
         state:{
             type:String,
-            required:trusted
+            required:true
         },
         pincode:{
             type:Number,
             required:true
         },
-        phone:{
+        mobile:{
             type:String,
             required:true
         },
-        alternativeNum:{
+        altNumber:{
             type:String,
-            required:true
+            required:false
         }
     }]
 })

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success</title>
+    <style>
+        
+        .successcontainer {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 10px auto 20px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .order-details {
+            margin: 25px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            text-align: left;
+        }
+        
+        .order-detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .order-detail-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .primary-button {
+            background-color: #E6D587;
+            color: #333;
+            border: none;
+        }
+        
+        .primary-button:hover {
+            background-color: #D9C878;
+        }
+        
+        .secondary-button {
+            background-color: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .secondary-button:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../../views/partials/user/header') %>
+    
+    <div class="successcontainer">
+        <div class="success-icon">✓</div>
+        <h1>Order Placed Successfully!</h1>
+        <p>Thank you for your purchase. Your order has been received and is being processed.</p>
+        <p>A confirmation email has been sent to your registered email address.</p>
+        
+        <div class="order-details">
+            <div class="order-detail-item">
+                <span>Order ID:</span>
+                <span>#ORD-23879456</span>
+            </div>
+            <div class="order-detail-item">
+                <span>Order Date:</span>
+                <span>March 20, 2025</span>
+            </div>
+            <div class="order-detail-item">
+                <span>Payment Method:</span>
+                <span>Credit Card (VISA ****4589)</span>
+            </div>
+            <div class="order-detail-item">
+                <span>Shipping Address:</span>
+                <span>123 Main St, Anytown, AN 12345</span>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <a href="#" class="button secondary-button">Order Details</a>
+            <a href="#" class="button primary-button">Continue Shopping</a>
+        </div>
+    </div>
+    
+    <%- include('../../views/partials/user/footer') %>
+</body>
+</html>

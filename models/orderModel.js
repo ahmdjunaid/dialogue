@@ -22,8 +22,6 @@ const orderSchema = new Schema({
             type:Number,
             default:0
         }
-
-
     }],
     totalPrice:{
         type:Number,

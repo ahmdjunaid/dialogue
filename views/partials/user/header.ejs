@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="/css/css/flaticon.css">
     <link rel="stylesheet" href="/css/css/icomoon.css">
     <link rel="stylesheet" href="/css/css/style.css">
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .owl-carousel.home-slider {
             background: url(/images/main\ banner\ 2.png) no-repeat;
@@ -63,11 +63,11 @@
                     <li class="nav-item active"><a href="/shop" class="nav-link">Shop</a></li>
                     <li class="nav-item"><a href="#" class="nav-link">About</a></li>
                     <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
-                    <li class="nav-item cta cta-colored"><a href="#" class="nav-link"><span
-                                class="icon-shopping_cart"></span></a></li>
+                    <li class="nav-item cta cta-colored"><a href="/cart" class="nav-link"><span
+                                class="icon-shopping_cart"></span>CART</a></li>
                     <li class="nav-item"><a href="#" class="nav-link">Wishlist</a></li>
                     <% if(findUser){ %>
-                        <li class="nav-item"><a href="#" class="nav-link">Profile</a></li>
+                        <li class="nav-item"><a href="/profile" class="nav-link">Profile</a></li>
                         <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
                     <% } else { %>
                         <li class="nav-item"><a href="/login" class="nav-link">Login</a></li>

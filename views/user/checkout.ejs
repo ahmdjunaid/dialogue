@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="/css/user/checkout.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <%- include('../../views/partials/user/header') %>
+    
+    <div class="container" style="margin-bottom: 2em;">
+        <h2 class="page-title">CHECKOUT</h2>
+        <!-- Address Section -->
+        <div class="address-section">
+            <div class="address-header">
+                <span>SHIPPING ADDRESS</span>
+                <button type="button" data-bs-toggle="modal" data-bs-target="#addModal">Add
+                    Address +</button>
+            </div>
+            
+            <div class="address-container">
+                <% addresses.forEach((address, index) => { %>
+                    <div class="address-card <% if (index === 0) { %>selected<% } %>" onclick="selectAddress('<%= address._id %>', this)">
+                        <p><b><%= address.name %></b></p>
+                        <p><% if (address.landmark) { %> <%= address.landmark %><% } %></p>
+                        <p><%= address.city %>, <%= address.state %>, <%= address.pincode %></p>
+                        <p><%= address.mobile %> <% if (address.altNumber) { %>, <%= address.altNumber %><% } %></p>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+
+        <form action="/payment" method="post">
+            <% selectedProduct.forEach(product => { %>
+                <input type="hidden" name="selectedProduct[]" value="<%= JSON.stringify(product) %>">
+              <% }) %>
+        <input type="hidden" name="selectedAddress" id="selectedAddress" value="<%= addresses[0]._id %>">
+        <button hidden type="submit" id="formSubmit"></button>
+        </form>
+
+        <!-- Order Review -->
+        <table class="checkout-table">
+            <thead>
+                <tr>
+                    <th>Product Details</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% selectedProduct.forEach(items=> { %>
+                <tr>
+                    <td>
+                        <div class="product-row">
+                            <img src="../uploads/<%= items.productId.productImage[0] %>" alt="<%= items.name %>" class="product-image">
+                            <div>
+                                <div class="product-name"><%= items.name %></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="price-cell">₹<%= items.price %></td>
+                    <td class="quantity-cell"><%= items.quantity %></td>
+                    <td class="total-cell">₹<%= items.totalPrice %></td>
+                </tr>
+                <%})%>
+            </tbody>
+        </table>
+        
+        <!-- Order Summary -->
+         <p><% cartTotals %></p>
+        <div class="summary-container">
+            <div class="order-summary">
+                <div class="order-summary-header">
+                    Order Summary
+                </div>
+                <div class="price-summary">
+                    <div class="price-row">
+                        <span>Subtotal</span>
+                        <span>₹<%= cartTotals.subtotal %></span>
+                    </div>
+                    <div class="price-row">
+                        <span>Discount</span>
+                        <span>₹<%= cartTotals.discount %></span>
+                    </div>
+                    <div class="price-row">
+                        <span>Shipping</span>
+                        <span>FREE</span>
+                    </div>
+                    <div class="price-row total-row">
+                        <span>Total Payable</span>
+                        <span>₹<%= cartTotals.total %></span>
+                    </div>
+                </div>
+                
+                <button class="checkout-btn" onclick="proceedForPayment()">Proceed to Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/add_address?redirect=checkout" method="post" onsubmit="return validateForm()">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Add new address</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="fullName">Full Name:</label>
+                        <input type="text" name="fullName" id="fullName">
+                        <label for="type">Address type:</label>
+                        <select name="type" id="type">
+                            <option value="" disabled selected>Select</option>
+                            <option value="Home">Home</option>
+                            <option value="Office">Office</option>
+                        </select>
+                        <label for="city">City</label>
+                        <input type="text" name="city" id="city">
+                        <label for="landmark">Landmark:</label>
+                        <input type="text" name="landmark" id="landmark" placeholder="(Optional)">
+                        <label for="state">State:</label>
+                        <input type="text" name="state" id="state">
+                        <label for="pincode">Pincode:</label>
+                        <input type="number" name="pincode" id="pincode">
+                        <label for="mobile">Mobile number:</label>
+                        <input type="text" name="mobile" id="mobile">
+                        <label for="altnum">Alternative Mobile:</label>
+                        <input type="text" name="altnum" id="altnum" placeholder="(Optional)">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Address</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" value="<%= message %>" id="err">
+    
+    <%- include('../../views/partials/user/footer') %>
+    <script>
+        const message = document.getElementById('err').value
+        if(message){
+            swal.fire(message)
+        }
+
+        function selectAddress(addressId, element) {
+            document.getElementById("selectedAddress").value = addressId;
+    
+            
+            document.querySelectorAll('.address-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+    
+            element.classList.add('selected');
+        }
+
+        function proceedForPayment(){
+            const submitBtn = document.getElementById('formSubmit')
+            submitBtn.click()
+        }
+
+        function validateForm() {
+                    const fullName = document.getElementById('fullName').value.trim();
+                    const type = document.getElementById('type').value.trim();
+                    const city = document.getElementById('city').value.trim();
+                    const landmark = document.getElementById('landmark').value.trim();
+                    const state = document.getElementById('state').value.trim();
+                    const pincode = document.getElementById('pincode').value.trim();
+                    const mobile = document.getElementById('mobile').value.trim();
+                    const altnum = document.getElementById('altnum').value.trim();
+
+                    const namePattern = /^[A-Za-z\s]+$/;  // Only letters and spaces
+                    const cityPattern = /^[A-Za-z\s]+$/;  // Only letters and spaces
+                    const landmarkPattern = /^[A-Za-z0-9\s,-]+$/;  // Allows letters, numbers, spaces, commas, and dashes
+                    const statePattern = /^[A-Za-z\s]+$/; // Only letters and spaces
+                    const pincodePattern = /^\d{6}$/;  // Exactly 6 digits
+                    const mobilePattern = /^[6789]\d{9}$/; // Starts with 6,7,8,9 & 10 digits
+
+                    if (fullName === '' || city === '' || state === '' || pincode == '' || mobile == '') {
+                        swal.fire('All fields are required.');
+                        return false;
+                    }
+
+                    if (!namePattern.test(fullName)) {
+                        swal.fire('Invalid Full Name! Only letters and spaces are allowed.');
+                        return false;
+                    }
+
+                    if (type === '') {
+                        swal.fire('Please select an address type.');
+                        return false;
+                    }
+
+                    if (!cityPattern.test(city)) {
+                        swal.fire('Invalid City Name! Only letters and spaces are allowed.');
+                        return false;
+                    }
+
+                    if (!statePattern.test(state)) {
+                        swal.fire('Invalid State Name! Only letters and spaces are allowed.');
+                        return false;
+                    }
+
+                    if (!pincodePattern.test(pincode)) {
+                        swal.fire('Invalid Pincode! It should be exactly 6 digits.');
+                        return false;
+                    }
+
+                    if (!mobilePattern.test(mobile)) {
+                        swal.fire('Invalid Mobile Number! It should be 10 digits and start with 6, 7, 8, or 9.');
+                        return false;
+                    }
+
+                    if (landmark !== '' && !landmarkPattern.test(landmark)) {
+                        swal.fire('Invalid Landmark! Only letters, numbers, spaces, commas, and dashes are allowed.');
+                        return false;
+                    }
+
+                    if (altnum !== '' && !mobilePattern.test(altnum)) {
+                        swal.fire('Invalid Alternate Number! It should be 10 digits and start with 6, 7, 8, or 9.');
+                        return false;
+                    }
+
+                    return true;
+                }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

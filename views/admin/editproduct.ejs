@@ -434,30 +434,37 @@
 
                 let isValid = true;
 
-                if (name.trim() === "") {
-                    displayErrorMessage('productName-error', 'Please enter a product name.');
+                if (name.trim() === "" || !/^(?=.*[a-zA-Z])[a-zA-Z0-9 ]+$/.test(name)) {
+                    displayErrorMessage('productName-error', 'Please enter a valid product name.');
                     isValid = false;
                 }
 
-                if (description.trim() === "") {
-                    displayErrorMessage('description-error', 'Please enter a product description.');
+                if (description.trim() === "" || !/^(?=.*[a-zA-Z]).+$/.test(description)) {
+                    displayErrorMessage('description-error', 'Please enter a valid product description.');
                     isValid = false;
                 }
+
 
                 if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
                     displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
                     isValid = false;
                 }
 
-                if (offerprice && (!/^\d+(\.\d{1,2})?$/.test(offerprice) || parseFloat(offerprice) < 0)) {
-                    displayErrorMessage('offerPrice-error', 'Please enter a valid non-negative offer price.');
+                if (!/^\d+(\.\d{1,2})?$/.test(offerprice) || parseFloat(offerprice) < 0) {
+                    displayErrorMessage('offerPrice-error', 'Please enter a valid non-negative price.');
                     isValid = false;
                 }
 
-                if (stock <= 1) {
-                    displayErrorMessage('quantity-error', 'Please enter a valid stock (more than 1).');
+                if (parseFloat(offerprice) > parseFloat(price)) {
+                    displayErrorMessage('offerPrice-error', 'Offer price should be less than regular price.');
                     isValid = false;
                 }
+
+                if (stock < 1) {
+                    displayErrorMessage('quantity-error', 'Please enter a valid stock.');
+                    isValid = false;
+                }
+
 
                 if (brand.trim() === "") {
                     displayErrorMessage('brandName-error', 'Please select a brand.');

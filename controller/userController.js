@@ -136,6 +136,7 @@ const signup = async (req, res) => {
             return res.redirect('/signup')
         }
 
+        req.session.resetData = null
         req.session.userOtp = otp;
         req.session.otpExpires = Date.now() + 30 * 1000;
         req.session.userData = { username, email, password };
@@ -184,6 +185,13 @@ const verifyOtp = async (req, res) => {
                 return res.status(400).json({ success: false, message: "User data missing in session" });
             }
 
+            if(!user.username){
+                await userModel.findByIdAndUpdate(req.session.user,{$set:{email:user.email}})
+                req.session.userMsg = 'Email updated successfully'
+                return res.json({ success: true, redirectUrl: "/profile"})
+            }
+            
+
             // Hash password before saving
             const hashedPass = await bcrypt.hash(user.password, 10);
             const saveUserData = new userModel({
@@ -229,7 +237,7 @@ const resendOtp = async (req, res) => {
         }else{
             req.session.userOtp = otp
         }
-        
+
         req.session.otpExpires = Date.now() + 30 * 1000;
 
         const emailSent = await sentVerificationEmail(email, otp)
@@ -362,7 +370,13 @@ const loadError = async (req, res) => {
 //rendering forgot page.
 const loadForgot = async (req, res) => {
     try {
-        res.render('user/forgot')
+        let email = (req.query.email || '').trim();
+        let message;
+        if(req.session.userMsg){
+            message = req.session.userMsg
+            req.session.userMsg = null
+        }
+        res.render('user/forgot',{ message ,email})
     } catch (error) {
         console.error(error)
         res.redirect('/pagenotfound')
@@ -400,10 +414,9 @@ const forgot = async (req, res) => {
         }
 
         req.session.forgotOtp = otp;
-        req.session.resetData = email;
         req.session.userData = findUser
         req.session.otpExpires = Date.now() + 30 * 1000;
-        
+        req.session.resetData = email
 
         res.render('user/otpverification')
         console.log("OTP Sent " + otp);
@@ -421,6 +434,7 @@ const loadreset = async (req, res) => {
     try {
         res.render('user/passwordreset')
     } catch (error) {
+        console.error(error)
         res.redirect('/pagenotfound')
     }
 }
@@ -430,12 +444,24 @@ const passreset = async (req, res) => {
 
         const { password } = req.body
         let email = req.session.resetData
+        
+
+        if(!email){
+            req.session.userMsg = 'Session timeout!'
+            return res.redirect('/forgot')
+        }
+
+        req.session.resetData = null;
 
         const hashed = await bcrypt.hash(password, saltRounds)
 
 
         await userModel.findOneAndUpdate({ email }, { $set: { password: hashed } })
 
+        if(req.session.user){
+            req.session.userMsg = 'Password reset successfully'
+            return res.redirect('/profile')
+        }
         req.session.userMsg = 'Password reset successfully'
         res.redirect('/login')
         return;
@@ -447,132 +473,50 @@ const passreset = async (req, res) => {
     }
 }
 
-const loadShoppingPage = async (req, res) => {
+const editcredentials = async (req,res)=>{
     try {
-        const user = req.session.user;
-        const userData = await userModel.findById(user);
-        const listedCategories = await categoryModel.find({ isListed: true }).select('name');
-        const listedBrands = await brandModel.find({ isListed: true }).select('name');
-
-
-        let { search, sort, brandf, categoryf, minValue, maxValue } = req.query;
-        const page = parseInt(req.query.page) || 1;
-        const perPage = 6;
-
-        if(!minValue){
-            minValue = 0
+        const findUser = await userModel.findById(req.session.user)
+        if(!findUser){
+            req.session.userMsg = 'Session timeout!'
+            return res.redirect('/login')
         }
         
-        if(!maxValue){
-            maxValue = Infinity
+        const {email} = req.body
+
+        const exist = await userModel.findOne({email})
+        if(exist){
+            req.session.userMsg = 'Email already exist!'
+            return res.redirect('/profile')
         }
 
-        let filter = {
-            isDeleted: false,
-            stock: { $gt: 0 },
-            category: { $in: listedCategories.map(cat => cat.name) },
-            brand: { $in: listedBrands.map(brand => brand.name) },
-            $and: [
-                { salePrice: { $gte: minValue } },
-                { salePrice: { $lte: maxValue } }
-            ]
-        };
-        
-        if (search) {
-            filter.productName = { $regex: search, $options: "i" };
+        if(findUser.googleID){
+            req.session.userMsg = 'Cannot update email since the account was created with Google Sign-In.'
+            return res.redirect('/profile')
         }
 
+        const otp = generateOtp()
 
-        if (categoryf) {
-            filter.category = categoryf;
+        const emailSent = await sentVerificationEmail(email, otp)
+
+        if (!emailSent) {
+            req.session.userMsg = "Error while sending email!"
+            return res.redirect('/signup')
         }
 
+        req.session.resetData = null
+        req.session.userOtp = otp;
+        req.session.otpExpires = Date.now() + 30 * 1000;
+        req.session.userData = { email };
 
-        if (brandf) {
-            filter.brand = brandf;
-        }
+        res.render('user/otpverification')
+        console.log("OTP Sent " + otp);
 
-        let sortOptions = {};
-        switch (sort) {
-            case 'A-Z':
-                sortOptions = { productName: 1 };
-                break;
-            case 'Z-A':
-                sortOptions = { productName: -1 };
-                break;
-            case 'Price : low - high':
-                sortOptions = { salePrice: 1 };
-                break;
-            case 'Price : high - low':
-                sortOptions = { salePrice: -1 };
-                break;
-            default:
-                sortOptions = { createdAt: -1 };
-        }
-
-        const brand = await brandModel.find({ isListed: true, isDeleted: false });
-        const category = await categoryModel.find({ isListed: true, isDeleted: false });
-
-        const totalProducts = await productModel.countDocuments(filter);
-        const totalPages = Math.ceil(totalProducts / perPage);
-        const currentPage = Math.max(1, Math.min(page, totalPages));
-
-        const products = await productModel.find(filter)
-            .sort(sortOptions)
-            .skip((currentPage - 1) * perPage)
-            .limit(perPage)
-            .populate('category');
-
-        res.render("user/shop", {
-            products,
-            totalPages,
-            currentPage,
-            search,
-            sort,
-            categoryf,
-            brandf,
-            category,
-            brand,
-            findUser: userData
-        });
     } catch (error) {
-        console.error("Error loading shop page:", error);
-        res.redirect('/admin/loaderror');
+        console.log(error);
+        return res.redirect('/pagenotfound')
+        
     }
 }
-
-const productDetails = async (req, res) => {
-
-    try {
-
-        const userId = req.session.user;
-        const userData = await userModel.findById(userId);
-        const productId = req.params.id;
-        const product = await productModel.findById(productId)
-        // console.log("productId", productId)
-        // const productOffer = product.productOffer || 0;
-
-
-
-        const products = await productModel.find({
-            isBlocked: false,
-            stock: { $gt: 0 },
-        })
-            .sort({ createdOn: -1 })
-            .skip(0)
-            .limit(9);
-
-        res.render("user/product-details", {
-            findUser: userData,
-            product: product,
-            products: products,
-            quantity: product.stock,
-        })
-    } catch (error) {
-        console.error("Error fetching product details:", error);
-        res.redirect('/pagenotfound');
-    }
-};
 
 
 
@@ -587,9 +531,8 @@ module.exports = {
     resendOtp,
     login,
     logout,
-    loadShoppingPage,
-    productDetails,
     forgot,
     loadreset,
-    passreset
+    passreset,
+    editcredentials
 }

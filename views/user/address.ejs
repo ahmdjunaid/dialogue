@@ -1,0 +1,354 @@
+<!-- views/account.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialogue Digital - Manage Account</title>
+    <link rel="stylesheet" href="/css/user/addressmanagement.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <%- include('../../views/partials/user/header') %>
+
+        <div class="main-content">
+            <%- include('../../views/partials/user/profileaside') %>
+
+                <div class="account-container" style="margin-bottom: 2em;">
+                    <h2 class="address-title" style="margin-top: 1em;">MY ADDRESSES</h2>
+                    <div class="addresses-list">
+                        <% if (addresses && addresses.length> 0) { %>
+                            <% addresses[0].address.forEach(function(address) { %>
+                                <div class="address-item">
+                                    <div class="address-info">
+                                        <p class="address-name">
+                                            <%= address.name %>
+                                        </p>
+                                        <p class="address-details">
+                                            <%= address.city %>
+                                                <% if (address.landmark) { %>, <%= address.landmark %>
+                                                        <% } %>,
+                                                            <%= address.state %> - <%= address.pincode %>
+                                        </p>
+                                        <p class="address-details">
+                                            Contact: <%= address.mobile %>
+                                                <% if (address.altNumber) { %>, <%= address.altNumber %>
+                                                        <% } %>
+                                        </p>
+                                        <p class="address-details">
+                                            Type: <%= address.addressType %>
+                                        </p>
+                                    </div>
+
+                                    <div class="address-actions">
+                                        <button class="edit-btn" data-address='<%= JSON.stringify(address) %>'
+                                            onclick="editForm(this)">Edit</button>
+                                        <button type="button" class="delete-btn" data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            onclick="setDeleteAddress('<%= address._id %>')">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                                <% }); %>
+                                    <% } else { %>
+                                        <div class="no-addresses">
+                                            <p>You have no saved addresses yet.</p>
+                                        </div>
+                                        <% } %>
+                    </div>
+                </div>
+
+
+                <div class="divider"></div>
+
+                <div class="add-address-container">
+                    <button class="add-address-btn" type="button" data-bs-toggle="modal" data-bs-target="#addModal">Add
+                        Address</button>
+                </div>
+        </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/add_address" method="post" onsubmit="return validateForm()">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Add new address</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="fullName">Full Name:</label>
+                            <input type="text" name="fullName" id="fullName">
+                            <label for="type">Address type:</label>
+                            <select name="type" id="type">
+                                <option value="" disabled selected>Select</option>
+                                <option value="Home">Home</option>
+                                <option value="Office">Office</option>
+                            </select>
+                            <label for="city">City</label>
+                            <input type="text" name="city" id="city">
+                            <label for="landmark">Landmark:</label>
+                            <input type="text" name="landmark" id="landmark" placeholder="(Optional)">
+                            <label for="state">State:</label>
+                            <input type="text" name="state" id="state">
+                            <label for="pincode">Pincode:</label>
+                            <input type="number" name="pincode" id="pincode">
+                            <label for="mobile">Mobile number:</label>
+                            <input type="text" name="mobile" id="mobile">
+                            <label for="altnum">Alternative Mobile:</label>
+                            <input type="text" name="altnum" id="altnum" placeholder="(Optional)">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add Address</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/edit_address" method="post" onsubmit="return editFormValidate()">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Add new address</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="fullName">Full Name:</label>
+                            <input type="text" name="fullName" id="editName">
+                            <label for="type">Address type:</label>
+                            <select name="type" id="editType">
+                                <option value="">Select</option>
+                                <option value="Home">Home</option>
+                                <option value="Office">Office</option>
+                            </select>
+                            <label for="city">City</label>
+                            <input type="text" name="city" id="editCity">
+                            <label for="landmark">Landmark:</label>
+                            <input type="text" name="landmark" id="editLandmark" placeholder="(Optional)">
+                            <label for="state">State:</label>
+                            <input type="text" name="state" id="editState">
+                            <label for="pincode">Pincode:</label>
+                            <input type="number" name="pincode" id="editPincode">
+                            <label for="mobile">Mobile number:</label>
+                            <input type="text" name="mobile" id="editMobile">
+                            <label for="altnum">Alternative Mobile:</label>
+                            <input type="text" name="altnum" id="editaltMobile" placeholder="(Optional)">
+                            <input type="hidden" id="editId" name="editId">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Edit Address</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete this address?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form id="deleteAddressForm" action="/delete_address">
+                            <input type="hidden" name="addressId" id="deleteAddressId">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <input type="hidden" value="<%= message %>" id="err">
+        <%- include('../../views/partials/user/footer') %>
+
+            <script>
+                function setDeleteAddress(addressId) {
+                    document.getElementById('deleteAddressId').value = addressId;
+                }
+
+
+                const message = document.getElementById('err').value
+                if (message) {
+                    swal.fire(message)
+                }
+
+                function validateForm() {
+                    const fullName = document.getElementById('fullName').value.trim();
+                    const type = document.getElementById('type').value.trim();
+                    const city = document.getElementById('city').value.trim();
+                    const landmark = document.getElementById('landmark').value.trim();
+                    const state = document.getElementById('state').value.trim();
+                    const pincode = document.getElementById('pincode').value.trim();
+                    const mobile = document.getElementById('mobile').value.trim();
+                    const altnum = document.getElementById('altnum').value.trim();
+
+                    const namePattern = /^[A-Za-z\s]+$/;  // Only letters and spaces
+                    const cityPattern = /^[A-Za-z\s]+$/;  // Only letters and spaces
+                    const landmarkPattern = /^[A-Za-z0-9\s,-]+$/;  // Allows letters, numbers, spaces, commas, and dashes
+                    const statePattern = /^[A-Za-z\s]+$/; // Only letters and spaces
+                    const pincodePattern = /^\d{6}$/;  // Exactly 6 digits
+                    const mobilePattern = /^[6789]\d{9}$/; // Starts with 6,7,8,9 & 10 digits
+
+                    if (fullName === '' || city === '' || state === '' || pincode == '' || mobile == '') {
+                        swal.fire('All fields are required.');
+                        return false;
+                    }
+
+                    if (!namePattern.test(fullName)) {
+                        swal.fire('Invalid Full Name! Only letters and spaces are allowed.');
+                        return false;
+                    }
+
+                    if (type === '') {
+                        swal.fire('Please select an address type.');
+                        return false;
+                    }
+
+                    if (!cityPattern.test(city)) {
+                        swal.fire('Invalid City Name! Only letters and spaces are allowed.');
+                        return false;
+                    }
+
+                    if (!statePattern.test(state)) {
+                        swal.fire('Invalid State Name! Only letters and spaces are allowed.');
+                        return false;
+                    }
+
+                    if (!pincodePattern.test(pincode)) {
+                        swal.fire('Invalid Pincode! It should be exactly 6 digits.');
+                        return false;
+                    }
+
+                    if (!mobilePattern.test(mobile)) {
+                        swal.fire('Invalid Mobile Number! It should be 10 digits and start with 6, 7, 8, or 9.');
+                        return false;
+                    }
+
+                    if (landmark !== '' && !landmarkPattern.test(landmark)) {
+                        swal.fire('Invalid Landmark! Only letters, numbers, spaces, commas, and dashes are allowed.');
+                        return false;
+                    }
+
+                    if (altnum !== '' && !mobilePattern.test(altnum)) {
+                        swal.fire('Invalid Alternate Number! It should be 10 digits and start with 6, 7, 8, or 9.');
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                function editForm(button) {
+                    let addressData = JSON.parse(button.getAttribute("data-address"));
+
+                    // Example: Populate form fields with address data
+                    document.getElementById("editName").value = addressData.name;
+                    document.getElementById("editCity").value = addressData.city;
+                    document.getElementById("editState").value = addressData.state;
+                    document.getElementById("editPincode").value = addressData.pincode;
+                    document.getElementById("editMobile").value = addressData.mobile;
+                    document.getElementById("editId").value = addressData._id;
+                    document.getElementById("editType").value = addressData.addressType;
+
+                    if (addressData.altMobile) {
+                        document.getElementById("editaltMobile").value = addressData.altMobile;
+                    }
+
+                    if (addressData.landmark) {
+                        document.getElementById("editLandmark").value = addressData.landmark;
+                    }
+
+                    var modalElement = document.getElementById('editModal');
+                    var modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+                    modalInstance.show();
+
+
+
+                }
+
+                function editFormValidate() {
+                    const fullName = document.getElementById("editName").value
+                    const city = document.getElementById("editCity").value
+                    const state = document.getElementById("editState").value
+                    const pincode = document.getElementById("editPincode").value
+                    const mobile = document.getElementById("editMobile").value
+                    const type = document.getElementById("editType").value
+                    const altnum = document.getElementById("editaltMobile").value
+                    const landmark = document.getElementById("editLandmark").value
+
+                    const namePattern = /^[A-Za-z\s]+$/;  // Only letters and spaces
+                    const cityPattern = /^[A-Za-z\s]+$/;  // Only letters and spaces
+                    const landmarkPattern = /^[A-Za-z0-9\s,-]+$/;  // Allows letters, numbers, spaces, commas, and dashes
+                    const statePattern = /^[A-Za-z\s]+$/; // Only letters and spaces
+                    const pincodePattern = /^\d{6}$/;  // Exactly 6 digits
+                    const mobilePattern = /^[6789]\d{9}$/; // Starts with 6,7,8,9 & 10 digits
+
+                    if (fullName === '' || city === '' || state === '' || pincode == '' || mobile == '') {
+                        swal.fire('All fields are required.');
+                        return false;
+                    }
+
+                    if (!namePattern.test(fullName)) {
+                        swal.fire('Invalid Full Name! Only letters and spaces are allowed.');
+                        return false;
+                    }
+
+                    if (type === '') {
+                        swal.fire('Please select an address type.');
+                        return false;
+                    }
+
+                    if (!cityPattern.test(city)) {
+                        swal.fire('Invalid City Name! Only letters and spaces are allowed.');
+                        return false;
+                    }
+
+                    if (!statePattern.test(state)) {
+                        swal.fire('Invalid State Name! Only letters and spaces are allowed.');
+                        return false;
+                    }
+
+                    if (!pincodePattern.test(pincode)) {
+                        swal.fire('Invalid Pincode! It should be exactly 6 digits.');
+                        return false;
+                    }
+
+                    if (!mobilePattern.test(mobile)) {
+                        swal.fire('Invalid Mobile Number! It should be 10 digits and start with 6, 7, 8, or 9.');
+                        return false;
+                    }
+
+                    if (landmark !== '' && !landmarkPattern.test(landmark)) {
+                        swal.fire('Invalid Landmark! Only letters, numbers, spaces, commas, and dashes are allowed.');
+                        return false;
+                    }
+
+                    if (altnum !== '' && !mobilePattern.test(altnum)) {
+                        swal.fire('Invalid Alternate Number! It should be 10 digits and start with 6, 7, 8, or 9.');
+                        return false;
+                    }
+
+                    return true;
+                }
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

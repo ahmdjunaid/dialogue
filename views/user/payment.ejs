@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Method Selection</title>
+    <style>
+.paymentcontainer {
+            max-width: 600px;
+            margin: 6em auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .payment-option {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .payment-option label {
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        
+        input[type="radio"] {
+            cursor: pointer;
+        }
+        
+        .card-logos {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .card-logo {
+            width: 40px;
+            height: 25px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .amex {
+            background-color: #006FCF;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .visa {
+            background-color: #191F6F;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .mastercard {
+            background-color: #EB001B;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .card-details {
+            margin-top: 15px;
+            margin-left: 25px;
+            display: none;
+        }
+        
+        input[name="payment"][value="card"]:checked ~ .card-details {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .button {
+            background-color: #E6D587;
+            color: #333;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        
+        .button:hover {
+            background-color: #D9C878;
+        }
+        
+        .payment-logo {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../../views/partials/user/header') %>
+
+    <div class="paymentcontainer">
+        <div id="payment-form">
+            <div class="payment-option">
+                <p class="text-success text-end"><b>Amount to be paid : <%= totalAmount %></b></p>
+            </div>
+        </div>
+
+        <h3>Choose payment method</h3>
+        
+        <form id="payment-form" action="/payment">
+            <div class="payment-option">
+                <input type="radio" id="cash" name="payment" value="cash" checked>
+                <label for="cash">Cash on delivery</label>
+            </div>
+            
+            <div class="payment-option">
+                <input type="radio" id="card" name="payment" value="card" disabled>
+                <label for="card">Credit or debit card</label>
+                <div class="card-logos">
+                    <div class="card-logo amex">AMEX</div>
+                    <div class="card-logo visa">VISA</div>
+                    <div class="card-logo mastercard">MC</div>
+                </div>
+            </div>
+            
+            <div class="card-details">
+                <div class="form-group">
+                    <input type="text" id="card-number" placeholder="Card number">
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <input type="text" id="expiry" placeholder="MM/YY">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <input type="text" id="cvc" placeholder="CVC">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="payment-option">
+                <input type="radio" id="wallet" name="payment" value="wallet" disabled>
+                <label for="paypal">
+                    Wallet
+                </label>
+            </div>
+            
+            <button type="submit" class="button">Complete Payment</button>
+        </form>
+    </div>
+    <%- include('../../views/partials/user/footer') %>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const radioButtons = document.querySelectorAll('input[name="payment"]');
+            const cardDetails = document.querySelector('.card-details');
+            
+            radioButtons.forEach(button => {
+                button.addEventListener('change', function() {
+                    if (this.value === 'card') {
+                        cardDetails.style.display = 'block';
+                    } else {
+                        cardDetails.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -8,6 +8,18 @@ username: {
     type: String,
     required:true
 },
+firstName: {
+    type: String,
+    required:false
+},
+lastName: {
+    type: String,
+    required:false
+},
+gender: {
+    type: String,
+    required:false
+},
 email: {
     type:String,
     required:true,
@@ -19,6 +31,10 @@ phone:{
     unique:false,
     sparse:true,
     default:'N/A'
+},
+profileImage:{
+    type:String,
+    required:false
 },
 googleID:{
     type:String,

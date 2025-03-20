@@ -5,7 +5,7 @@
     <div class="container">
       <div class="row no-gutters slider-text align-items-center justify-content-center">
         <div class="col-md-9 ftco-animate text-center">
-          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Product</span></p>
+          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home ></a></span><span>Product</span></p>
           <h1 class="mb-0 bread">
             <%= product.productName %>
           </h1>
@@ -81,10 +81,14 @@
           </div>
           <p>
             <%if( product.stock <=0){%>
-              <a href="/cart/add/<%= product._id %>" class="btn btn-warning py-3 px-5 mr-2">STOCK OUT</a>
+              <a href="" class="btn btn-warning py-3 px-5 mr-2">STOCK OUT</a>
               <%}else{%>
-                <a href="/cart/add/<%= product._id %>" class="btn btn-black py-3 px-5 mr-2">Add to Cart</a>
-                <a href="/checkout/<%= product._id %>" class="btn btn-primary py-3 px-5">Buy now</a>
+              <form id="cartForm" action="/addtocart" method="get">
+                <input type="hidden" name="quantity" id="addtocart">
+                <input type="hidden" name="productId" value="<%= product._id %>">
+                <a href="" class="btn btn-black py-3 px-5 my-2" id="addToCart" >Add to Cart</a>
+              </form>
+                <a href="/checkout/<%= product._id %>" class="btn btn-primary py-3 px-5">Wishlist <i class="ion-ios-heart ml-1"></i></a>
                 <%}%>
           </p>
           <div class="mt-4">
@@ -185,6 +189,52 @@
           </div>
         </div>
       </div>
+      <h3 class="text-center p-4"><b>Others also bought</b></h3>
+      <div class="row justify-content-center">
+        <% relatedProducts.forEach(product=> { %>
+          <div class="col-sm-12 col-md-12 col-lg-3 ftco-animate d-flex">
+            <div class="product d-flex flex-column">
+              <a href="/product/<%= product._id %>" class="img-prod">
+                <img class="img-fluid" src="../uploads/<%= product.productImage[0] %>"
+                  alt="<%= product.productName %>">
+                <div class="overlay"></div>
+              </a>
+              <div class="text py-3 pb-4 px-3">
+                <div class="d-flex">
+                  <div class="cat">
+                    <span>
+                      <%= product.brand %>
+                    </span>
+                  </div>
+                  <div class="rating">
+                    <p class="text-right mb-0">
+                      <span class="ion-ios-star-outline"></span>
+                      <span class="ion-ios-star-outline"></span>
+                      <span class="ion-ios-star-outline"></span>
+                      <span class="ion-ios-star-outline"></span>
+                      <span class="ion-ios-star-outline"></span>
+                    </p>
+                  </div>
+                </div>
+                <h3><a href="/product/<%= product._id %>">
+                    <%= product.productName %>
+                  </a></h3>
+                <div class="pricing">
+                  <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
+                </div>
+                <p class="bottom-area d-flex px-3">
+                  <a href="/cart/add/<%= product._id %>" class="add-to-cart text-center py-2 mr-1">
+                    <span>Add to cart <i class="ion-ios-add ml-1"></i></span>
+                  </a>
+                  <a href="/checkout/<%= product._id %>" class="buy-now text-center py-2">
+                    <span>Buy now<i class="ion-ios-cart ml-1"></i></span>
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+          <% }) %>
+      </div>
     </div>
   </section>
 
@@ -233,6 +283,19 @@
         });
       });
 
+      function quantityAdd(){
+        const quantitiy = document.getElementById('quantity').value;
+        document.getElementById('addtocart').value = quantitiy
+        return true
+      }
+
+      document.getElementById('addToCart').addEventListener('click', function(event) {
+      event.preventDefault();
+      const quantitiy = document.getElementById('quantity').value;
+      document.getElementById('addtocart').value = quantitiy
+      document.getElementById('cartForm').submit();
+
+      });
     </script>
     </body>
 

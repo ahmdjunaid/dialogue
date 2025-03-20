@@ -35,9 +35,8 @@ const loadAddProduct = async (req, res) => {
 }
 
 const addProduct = async (req, res) => {
-
     if (!req.session.admin) {
-        res.redirect('/admin/login')
+        res.redirect('/admin/login');
         return;
     }
 
@@ -45,12 +44,12 @@ const addProduct = async (req, res) => {
         const productData = req.body;
 
         const productExist = await productModel.findOne({
-            productName: productData.productName
+            productName: productData.productName.trim(),isDeleted:false
         });
 
         if (productExist) {
-            req.session.admMsg = 'Product already exist'
-            return res.redirect('/admin/addproduct')
+            req.session.admMsg = 'Product already exists';
+            return res.redirect('/admin/addproduct');
         }
 
         const newProduct = new productModel({
@@ -65,27 +64,27 @@ const addProduct = async (req, res) => {
             ram: productData.ram,
             camera: productData.camera,
             cpu: productData.cpu,
-            status: 'Available'
+            status: 'Available',
+            productImage: []
         });
 
-        const images = [];
+        let images = [];
         for (let i = 1; i <= 4; i++) {
             if (req.files[`image${i}`]) {
-                images[i - 1] = req.files[`image${i}`][0].filename;
+                images.push(req.files[`image${i}`][0].filename);
             }
         }
 
-        if (images.length > 0) {
-            images.forEach((image, index) => {
-                if (image) {
-                    newProduct.productImage[index] = image;
-                }
-            });
+        // Ensure first index (0) is occupied by shifting images if necessary
+        if (images.length > 0 && !images[0]) {
+            images = images.filter(img => img); // Remove empty slots
         }
+
+        newProduct.productImage = images;
 
         await newProduct.save();
 
-        req.session.admMsg = 'Product Added successfully'
+        req.session.admMsg = 'Product added successfully';
         return res.redirect('/admin/addproduct');
 
     } catch (error) {
@@ -93,6 +92,7 @@ const addProduct = async (req, res) => {
         return res.redirect('/admin/loaderror');
     }
 };
+
 
 const loadProduct = async (req, res) => {
 
@@ -124,7 +124,6 @@ const loadProduct = async (req, res) => {
         const totalPages = Math.ceil(totalProducts / limit)
         const skip = (page - 1) * limit
 
-        console.log(listedCategories);
         
 
         const products = await productModel.find({
@@ -191,6 +190,17 @@ const updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         const { productName, productDescription, brandId, categoryId, productAmount, offerAmount, stockCount, storage, ram, camera, cpu } = req.body;
+
+        const existing = await productModel.findOne({
+            _id: { $ne: productId },
+            productName:productName.trim(),
+            isDeleted:false
+        })
+
+        if(existing){
+            req.session.admMsg = 'Product already exist'
+            return res.redirect('/admin/products')
+        }
 
         const updatedData = {
             productName,
@@ -283,6 +293,159 @@ const deleteProduct = async (req, res) => {
     }
 }
 
+const loadShoppingPage = async (req, res) => {
+    try {
+        const user = req.session.user;
+        const userData = await userModel.findById(user);
+        const listedCategories = await categoryModel.find({ isListed: true }).select('name');
+        const listedBrands = await brandModel.find({ isListed: true }).select('name');
+
+
+        let { search, sort, brandf, categoryf, minValue, maxValue } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 6;
+
+        if(!minValue){
+            minValue = 0
+        }
+        
+        if(!maxValue){
+            maxValue = Infinity
+        }
+
+        let filter = {
+            isDeleted: false,
+            stock: { $gt: 0 },
+            category: { $in: listedCategories.map(cat => cat.name) },
+            brand: { $in: listedBrands.map(brand => brand.name) },
+            $and: [
+                { salePrice: { $gte: minValue } },
+                { salePrice: { $lte: maxValue } }
+            ]
+        };
+        
+        if (search) {
+            filter.productName = { $regex: search, $options: "i" };
+        }
+
+
+        if (categoryf) {
+            filter.category = categoryf;
+        }
+
+
+        if (brandf) {
+            filter.brand = brandf;
+        }
+
+        let sortOptions = {};
+        switch (sort) {
+            case '':
+                sortOptions = { createdAt: -1 };
+                break;
+            case 'A-Z':
+                sortOptions = { productName: 1 };
+                break;
+            case 'Z-A':
+                sortOptions = { productName: -1 };
+                break;
+            case 'Price : low - high':
+                sortOptions = { salePrice: 1 };
+                break;
+            case 'Price : high - low':
+                sortOptions = { salePrice: -1 };
+                break;
+            default:
+                sortOptions = { createdAt: -1 };
+        }
+
+        const brand = await brandModel.find({ isListed: true, isDeleted: false });
+        const category = await categoryModel.find({ isListed: true, isDeleted: false });
+
+        const totalProducts = await productModel.countDocuments(filter);
+        const totalPages = Math.ceil(totalProducts / perPage);
+        const currentPage = Math.max(1, Math.min(page, totalPages));
+
+        let message;
+        if(req.session.userMsg){
+            message = req.session.userMsg
+            req.session.userMsg = null
+        }
+
+        const products = await productModel.find(filter)
+            .sort(sortOptions)
+            .skip((currentPage - 1) * perPage)
+            .limit(perPage)
+            .populate('category');
+
+        res.render("user/shop", {
+            products,
+            totalPages,
+            currentPage,
+            search,
+            sort,
+            categoryf,
+            brandf,
+            category,
+            brand,
+            findUser: userData,
+            message
+        });
+    } catch (error) {
+        console.error("Error loading shop page:", error);
+        res.redirect('/admin/loaderror');
+    }
+}
+
+const productDetails = async (req, res) => {
+
+    try {
+
+        const userId = req.session.user;
+        const userData = await userModel.findById(userId);
+        const productId = req.params.id;
+
+        const unlistedCategories = await categoryModel.find({ isListed: false }).select('name');
+        const unlistedBrands = await brandModel.find({ isListed: false }).select('name');
+
+        const blockedProduct = await productModel.findOne({
+            _id:productId,
+            $or: [
+                { isDeleted: true },
+                { category: { $in: unlistedCategories.map(cat => cat.name) } },
+                { brand: { $in: unlistedBrands.map(brand => brand.name) } }
+            ],
+        })
+
+        if(blockedProduct){
+            req.session.userMsg = 'This product is unlisted by the seller.'
+            return res.redirect('/shop')
+        }
+
+        const product = await productModel.findById(productId)
+ 
+
+        const relatedProducts = await productModel.find({
+            isDeleted: false,
+            stock: { $gt: 0 },
+            _id: { $ne: productId },
+        })
+            .sort({ createdOn: -1 })
+            .skip(0)
+            .limit(3);
+
+        res.render("user/product-details", {
+            findUser: userData,
+            product: product,
+            relatedProducts,
+            quantity: product.stock,
+        })
+    } catch (error) {
+        console.error("Error fetching product details:", error);
+        res.redirect('/pagenotfound');
+    }
+};
+
 
 module.exports = {
     loadAddProduct,
@@ -291,5 +454,9 @@ module.exports = {
     editProductPage,
     updateProduct,
     removeProductImage,
-    deleteProduct
+    deleteProduct,
+
+    //user side
+    loadShoppingPage,
+    productDetails,
 }

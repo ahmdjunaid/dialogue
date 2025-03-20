@@ -1,0 +1,228 @@
+
+.cart_container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    margin-top: 6em;
+    margin-bottom: 8em;
+  }
+  
+  .cart_products_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+  }
+  
+  .cart_header_row {
+    background-color: #e0d5a0;
+  }
+  
+  .cart_header_cell {
+    padding: 15px;
+    text-align: center;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .cart_item_row {
+    border-bottom: 1px solid #eee;
+  }
+  
+  .cart_product_cell {
+    padding: 20px 15px;
+    width: 60%;
+  }
+  
+  .cart_price_cell, .cart_quantity_cell, .cart_total_cell {
+    padding: 20px 15px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  
+  .cart_product_wrapper {
+    display: flex;
+    align-items: center;
+  }
+  
+  .cart_remove_btn_wrapper {
+    margin-right: 10px;
+  }
+  
+  .cart_remove_btn {
+    background-color: #e0d5a0;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .cart_product_img_wrapper {
+    width: 80px;
+    margin-right: 20px;
+  }
+  
+  .cart_product_img {
+    width: 100%;
+    height: auto;
+  }
+  
+  .cart_product_info {
+    flex: 1;
+  }
+  
+  .cart_product_title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+  }
+  
+  .cart_product_desc {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+    line-height: 1.4;
+  }
+  
+  .cart_summary_wrapper {
+    max-width: 600px;
+    margin-left: auto;
+  }
+  
+  .cart_totals_heading {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+  }
+  
+  .cart_totals_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .cart_totals_row {
+    border-bottom: 1px solid #eee;
+  }
+  
+  .cart_totals_label, .cart_totals_value {
+    padding: 12px 10px;
+  }
+  
+  .cart_totals_label {
+    color: #666;
+  }
+  
+  .cart_totals_value {
+    text-align: right;
+  }
+  
+  .cart_grand_total_row {
+    font-weight: 600;
+  }
+  
+  .cart_coupon_wrapper {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  
+  .cart_coupon_input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+    outline: none;
+  }
+  
+  .cart_apply_coupon_btn {
+    background-color: #8e9de0;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 0 4px 4px 0;
+  }
+  
+  .cart_checkout_btn {
+    display: block;
+    width: 100%;
+    background-color: #e0d5a0;
+    color: #333;
+    border: none;
+    padding: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 14px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .cart_product_wrapper {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .cart_remove_btn_wrapper {
+      margin-bottom: 10px;
+    }
+    
+    .cart_product_img_wrapper {
+      margin-bottom: 10px;
+    }
+    
+    .cart_coupon_wrapper {
+      flex-direction: column;
+    }
+    
+    .cart_coupon_input {
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    
+    .cart_apply_coupon_btn {
+      border-radius: 4px;
+    }
+  }
+
+  /* Quantity Controls */
+.quantity_control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity_btn {
+  width: 30px;
+  height: 30px;
+  background-color: #e0d5a0;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity_value {
+  margin: 0 10px;
+  font-size: 16px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.decrease_btn:disabled {
+  background-color: #e0e0e0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}

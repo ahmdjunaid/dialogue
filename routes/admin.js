@@ -7,7 +7,7 @@ const brandController = require('../controller/brandController')
 const productController = require('../controller/productController')
 const categoryController = require('../controller/categoryController')
 const path = require('path')
-const upload = require('../config/multer')
+const { upload } = require('../config/multer')
 
 
 //login management

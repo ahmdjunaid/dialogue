@@ -8,6 +8,10 @@ const cartSchema = new Schema({
         required:true
     },
     items:[{
+        name:{
+            type:String,
+            required:true
+        },
         productId:{
             type:Schema.Types.ObjectId,
             ref:"Product",
@@ -25,13 +29,9 @@ const cartSchema = new Schema({
             type:Number,
             required:true
         },
-        status:{
-            type:String,
-            default:"Placed"
-        },
-        cancellationReason:{
-            type:String,
-            default:"none"
+        discount:{
+            type:Number,
+            default:0
         }
     }]
 })

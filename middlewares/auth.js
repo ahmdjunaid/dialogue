@@ -8,6 +8,7 @@ const userAuth = async (req, res, next) => {
             return // Redirect to home page if session is missing
         }
 
+        
         const user = await userModel.findById(req.session.user);
 
         if (!user || user.isBlocked) {
@@ -16,7 +17,9 @@ const userAuth = async (req, res, next) => {
             return; // Redirect to home page instead of login
         }
 
+        
         next(); // Proceed if user is valid and not blocked
+        
     } catch (error) {
         console.error("Error in user authentication middleware:", error);
         res.redirect('/pagenotfound')

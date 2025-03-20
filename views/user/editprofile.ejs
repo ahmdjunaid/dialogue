@@ -1,0 +1,173 @@
+<!-- views/account.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialogue Digital - Manage Account</title>
+    <link rel="stylesheet" href="/css/user/profilemanagement.css">
+    <!-- Cropper.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <!-- Cropper.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+</head>
+
+<body>
+    <!-- Include header partial -->
+    <%- include('../../views/partials/user/header') %>
+
+    <div class="main-container">
+        <!-- Include sidebar partial -->
+        <%- include('../../views/partials/user/profileaside') %>
+
+        <main class="content">
+            <section class="basic-info">
+                <h2>BASIC INFO</h2>
+                <form id="profile-form" onsubmit="return validateForm()" action="/editprofile" method="POST" enctype="multipart/form-data">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="image">Image</label>
+
+                            <div class="ftco-animate" id="prod-image">
+                                <% if (findUser.profileImage) { %>
+                                    <img src="/uploads/<%= findUser.profileImage %>" class="img-fluid mb-2"
+                                        style="height: 200px; width: 200px !important; object-fit: cover;"
+                                        alt="<%= findUser.username %>" id="image-sec">
+                                <% } else { %>
+                                    <img src="/uploads/default.jpg" class="img-fluid"
+                                        style="height: 200px; width: 200px; object-fit: cover;"
+                                        alt="No Image Available" id="image-sec">
+                                <% } %>
+                            </div>
+
+                            <input type="file" id="input-image" name="croppedImage" class="inputimage" style="width: 200px;" accept="image/*">
+
+                            <!-- Modal for Image Cropping -->
+                            <div id="crop-modal" style="display: none;">
+                                <img id="crop-image" style="max-width: 100%;">
+                                <button type="button" id="confirm-crop" class="btn btn-success">Confirm Crop</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" value="<%= findUser.firstName%>" id="firstName" name="firstName">
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" value="<%= findUser.lastName%>" id="lastName" name="lastName">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="text" value="<%= findUser.phone%>" id="phone" name="phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" value="<%= findUser.username %>" id="username" name="username"
+                                readonly>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select name="gender" id="gender" style="width: 49% !important;">
+                                <option value="" <%= findUser.gender==='' ? 'selected' : ''%>>Select</option>
+                                <option value="Male" <%= findUser.gender==='Male' ? 'selected' : ''%>>Male</option>
+                                <option value="Female" <%= findUser.gender==='Female' ? 'selected' : ''%>>Female</option>
+                                <option value="Other" <%= findUser.gender==='Other' ? 'selected' : ''%>>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="edit-container">
+                        <button class="edit-btn">UPDATE DETAILS</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <!-- Include footer partial -->
+    <%- include('../../views/partials/user/footer') %>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const inputImage = document.getElementById("input-image");
+            const cropModal = document.getElementById("crop-modal");
+            const cropImage = document.getElementById("crop-image");
+            const confirmCrop = document.getElementById("confirm-crop");
+            let cropper;
+            let originalFile;
+
+            inputImage.addEventListener("change", function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    originalFile = file; // Store the original file
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        cropImage.src = e.target.result;
+                        cropModal.style.display = "block"; // Show modal
+                        if (cropper) {
+                            cropper.destroy();
+                        }
+                        cropper = new Cropper(cropImage, {
+                            aspectRatio: 1, // Square crop (modify as needed)
+                            viewMode: 2,
+                            autoCropArea: 1,
+                        });
+                    };
+                    reader.readAsDataURL(file); // Still needed for Cropper.js to display the image
+                }
+            });
+
+            confirmCrop.addEventListener("click", function () {
+                if (cropper) {
+                    cropper.getCroppedCanvas({
+                        width: 400,
+                        height: 400,
+                    }).toBlob(function (blob) {
+                        // Create a File object from the Blob
+                        const croppedFile = new File([blob], originalFile.name, { type: originalFile.type });
+
+                        // Update the preview
+                        const previewUrl = URL.createObjectURL(croppedFile);
+                        document.getElementById("image-sec").src = previewUrl;
+
+                        // Replace the input file with the cropped file
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(croppedFile);
+                        inputImage.files = dataTransfer.files;
+
+                        // Hide modal
+                        cropModal.style.display = "none";
+                    }, originalFile.type, 0.9); // Use the original file type and quality
+                }
+            });
+        });
+
+        function validateForm(){
+            let firstName = document.getElementById('firstName').value.trim()
+            let lastName = document.getElementById('lastName').value.trim()
+            let phone = document.getElementById('phone').value.trim()
+            let username = document.getElementById('username').value.trim()
+
+            if(!/^[A-Za-z\s]+$/.test(firstName)||!/^[A-Za-z\s]+$/.test(lastName)||!/^[A-Za-z\s]+$/.test(username)){
+                swal.fire('Name or User name only accept character and spaces')
+                return false
+            }
+
+            if(!/^\d{10}$/.test(phone)){
+                swal.fire('Mobile number should be 10 digit Number')
+                return false
+            }
+            return true
+
+        }
+
+    </script>
+</body>
+
+</html>

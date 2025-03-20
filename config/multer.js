@@ -19,5 +19,12 @@ const upload = multer({
     { name: 'image4', maxCount: 1 }
 ]);
 
+const singleupload = multer({
+    storage: storage,
 
-module.exports = upload;
+}).single("croppedImage");
+
+module.exports = {
+    upload,
+    singleupload
+}
