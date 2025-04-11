@@ -3,6 +3,10 @@ const {Schema} = mongoose
 const {v4:uuidv4} = require('uuid')
 
 const orderSchema = new Schema({
+    userId:{
+        type:Schema.Types.ObjectId,
+        ref:"User",
+    },
     orderId:{
         type:String,
         default:()=>uuidv4(),
@@ -20,7 +24,33 @@ const orderSchema = new Schema({
         },
         price:{
             type:Number,
-            default:0
+            required:true
+        },
+        offerAmount:{
+            type:Number,
+            required:false
+        },
+        offerId:{
+            type:Schema.Types.ObjectId,
+            ref:"Offer",
+            required:false
+        },
+        imageurl:{
+            type:Array,
+            required:true
+        },
+        status:{
+            type:String,
+            required:true,
+            enum:["Pending","Processing","Shipped","Delivered","Cancelled","Return Requested","Return Rejected","Returned"]
+        },
+        cancellationReason:{
+            type:String,
+            required:false
+        },
+        returnReason:{
+            type:String,
+            required:false
         }
     }],
     totalPrice:{
@@ -31,32 +61,49 @@ const orderSchema = new Schema({
         type:Number,
         default:0
     },
+    couponDiscount:{
+        type:Number,
+        default:0
+    },
+    couponApplied:{
+        type: Schema.Types.ObjectId, 
+        ref: "Coupon",
+        required:false
+    },
     finalAmount:{
         type:Number,
         required:true
     },
-    address:{
-        type:Schema.Types.ObjectId,
-        ref:"User",
+    paymentMethod:{
+        type:String,
         required:true
     },
-    invoiceDate:{
-        type:Date,
-        default:Date.now
-    },
+    shippingaddress:{ 
+        addressType:{type:String,required:true},
+        name:{type:String,required:true},
+        city:{type:String,required:true},
+        landmark:{type:String,required:false},
+        state:{type:String,required:true},
+        pincode:{type:Number,required:true},
+        mobile:{type:String,required:true},
+        altNumber:{type:String,required:false}},
     status:{
         type:String,
         required:true,
-        enum:["Pending","Processing","Shipped","Delivered","Cancelled","Return Requested"]
+        enum:["Pending","Processing","Shipped","Delivered","Cancelled","Return Requested","Return Rejected","Returned"]
     },
     createdOn:{
         type:Date,
         default:Date.now,
         required:true
     },
-    couponApplied:{
-        type:Boolean,
-        default:false
+    cancellationReason:{
+        type:String,
+        required:false
+    },
+    returnReason:{
+        type:String,
+        required:false
     }
 })
 

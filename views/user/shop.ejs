@@ -64,7 +64,7 @@
                     <div class="d-flex">
                       <div class="cat">
                         <span>
-                          <%= product.brand %>
+                          <%= product.brand.name %>
                         </span>
                       </div>
                       <div class="rating">
@@ -87,7 +87,7 @@
                       <a href="/addtocart?productId=<%= product._id %>&quantity=1" class="add-to-cart text-center py-2 mr-1">
                         <span>Add to cart <i class="ion-ios-add ml-1"></i></span>
                       </a>
-                      <a href="/checkout/<%= product._id %>" class="buy-now text-center py-2">
+                      <a href="/addtowishlist?productId=<%= product._id %>" class="buy-now text-center py-2">
                         <span>Wishlist<i class="ion-ios-heart ml-1"></i></span>
                       </a>
                     </p>
@@ -123,9 +123,9 @@
               <div class="sidebar-box-2">
                 <h6>Categories</h6>
                 <select name="categoryf" id="" class="selector">
-                  <option value="" <%=category.name==='' ? 'selected' : '' %>>Select</option>
+                  <option value="" <%=category._id==='' ? 'selected' : '' %>>Select</option>
                   <% category.forEach((category)=>{%>
-                    <option value="<%= category.name %>" <%=category.name==categoryf ? 'selected' : '' %>>
+                    <option value="<%= category._id %>" <%=category._id==categoryf ? 'selected' : '' %>>
                       <%= category.name %>
                     </option>
                     <%})%>
@@ -134,9 +134,9 @@
               <div class="sidebar-box-2">
                 <h6>Brands</h6>
                 <select name="brandf" id="" class="selector">
-                  <option value="" <%=brand.name==='' ? 'selected' : '' %>>Select</option>
+                  <option value="" <%=brand._id==='' ? 'selected' : '' %>>Select</option>
                   <% brand.forEach((brand)=>{ %>
-                    <option value="<%= brand.name %>" <%=brand.name==brandf ? 'selected' : '' %>>
+                    <option value="<%= brand._id %>" <%=brand._id==brandf ? 'selected' : '' %>>
                       <%= brand.name %>
                     </option>
                     <%})%>

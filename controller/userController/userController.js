@@ -1,7 +1,7 @@
-const userModel = require('../models/userModel')
-const productModel = require('../models/productModel')
-const brandModel = require('../models/brandModel')
-const categoryModel = require('../models/categoryModel')
+const userModel = require('../../models/userModel')
+const productModel = require('../../models/productModel')
+const brandModel = require('../../models/brandModel')
+const categoryModel = require('../../models/categoryModel')
 const nodemailer = require('nodemailer')
 const env = require('dotenv').config()
 const bcrypt = require('bcrypt')
@@ -22,17 +22,19 @@ const loadHome = async (req, res) => {
                 console.warn('User not found for session ID:', userId);
             }
         }
-        const listedCategories = await categoryModel.find({ isListed: true }).select('name');
-        const listedBrands = await brandModel.find({ isListed: true }).select('name');
+        const listedCategories = await categoryModel.find({ isListed: true }).select('_id');
+        const listedBrands = await brandModel.find({ isListed: true }).select('_id');
 
 
         const products = await productModel.find({
-            category: { $in: listedCategories.map(cat => cat.name) }, //only showing listed category
-            brand: { $in: listedBrands.map(brand => brand.name) }, //only showing listed brand
+            isDeleted: false,
+            stock: { $gt: 0 },
+            category: { $in: listedCategories.map(cat => cat._id) }, //only showing listed category
+            brand: { $in: listedBrands.map(brand => brand._id) }, //only showing listed brand
         })
             .sort({ createdAt: -1 })
-            .limit(8);
-
+            .limit(8)
+            .populate('brand')
 
         res.render('user/landing', {
             products,
@@ -77,7 +79,7 @@ async function sentVerificationEmail(email, otp) { //Generated otp sent to  user
 
 
     } catch (error) {
-        console.log("Error while sending email", error);
+        console.error("Error while sending email", error);
         res.redirect('/pagenotfound')
         return;
     }
@@ -147,7 +149,7 @@ const signup = async (req, res) => {
 
 
     } catch (error) {
-        console.log(error, 'Error while signup')
+        console.error(error, 'Error while signup')
         return res.redirect('/pagenotfound')
 
     }
@@ -321,7 +323,7 @@ const login = async (req, res) => {
 
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
         req.session.userMsg = 'Something went wrong'
         return res.redirect('/login')
 
@@ -424,7 +426,7 @@ const forgot = async (req, res) => {
 
 
     } catch (error) {
-        console.log(error, 'Error while forgot password')
+        console.error(error, 'Error while forgot password')
         return res.redirect('/pagenotfound')
 
     }
@@ -467,8 +469,7 @@ const passreset = async (req, res) => {
         return;
 
     } catch (error) {
-        console.log(error);
-
+        console.error(error);
         res.redirect('/pagenotfound')
     }
 }
@@ -512,7 +513,7 @@ const editcredentials = async (req,res)=>{
         console.log("OTP Sent " + otp);
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.redirect('/pagenotfound')
         
     }

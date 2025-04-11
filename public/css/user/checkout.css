@@ -91,6 +91,8 @@
 .product-row {
     display: flex;
     align-items: center;
+    text-align: justify;
+
 }
 .product-image {
     width: 60px;

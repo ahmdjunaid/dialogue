@@ -1,17 +1,9 @@
-const categoryModel = require('../models/categoryModel')
+const categoryModel = require('../../models/categoryModel')
 
 
 
 const loadCategory = async (req, res) => {
     try {
-
-
-
-        if (!req.session.admin) {
-            res.redirect('/admin/login')
-            return;
-        }
-
 
         let search = '';
         if (req.query.search) {
@@ -61,39 +53,28 @@ const loadCategory = async (req, res) => {
 const addCategory = async (req, res) => {
 
 
-    if (!req.session.admin) {
-        res.redirect('/admin/login')
-        return;
-    }
-
-
-    let { categoryname, categorydescription, offer } = req.body
-
-    const nameRegex = /^[a-zA-Z0-9\-_&/ ]+$/; // Allows letters, numbers, -, /, _, &, and spaces
-    offer = parseFloat(offer)
-
-    if (typeof offer !== 'number' || isNaN(offer) || offer < 0 || offer > 100) {
-        req.session.admMsg = 'Enter a valid offer percentage (0-100)';
-        return res.redirect('/admin/category');
-    }
-
-    if (!categoryname.trim() || !categorydescription.trim()) {
-        req.session.admMsg = 'All fields are required';
-        return res.redirect('/admin/category');
-    }
-
-    if (!nameRegex.test(categoryname.trim())) {
-        req.session.admMsg = 'Category name can only contain letters, numbers, and (- / _ &) symbols';
-        return res.redirect('/admin/category');
-    }
-
-
     try {
+
+        let { categoryname, categorydescription } = req.body
+
+        const nameRegex = /^[a-zA-Z0-9\-_&/ ]+$/; // Allows letters, numbers, -, /, _, &, and spaces
+
+        if (!categoryname.trim() || !categorydescription.trim()) {
+            req.session.admMsg = 'All fields are required';
+            return res.redirect('/admin/category');
+        }
+
+        if (!nameRegex.test(categoryname.trim())) {
+            req.session.admMsg = 'Category name can only contain letters, numbers, and (- / _ &) symbols';
+            return res.redirect('/admin/category');
+        }
+
+
         const existingBrand = await categoryModel.findOne({ name: categoryname.trim() })
 
         if (existingBrand) {
             if (existingBrand.isDeleted == true) {
-                await categoryModel.findOneAndUpdate({ name: categoryname }, { $set: { description: categorydescription, categoryOffer: offer, isDeleted: false } })
+                await categoryModel.findOneAndUpdate({ name: categoryname }, { $set: { description: categorydescription, isDeleted: false } })
                 req.session.admMsg = 'Category added successfully'
                 return res.redirect('/admin/category')
             }
@@ -103,8 +84,7 @@ const addCategory = async (req, res) => {
 
         const newBrand = new categoryModel({
             name: categoryname.trim(),
-            description: categorydescription.trim(),
-            categoryOffer: offer
+            description: categorydescription.trim()
         })
 
 
@@ -113,6 +93,7 @@ const addCategory = async (req, res) => {
         return res.redirect('/admin/category')
 
     } catch (error) {
+        console.error(error)
         req.session.admMsg = 'Internal server error'
         return res.redirect('/admin/category')
     }
@@ -122,22 +103,10 @@ const editCategory = async (req, res) => {
 
     try {
 
+        let { categoryname, catdescription, id } = req.body
 
-        if (!req.session.admin) {
-            res.redirect('/admin/login')
-            return;
-        }
-
-        let { categoryname, catdescription, offer, id } = req.body
-     
 
         const nameRegex = /^[a-zA-Z0-9\-_&/ ]+$/; // Allows letters, numbers, -, /, _, &, and spaces
-        offer = parseFloat(offer)
-
-        if (typeof offer !== 'number' || isNaN(offer) || offer < 0 || offer > 100) {
-            req.session.admMsg = 'Enter a valid offer percentage (0-100)';
-            return res.redirect('/admin/category');
-        }
 
         if (!categoryname.trim() || !catdescription.trim()) {
             req.session.admMsg = 'All fields are required';
@@ -149,14 +118,19 @@ const editCategory = async (req, res) => {
             return res.redirect('/admin/category');
         }
 
-        const existingCategory = await categoryModel.findOne({ name: categoryname.trim(), isDeleted: false })
+        const existingCategory = await categoryModel.findOne({
+            _id: { $ne: id },
+            name: categoryname.trim(),
+            isDeleted: false
+          });
+          
 
         if (existingCategory) {
             req.session.admMsg = 'Category already exist!'
             return res.redirect('/admin/category')
         }
 
-        await categoryModel.findOneAndUpdate({ _id: id }, { $set: { name: categoryname, description: catdescription, categoryOffer: offer } })
+        await categoryModel.findOneAndUpdate({ _id: id }, { $set: { name: categoryname, description: catdescription} })
 
         req.session.admMsg = 'Category edited successfully'
         res.redirect('/admin/category')
@@ -173,18 +147,13 @@ const editCategory = async (req, res) => {
 const deleteCategory = async (req, res) => {
     try {
 
-        if (!req.session.admin) {
-            res.redirect('/admin/login')
-            return;
-        }
-    
         const { id } = req.body
-    
+
         await categoryModel.findOneAndUpdate({ _id: id }, { $set: { isDeleted: true } })
-    
+
         req.session.admMsg = 'Category deleted successfully'
         return res.redirect('/admin/category')
-        
+
     } catch (error) {
         req.session.admMsg = 'Internal server error'
         return res.redirect('/admin/category')
@@ -196,17 +165,14 @@ const listCategory = async (req, res) => {
 
     try {
 
-        if (!req.session.admin) {
-            res.redirect('/admin/login')
-            return;
-        }
-
         let id = req.query.id;
 
         await categoryModel.findOneAndUpdate({ _id: id }, { $set: { isListed: true } })
+
         return res.redirect('/admin/category')
-        
+
     } catch (error) {
+        console.error(error)
         res.redirect('/admin/loaderror')
     }
 }
@@ -215,16 +181,11 @@ const unlistCategory = async (req, res) => {
 
     try {
 
-        if (!req.session.admin) {
-            res.redirect('/admin/login')
-            return;
-        }
-
         let id = req.query.id;
 
         await categoryModel.findOneAndUpdate({ _id: id }, { $set: { isListed: false } })
         return res.redirect('/admin/category')
-        
+
     } catch (error) {
         console.error(error)
         res.redirect('/admin/loaderror')

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Failed</title>
+    <style>
+        .order_main_container {
+            margin-top: 3.1em;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+        }
+        .icon {
+            color: #dc3545;
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: #dc3545;
+        }
+        p {
+            margin-bottom: 24px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .button {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .button:hover {
+            background-color: #0b5ed7;
+        }
+    </style>
+</head>
+<body>
+    
+    <%- include('../../views/partials/user/header') %>
+
+    <div class="main-container">
+
+    
+        <div class="order_main_container">
+            <div class="icon">
+                ❌
+            </div>
+            <h1>Order Failed</h1>
+            <p>We're sorry, but there was a problem processing your order. The transaction was not completed.</p>
+            <p>Please try again or contact customer support if the problem persists.</p>
+            <a href="javascript:history.back()" class="button">Return to Payment Page</a>
+            <a href="/" class="button">Return to Home Page</a>
+        </div>
+
+    </div>
+    <%- include('../../views/partials/user/footer') %>
+    
+</body>
+</html>

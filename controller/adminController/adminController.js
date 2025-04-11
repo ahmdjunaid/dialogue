@@ -1,13 +1,9 @@
-const userModel = require('../models/userModel')
+const userModel = require('../../models/userModel')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
-const {userAuth,adminAuth} = require('../middlewares/auth')
+const {userAuth,adminAuth} = require('../../middlewares/auth')
 
 const loadLogin = async (req,res)=> {
-    if(req.session.admin){
-        res.redirect('/admin/dashboard')
-        return;
-    }
 
     let message;
     if(req.session.admMsg){
@@ -50,11 +46,13 @@ const login = async (req,res)=>{
 }
 
 const loadDash = async (req,res)=> {
-    if(req.session.admin){
+    try {
         res.render('admin/dashboard')
-        return;
+        
+    } catch (error) {
+        console.error(error, 'Error while loading dashboard')
     }
-    res.redirect('/admin/login')
+
 }
 
 const loaderror = async (req,res)=>{

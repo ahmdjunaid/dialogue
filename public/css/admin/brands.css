@@ -101,11 +101,13 @@ body {
     color: #6c7293;
     font-weight: normal;
     border-bottom: 1px solid #292d38;
+    font-size: 14px;
 }
 
 .categories-table td {
     padding: 15px 20px;
     border-bottom: 1px solid #292d38;
+    font-size: 14px;
 }
 
 .edit-button,

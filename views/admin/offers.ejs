@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialogue Digital - Offers</title>
+    <link rel="stylesheet" href="/css/admin/brands.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        /* Common button base style */
+        .action-button {
+            padding: 6px 14px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s ease;
+            margin-right: 8px;
+        }
+
+        /* Edit button */
+        .edit-button {
+            background-color: #0d6efd;
+        }
+
+        .edit-button:hover {
+            background-color: #0b5ed7;
+        }
+
+        /* Activate button */
+        .activate-button {
+            background-color: #28a745;
+            /* Bootstrap Success Green */
+        }
+
+        .activate-button:hover {
+            background-color: #218838;
+        }
+
+        /* Deactivate button */
+        .deactivate-button {
+            background-color: #dc3545;
+            /* Bootstrap Danger Red */
+        }
+
+        .deactivate-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <%-include("../../views/partials/admin/aside")%>
+
+        <!-- Main content area -->
+        <div class="main-content">
+            <!-- Header with search -->
+            <div class="header">
+                <div class="search-container">
+                    <form action="/admin/offers" method="GET">
+                        <input class="search-input" type="text" name="search" id="searchInput"
+                            placeholder="Search for Offers">
+                        <button type="submit" id="searchBtn" class="btn btn-success">Search</button>
+                        <button type="button" class="btn btn-secondary" onclick="clearSearch()">Clear</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-success" button type="button" data-bs-toggle="modal"
+                    data-bs-target="#addOfferModal">ADD OFFER +</button>
+            </div>
+            <!-- Categories section -->
+            <div class="categories-container">
+                <div class="categories-header">
+                    <div class="categories-title">Offers</div>
+                </div>
+                <table class="categories-table">
+                    <thead>
+                        <tr>
+                            <th>OFFER NAME</th>
+                            <th>OFFER TYPE</th>
+                            <th>APPLICABLE</th>
+                            <th>TYPE</th>
+                            <th>OFFER AMOUNT</th>
+                            <th>VALID FROM</th>
+                            <th>VALID UPTO</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="justify-content-center" id="couponTableBody">
+                        <%if(offers && offers.length>0){%>
+                            <%offers.forEach(items=>{%>
+                                <tr>
+                                    <td>
+                                        <%= items.offerName %>
+                                    </td>
+                                    <td>
+                                        <%= items.offerType %>
+                                    </td>
+                                    <%if(items.offerType=="Product"){%>
+                                        <td>
+                                            <%= items.applicableTo.productName %>
+                                        </td>
+                                        <%}else{%>
+                                            <td>
+                                                <%= items.applicableTo.name %>
+                                            </td>
+                                            <%}%>
+                                                <td>
+                                                    <%= items.discountType %>
+                                                </td>
+                                                <%if(items.discountType=='flat'){%>
+                                                <td>₹ <%= items.discountAmount %></td>
+                                                <%}else{%>
+                                                <td><%= items.discountAmount %> %</td>
+                                                <%}%>
+                                                <td>
+                                                    <%= items.validFrom.toLocaleDateString('en-US', { year: 'numeric' ,
+                                                        month: 'short' , day: 'numeric' }) %>
+                                                </td>
+                                                <td>
+                                                    <%= items.validUpto.toLocaleDateString('en-US', { year: 'numeric' ,
+                                                        month: 'short' , day: 'numeric' }) %>
+                                                </td>
+                                                <td><button class="action-button edit-button"
+                                                        onclick='openEditForm(<%- JSON.stringify(items) %>)'>Edit</button>
+                                                    <%if(items.isActive==true){%>
+                                                        <button onclick="Listing('<%= items._id %>')"
+                                                            class="action-button activate-button">Unlist</button>
+                                                        <%}else{%>
+                                                            <button onclick="Listing('<%= items._id %>')"
+                                                                class="action-button deactivate-button">List</button>
+                                                            <%}%>
+                                                </td>
+                                </tr>
+                                <%})%>
+                                    <%}%>
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <div class="page-numbers">
+                        <div class="page-nav"></div>
+                        <% for (let j=1; j <=totalPages; j++) { %>
+                            <a href="?page=<%= j %>" style="text-decoration: none;">
+                                <button class="page-button <%= (j === currentPage) ? 'active' : '' %>">
+                                    <%= j %>
+                                </button>
+                            </a>
+                            <% } %>
+                                <div class="page-nav"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Offer Modal -->
+        <div class="modal fade" id="addOfferModal" tabindex="-1" aria-labelledby="addOfferModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content p-3" style="background-color: #1e2027;">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addOfferModalLabel">Add New Offer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <form id="offerForm">
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="offerName" class="form-label">Offer Name</label>
+                                    <input type="text" class="form-control" id="offerName" name="offerName">
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description"
+                                        rows="2"></textarea>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="discountType" class="form-label">Discount Type</label>
+                                    <select class="form-select" id="discountType" name="discountType"
+                                        onchange="updateDiscountInput()">
+                                        <option value="flat">Flat</option>
+                                        <option value="percentage">Percentage</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="discountAmount" class="form-label">Discount Amount</label>
+                                    <input type="number" class="form-control" id="discountAmount" name="discountAmount"
+                                        placeholder="Amount in ₹">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="validFrom" class="form-label">Valid From</label>
+                                    <input type="date" class="form-control" id="validFrom" name="validFrom">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="validUpto" class="form-label">Valid Upto</label>
+                                    <input type="date" class="form-control" id="validUpto" name="validUpto">
+                                </div>
+
+                                <!-- Offer Type -->
+                                <div class="col-md-6">
+                                    <label for="offerType" class="form-label">Offer Applies To</label>
+                                    <select class="form-select" id="offerType" name="offerType"
+                                        onchange="handleOfferTypeChange()">
+                                        <option value="">-- Select --</option>
+                                        <option value="Category">Category</option>
+                                        <option value="Brand">Brand</option>
+                                        <option value="Product">Product</option>
+                                    </select>
+                                </div>
+
+                                <!-- Dynamic Dropdowns -->
+                                <div class="col-12" id="categorySection" style="display: none;">
+                                    <label class="form-label">Applicable Categories</label>
+                                    <select class="form-select" name="applicableCategories">
+                                        <% categories.forEach(cat=> { %>
+                                            <option value="<%= cat._id %>">
+                                                <%= cat.name %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+
+                                <div class="col-12" id="brandSection" style="display: none;">
+                                    <label class="form-label">Applicable Brands</label>
+                                    <select class="form-select" name="applicableBrands">
+                                        <% brands.forEach(brand=> { %>
+                                            <option value="<%= brand._id %>">
+                                                <%= brand.name %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+
+                                <div class="col-12" id="productSection" style="display: none;">
+                                    <label class="form-label">Applicable Products</label>
+                                    <select class="form-select" name="applicableProducts">
+                                        <% products.forEach(product=> { %>
+                                            <option value="<%= product._id %>">
+                                                <%= product.productName %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Create Offer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- editModal -->
+        <div class="modal fade" id="editOfferModal" tabindex="-1" aria-labelledby="addOfferModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content p-3" style="background-color: #1e2027;">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addOfferModalLabel">Edit Offer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <form id="editForm">
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="offerName" class="form-label">Offer Name</label>
+                                    <input type="text" class="form-control" id="offerName" name="offerName">
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description"
+                                        rows="2"></textarea>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="discountType" class="form-label">Discount Type</label>
+                                    <select class="form-select" id="discountType" name="discountType"
+                                        onchange="updateDiscountInput()">
+                                        <option value="flat">Flat</option>
+                                        <option value="percentage">Percentage</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="discountAmount" class="form-label">Discount Amount</label>
+                                    <input type="number" class="form-control" id="discountAmount" name="discountAmount"
+                                        placeholder="Amount in ₹">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="validFrom" class="form-label">Valid From</label>
+                                    <input type="date" class="form-control" id="validFrom" name="validFrom">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="validUpto" class="form-label">Valid Upto</label>
+                                    <input type="date" class="form-control" id="validUpto" name="validUpto">
+                                </div>
+
+                                <!-- Offer Type -->
+                                <div class="col-md-6">
+                                    <label for="offerType" class="form-label">Offer Applies To</label>
+                                    <select class="form-select" id="editofferType" name="offerType"
+                                        onchange="edithandleOfferTypeChange()">
+                                        <option value="">-- Select --</option>
+                                        <option value="Category">Category</option>
+                                        <option value="Brand">Brand</option>
+                                        <option value="Product">Product</option>
+                                    </select>
+                                </div>
+
+                                <!-- Dynamic Dropdowns -->
+                                <div class="col-12" id="editcategorySection" style="display: none;">
+                                    <label class="form-label">Applicable Categories</label>
+                                    <select class="form-select" name="applicableCategories">
+                                        <% categories.forEach(cat=> { %>
+                                            <option value="<%= cat._id %>">
+                                                <%= cat.name %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+
+                                <div class="col-12" id="editbrandSection" style="display: none;">
+                                    <label class="form-label">Applicable Brands</label>
+                                    <select class="form-select" name="applicableBrands">
+                                        <% brands.forEach(brand=> { %>
+                                            <option value="<%= brand._id %>">
+                                                <%= brand.name %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+
+                                <div class="col-12" id="editproductSection" style="display: none;">
+                                    <label class="form-label">Applicable Products</label>
+                                    <select class="form-select" name="applicableProducts">
+                                        <% products.forEach(product=> { %>
+                                            <option value="<%= product._id %>">
+                                                <%= product.productName %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+
+                                <input type="hidden" id="offerId" name="offerId">
+
+                            </div>
+                        </div>
+
+                        <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Update Offer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+        <script>
+
+            function updateDiscountInput() {
+                const type = document.getElementById('discountType').value;
+                const input = document.getElementById('discountAmount');
+
+                input.placeholder = type === 'percentage' ? 'Enter % (e.g., 10)' : 'Amount in ₹';
+            }
+
+            function handleOfferTypeChange() {
+                const typeSelect = document.getElementById('offerType');
+                const type = typeSelect.value;
+
+                // Hide all sections
+                document.getElementById('categorySection').style.display = 'none';
+                document.getElementById('brandSection').style.display = 'none';
+                document.getElementById('productSection').style.display = 'none';
+
+                // Show relevant section
+                if (type === 'Category') {
+                    document.getElementById('categorySection').style.display = 'block';
+                } else if (type === 'Brand') {
+                    document.getElementById('brandSection').style.display = 'block';
+                } else if (type === 'Product') {
+                    document.getElementById('productSection').style.display = 'block';
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const form = document.getElementById('offerForm');
+
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(form);
+
+                    const offerName = formData.get('offerName')?.trim();
+                    const description = formData.get('description')?.trim();
+                    const discountType = formData.get('discountType')?.trim();
+                    const discountAmount = formData.get('discountAmount')?.trim();
+                    const offerType = formData.get('offerType')?.trim();
+                    const validFrom = formData.get('validFrom').trim();
+                    const validUpto = formData.get('validUpto').trim();
+
+
+                    if (offerType === 'Category') {
+                        formData.delete('applicableBrands');
+                        formData.delete('applicableProducts');
+                    }
+
+                    if (offerType === 'Brand') {
+                        formData.delete('applicableCategories');
+                        formData.delete('applicableProducts');
+                    }
+
+                    if (offerType === 'Product') {
+                        formData.delete('applicableBrands');
+                        formData.delete('applicableCategories');
+                    }
+
+
+                    // Validation
+                    const regex = /^[A-Za-z0-9 ]+$/;
+                    const descriptionRegex = /^[A-Za-z0-9 ₹.,%!'"()-]+$/;
+
+                    if (!offerName || !description || !discountType || !discountAmount || !offerType) {
+                        Swal.fire("Error", "All fields are required including the applicable selection", "error");
+                        return;
+                    }
+
+                    if (!regex.test(offerName)) {
+                        Swal.fire("Error", "Name should only contain letters and numbers", "error");
+                        return;
+                    }
+
+                    if (!descriptionRegex.test(description)) {
+                        Swal.fire("Error", "Description should only contain valid characters", "error");
+                        return;
+                    }
+
+                    if (validFrom < getTodayDate()) {
+                        Swal.fire("Invalid Date", "Starting date should be today or a future date.", "error");
+                        return;
+                    }
+
+                    if (discountType == 'percentage' && discountAmount > 100) {
+                        Swal.fire("Invalid Percentage", "Offer percentage must be 100 or less.", "error");
+                        return;
+                    }
+
+                    if (new Date(validFrom) > new Date(validUpto)) {
+                        Swal.fire("Invalid Date", "Valid Upto should be later than Valid From.", "error");
+                        return;
+                    }
+
+                    fetch('/admin/add-offer', {
+                        method: 'POST',
+                        body: new URLSearchParams([...formData])
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: "success",
+                                    title: "Offer added successfully!",
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then(() => location.reload());
+
+                                form.reset();
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: data.message || "Failed to add offer",
+                                    showConfirmButton: true
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error submitting form:", error);
+                            Swal.fire("Error", "Something went wrong! Please try again.", "error");
+                        });
+                })
+            })
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const form = document.getElementById('editForm');
+
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(form);
+
+                    const offerName = formData.get('offerName')?.trim();
+                    const description = formData.get('description')?.trim();
+                    const discountType = formData.get('discountType')?.trim();
+                    const discountAmount = formData.get('discountAmount')?.trim();
+                    const offerType = formData.get('offerType')?.trim();
+                    const validFrom = formData.get('validFrom').trim();
+                    const validUpto = formData.get('validUpto').trim();
+
+
+                    if (offerType === 'Category') {
+                        formData.delete('applicableBrands');
+                        formData.delete('applicableProducts');
+                    }
+
+                    if (offerType === 'Brand') {
+                        formData.delete('applicableCategories');
+                        formData.delete('applicableProducts');
+                    }
+
+                    if (offerType === 'Product') {
+                        formData.delete('applicableBrands');
+                        formData.delete('applicableCategories');
+                    }
+
+
+                    // Validation
+                    const regex = /^[A-Za-z0-9 ]+$/;
+                    const descriptionRegex = /^[A-Za-z0-9 ₹.%,!'"()-]+$/;
+
+                    if (!offerName || !description || !discountType || !discountAmount || !offerType) {
+                        Swal.fire("Error", "All fields are required including the applicable selection", "error");
+                        return;
+                    }
+
+                    if (!regex.test(offerName)) {
+                        Swal.fire("Error", "Name should only contain letters and numbers", "error");
+                        return;
+                    }
+
+                    if (!descriptionRegex.test(description)) {
+                        Swal.fire("Error", "Description should only contain valid characters", "error");
+                        return;
+                    }
+
+                    if (new Date(validFrom) > new Date(validUpto)) {
+                        Swal.fire("Invalid Date", "Valid Upto should be later than Valid From.", "error");
+                        return;
+                    }
+
+                    if (new Date(validFrom) > new Date(validUpto)) {
+                        Swal.fire("Invalid Date", "Valid Upto should be later than Valid From.", "error");
+                        return;
+                    }
+
+                    if (discountType == 'percentage' && discountAmount > 100) {
+                        Swal.fire("Invalid Percentage", "Offer percentage must be 100 or less.", "error");
+                        return;
+                    }
+
+                    fetch('/admin/edit-offer', {
+                        method: 'POST',
+                        body: new URLSearchParams([...formData])
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: "success",
+                                    title: "Offer edited successfully!",
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then(() => location.reload());
+
+                                form.reset();
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: data.message || "Failed to edit offer",
+                                    showConfirmButton: true
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error submitting form:", error);
+                            Swal.fire("Error", "Something went wrong! Please try again.", "error");
+                        });
+                })
+            })
+
+            function openEditForm(offer) {
+                const form = document.getElementById('editForm');
+
+                form.elements['offerName'].value = offer.offerName || '';
+                form.elements['description'].value = offer.description || '';
+                form.elements['discountType'].value = offer.discountType || '';
+                form.elements['discountAmount'].value = offer.discountAmount;
+                form.elements['offerType'].value = offer.offerType || '';
+                form.elements['validFrom'].value = offer.validFrom ? offer.validFrom.split('T')[0] : '';
+                form.elements['validUpto'].value = offer.validUpto ? offer.validUpto.split('T')[0] : '';
+                form.elements['applicableCategories'].value = offer.applicableTo._id || '';
+                form.elements['applicableBrands'].value = offer.applicableTo._id || '';
+                form.elements['applicableProducts'].value = offer.applicableTo._id || '';
+                form.elements['offerId'].value = offer._id || '';
+
+                if (offer.offerType === "Brand") {
+                    document.getElementById('editbrandSection').style.display = 'block';
+                    document.getElementById('editcategorySection').style.display = 'none';
+                    document.getElementById('editproductSection').style.display = 'none';
+
+                } else if (offer.offerType === "Category") {
+                    document.getElementById('editcategorySection').style.display = 'block';
+                    document.getElementById('editbrandSection').style.display = 'none';
+                    document.getElementById('editproductSection').style.display = 'none';
+
+                } else if (offer.offerType === "Product") {
+                    document.getElementById('editproductSection').style.display = 'block';
+                    document.getElementById('editbrandSection').style.display = 'none';
+                    document.getElementById('editcategorySection').style.display = 'none';
+                }
+
+
+
+                const modal = new bootstrap.Modal(document.getElementById('editOfferModal'));
+                modal.show();
+            }
+
+            function edithandleOfferTypeChange() {
+                const typeSelect = document.getElementById('editofferType');
+                const type = typeSelect.value;
+
+                // Hide all sections
+                document.getElementById('editcategorySection').style.display = 'none';
+                document.getElementById('editbrandSection').style.display = 'none';
+                document.getElementById('editproductSection').style.display = 'none';
+
+                // Show relevant section
+                if (type === 'Category') {
+                    document.getElementById('editcategorySection').style.display = 'block';
+                } else if (type === 'Brand') {
+                    document.getElementById('editbrandSection').style.display = 'block';
+                } else if (type === 'Product') {
+                    document.getElementById('editproductSection').style.display = 'block';
+                }
+            }
+
+            function clearSearch() {
+                document.getElementById("searchInput").value = "";
+                document.getElementById('searchBtn').click();
+
+            }
+
+            function getTodayDate() {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+        </script>

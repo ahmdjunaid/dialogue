@@ -1,0 +1,110 @@
+<!-- views/account.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialogue Digital - Manage Account</title>
+    <link rel="stylesheet" href="/css/user/cart.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <%- include('../../views/partials/user/header') %>
+
+        <div class="main-content">
+            <div class="cart_container">
+                <h2 class="text-center">MY WISHLIST</h2>
+                <!-- Products table -->
+                <table class="cart_products_table">
+                    <thead>
+                        <tr class="cart_header_row">
+                            <th class="cart_header_cell cart_product_header">Product Details</th>
+                            <th class="cart_header_cell cart_price_header">Price</th>
+                            <th class="cart_header_cell cart_price_header">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% offer.forEach(item => {
+                            const product = item.product?.productId;
+                            const offer = item.bestOffer;
+                      
+                            if (!product) return;
+                      
+                            const salePrice = product.salePrice;
+                            let discount = 0;
+                      
+                            if (offer) {
+                              if (offer.discountType === 'percentage') {
+                                discount = (salePrice * offer.discountAmount) / 100;
+                              } else {
+                                discount = offer.discountAmount;
+                              }
+                            }
+                      
+                            const finalPrice = salePrice - discount;
+                        %>
+                          <tr class="cart_item_row">
+                            <td class="cart_product_cell">
+                              <div class="cart_product_wrapper">
+                                <div class="cart_remove_btn_wrapper">
+                                  <a href="/removewishlist?productId=<%= item.product?._id %>">
+                                    <button class="cart_remove_btn">×</button>
+                                  </a>
+                                </div>
+                                <div class="cart_product_img_wrapper">
+                                  <img src="../uploads/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="cart_product_img">
+                                </div>
+                                <div class="cart_product_info">
+                                  <h3 class="cart_product_title"><%= product.productName %></h3>
+                                  <p class="cart_product_desc"><%= product.description %></p>
+                      
+                                  <% if (offer) { %>
+                                    <p class="offer_text text-success">
+                                      Offer: <%= offer.offerName %> -
+                                      <% if (offer.discountType === 'percentage') { %>
+                                        <%= offer.discountAmount %>% Off
+                                      <% } else { %>
+                                        ₹<%= offer.discountAmount.toLocaleString() %> Off
+                                      <% } %>
+                                    </p>
+                                  <% } else { %>
+                                    <p class="offer_text text-muted">No current offer</p>
+                                  <% } %>
+                                </div>
+                              </div>
+                            </td>
+                      
+                            <td class="cart_price_cell">
+                              ₹<%= finalPrice.toLocaleString() %>
+                              <% if (offer) { %>
+                                <span class="original_price text-muted" style="text-decoration: line-through;">₹<%= salePrice.toLocaleString() %></span>
+                              <% } %>
+                            </td>
+                      
+                            <td class="cart_price_cell">
+                              <a href="/addtocart?productId=<%= product._id %>&quantity=1">
+                                <button class="btn btn-success">Add to Cart</button>
+                              </a>
+                            </td>
+                          </tr>
+                        <% }); %>
+                      </tbody>
+                </table>
+            </div>
+        </div>
+        <input type="hidden" value="<%= message %>" id="err">
+        <%- include('../../views/partials/user/footer') %>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                const message = document.getElementById('err').value;
+                if (message) {
+                    swal.fire(message)
+                }
+            </script>
+
+</body>
+
+</html>

@@ -1,6 +1,9 @@
-const addressModel = require('../models/addressModel');
-const userModel = require('../models/userModel')
+const addressModel = require('../../models/addressModel');
+const userModel = require('../../models/userModel')
 const mongoose = require('mongoose')
+const orderModel = require('../../models/orderModel');
+const walletModel = require('../../models/walletModel')
+const { log } = require('console');
 
 
 const loadProfile = async (req, res) => {
@@ -201,6 +204,8 @@ const editaddress = async (req,res)=>{
             return res.redirect('/login')
         }
 
+        let redirect = req.query.redirect
+
         const { fullName, type, city, landmark, state, pincode, mobile, altnum, editId } = req.body
 
         const userAddress = await addressModel.findOne({ 'address._id': editId });
@@ -235,6 +240,11 @@ const editaddress = async (req,res)=>{
             { 'address._id': editObjectId },
             { $set: updateFields }
         );
+
+        if(redirect === 'checkout'){
+            req.session.userMsg = 'Address edited successfully'
+            return res.redirect('/checkout')
+        }
 
         req.session.userMsg = 'Address edited successfully'
         return res.redirect('/address')
@@ -275,6 +285,63 @@ const deleteaddress = async (req,res)=>{
     }
 }
 
+const loadOrders = async (req,res)=>{
+    try {
+        const findUser = await userModel.findById(req.session.user)
+
+        if(!findUser){
+            req.session.userMsg = 'Session timeout!'
+            return res.redirect('/login')
+        }
+
+        const orders = await orderModel.find({userId:findUser._id}).populate({path:'orderedItems.product'}).lean();
+        
+
+        return res.render('user/myorder',{
+            findUser,
+            orders
+        })
+
+    } catch (error) {
+        console.error(error)
+        return res.redirect('/pagenotfound')
+    }
+}
+
+const loadWallet = async (req, res) => {
+    try {
+
+        const findUser = await userModel.findById(req.session.user).lean();
+
+        if (!findUser) {
+            req.session.userMsg = 'Session timeout!';
+            return res.redirect('/login');
+        }
+
+
+        const wallet = await walletModel.findOne({ userId: findUser._id }).lean();
+
+        if (!wallet) {
+
+            return res.render('user/wallet', {
+                user: findUser,
+                wallet: null,
+                message: "No wallet found. Add funds to create one.",
+            });
+        }
+
+        return res.render('user/wallet', {
+            user: findUser,
+            wallet: wallet,
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.redirect('/pagenotfound');
+    }
+};
+
+
 module.exports = {
     loadProfile,
     editProfile,
@@ -282,5 +349,7 @@ module.exports = {
     address,
     addaddress,
     editaddress,
-    deleteaddress
+    deleteaddress,
+    loadOrders,
+    loadWallet
 }

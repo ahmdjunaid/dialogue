@@ -52,7 +52,7 @@
                             <select name="brandId" class="form-control" id="brandId">
                                 <option value="" disabled>Select Brand</option>
                                 <% for(let i=0; i < brand.length; i++) { %>
-                                    <option value="<%= brand[i].name %>" <%=product.brand===brand[i].name ? 'selected'
+                                    <option value="<%= brand[i]._id %>" <%=product.brand===brand[i].name ? 'selected'
                                         : '' %>>
                                         <%= brand[i].name %>
                                     </option>
@@ -66,7 +66,7 @@
                             <select name="categoryId" class="form-control" id="categoryId">
                                 <option value="" disabled>Select Category</option>
                                 <% for(let i=0; i < category.length; i++) { %>
-                                    <option value="<%= category[i].name %>" <%=product.category===category[i].name
+                                    <option value="<%= category[i]._id %>" <%=product.category===category[i].name
                                         ? 'selected' : '' %>>
                                         <%= category[i].name %>
                                     </option>
@@ -434,7 +434,7 @@
 
                 let isValid = true;
 
-                if (name.trim() === "" || !/^(?=.*[a-zA-Z])[a-zA-Z0-9 ]+$/.test(name)) {
+                if (name.trim() === "" || !/^[a-zA-Z0-9+()\-".,' ]*[a-zA-Z][a-zA-Z0-9+()\-".,' ]*$/.test(name)) {
                     displayErrorMessage('productName-error', 'Please enter a valid product name.');
                     isValid = false;
                 }

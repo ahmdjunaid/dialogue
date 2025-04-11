@@ -41,7 +41,6 @@
                         <tr>
                             <th>BRANDS</th>
                             <th>BRAND DESCRIPTION</th>
-                            <th>BRAND OFFER</th>
                             <th>LAST UPDATED</th>
                             <th>LISTING</th>
                             <th>ACTIONS</th>
@@ -55,9 +54,6 @@
                                 </td>
                                 <td>
                                     <%= brand[i].description %>
-                                </td>
-                                <td>
-                                    <%= brand[i].brandOffer %> %
                                 </td>
                                 <td>
                                     <%= brand[i].createdAt.toLocaleDateString('en-US', { year: 'numeric' ,
@@ -126,11 +122,6 @@
                                     <textarea class="form-input" name="categorydescription" id="description"></textarea>
                                 </div>
 
-                                <div class="form-group">
-                                    <label class="form-label">Offer percentage:</label>
-                                    <input type="number" class="form-input" name="offer" id="offer">
-                                </div>
-
                                 <div class="button-container">
                                     <button type="submit" class="submit-button">ADD BRAND</button>
                                 </div>
@@ -166,11 +157,6 @@
                                 <div class="form-group">
                                     <label class="form-label">Description:</label>
                                     <textarea class="form-input" name="catdescription" id="editdescription"></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Offer percentage:</label>
-                                    <input type="number" class="form-input" name="offer" id="editoffer">
                                 </div>
 
                                 <input type="hidden" id="edit_id" name="id">
@@ -227,10 +213,9 @@
             function editBrand(name, desciption, brandOff, brandId) {
                 document.getElementById('editname').value = name
                 document.getElementById('editdescription').value = desciption
-                document.getElementById('editoffer').value = brandOff
                 document.getElementById('edit_id').value = brandId
 
-                console.log(name, desciption, brandOff, brandId);
+                console.log(name, desciption, brandId);
 
                 var modal = new bootstrap.Modal(document.getElementById('editBrand'))
                 modal.show()

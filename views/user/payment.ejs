@@ -1,199 +1,363 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Method Selection</title>
     <style>
-.paymentcontainer {
-            max-width: 600px;
-            margin: 6em auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        h3 {
-            font-size: 20px;
-            margin-bottom: 20px;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 0;
             color: #333;
-            text-transform: uppercase;
-            font-weight: bold;
-            text-align: center;
         }
-        
+
+        .paymentcontainer {
+            max-width: 600px;
+            margin: 3em auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .amount-display {
+            background-color: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .amount-display .amount {
+            font-weight: 700;
+            color: #2f855a;
+        }
+
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
         .payment-option {
-            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .payment-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .payment-button {
             display: flex;
             align-items: center;
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background-color: white;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            text-align: left;
         }
-        
-        .payment-option label {
-            margin-left: 10px;
-            cursor: pointer;
+
+        .payment-option input[type="radio"]:checked + .payment-button {
+            border-color: #E6D587;
+            background-color: #fefcf3;
         }
-        
-        input[type="radio"] {
-            cursor: pointer;
+
+        .payment-option input[type="radio"]:hover + .payment-button {
+            border-color: #E6D587;
+            background-color: #fefcf3;
         }
-        
-        .card-logos {
-            display: flex;
-            gap: 5px;
-            margin-left: 10px;
-        }
-        
-        .card-logo {
-            width: 40px;
-            height: 25px;
-            border-radius: 3px;
+
+        .payment-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 20px;
+            color: #4a5568;
         }
-        
+
+        .payment-text {
+            flex-grow: 1;
+        }
+
+        .payment-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .payment-description {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .card-logos {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .card-logo {
+            width: 40px;
+            height: 25px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
         .amex {
             background-color: #006FCF;
             color: white;
-            font-size: 10px;
-            font-weight: bold;
         }
-        
+
         .visa {
             background-color: #191F6F;
             color: white;
-            font-size: 10px;
-            font-weight: bold;
         }
-        
+
         .mastercard {
             background-color: #EB001B;
             color: white;
-            font-size: 10px;
-            font-weight: bold;
         }
-        
-        .card-details {
-            margin-top: 15px;
-            margin-left: 25px;
-            display: none;
-        }
-        
-        input[name="payment"][value="card"]:checked ~ .card-details {
-            display: block;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-row {
-            display: flex;
-            gap: 10px;
-        }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .button {
+
+        .proceed-button {
             background-color: #E6D587;
             color: #333;
             border: none;
-            padding: 12px;
+            padding: 16px;
             width: 100%;
-            border-radius: 25px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            margin-top: 20px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(230, 213, 135, 0.2);
         }
-        
-        .button:hover {
+
+        .proceed-button:hover {
             background-color: #D9C878;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(230, 213, 135, 0.3);
         }
-        
-        .payment-logo {
-            width: 20px;
-            height: 20px;
-            margin-right: 5px;
+
+        .secure-notice {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .secure-notice i {
+            margin-right: 8px;
+        }
+
+        @media (max-width: 640px) {
+            .paymentcontainer {
+                margin: 1em;
+                padding: 20px;
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
+
 <body>
     <%- include('../../views/partials/user/header') %>
 
     <div class="paymentcontainer">
-        <div id="payment-form">
-            <div class="payment-option">
-                <p class="text-success text-end"><b>Amount to be paid : <%= totalAmount %></b></p>
-            </div>
+        <div class="header-section">
+            <h3>Complete Your Payment</h3>
+            <p class="subtitle">Choose your preferred payment method below</p>
         </div>
 
-        <h3>Choose payment method</h3>
-        
+        <div class="amount-display">
+            <span>Amount to be paid: </span>
+            <span class="amount">₹<%= totalAmount.total %></span>
+        </div>
+
         <form id="payment-form" action="/payment">
-            <div class="payment-option">
-                <input type="radio" id="cash" name="payment" value="cash" checked>
-                <label for="cash">Cash on delivery</label>
-            </div>
-            
-            <div class="payment-option">
-                <input type="radio" id="card" name="payment" value="card" disabled>
-                <label for="card">Credit or debit card</label>
-                <div class="card-logos">
-                    <div class="card-logo amex">AMEX</div>
-                    <div class="card-logo visa">VISA</div>
-                    <div class="card-logo mastercard">MC</div>
+            <div class="payment-options">
+                <div class="payment-option">
+                    <input type="radio" id="razorpay-option" name="payment" value="razorpay" >
+                    <label for="razorpay-option" class="payment-button">
+                        <div class="payment-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="payment-text">
+                            <div class="payment-title">Pay Online</div>
+                            <div class="payment-description">Credit/Debit Card, UPI, Net Banking</div>
+                            <div class="card-logos">
+                                <div class="card-logo visa">VISA</div>
+                                <div class="card-logo mastercard">MC</div>
+                                <div class="card-logo amex">AMEX</div>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </label>
+                </div>
+
+                <div class="payment-option">
+                    <input type="radio" id="wallet-option" name="payment" value="wallet" >
+                    <label for="wallet-option" class="payment-button">
+                        <div class="payment-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="payment-text">
+                            <div class="payment-title">Wallet Balance</div>
+                            <div class="payment-description">Use your available wallet balance</div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </label>
+                </div>
+
+                <div class="payment-option">
+                    <input type="radio" id="cod-option" name="payment" value="cash" >
+                    <label for="cod-option" class="payment-button">
+                        <div class="payment-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="payment-text">
+                            <div class="payment-title">Cash On Delivery</div>
+                            <div class="payment-description">Pay when you receive your order</div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </label>
                 </div>
             </div>
-            
-            <div class="card-details">
-                <div class="form-group">
-                    <input type="text" id="card-number" placeholder="Card number">
-                </div>
-                <div class="form-row">
-                    <div class="form-group" style="flex: 1;">
-                        <input type="text" id="expiry" placeholder="MM/YY">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <input type="text" id="cvc" placeholder="CVC">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="payment-option">
-                <input type="radio" id="wallet" name="payment" value="wallet" disabled>
-                <label for="paypal">
-                    Wallet
-                </label>
-            </div>
-            
-            <button type="submit" class="button">Complete Payment</button>
+
+            <button type="submit" id="proceed-button" class="proceed-button">
+                Proceed to Pay
+            </button>
         </form>
+
+        <div class="secure-notice">
+            <i class="fas fa-lock"></i> All payments are secure and encrypted
+        </div>
     </div>
+
     <%- include('../../views/partials/user/footer') %>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const radioButtons = document.querySelectorAll('input[name="payment"]');
-            const cardDetails = document.querySelector('.card-details');
+        document.getElementById("payment-form").addEventListener("submit", function(e) {
+            // Get the selected payment method
+            const selectedPayment = document.querySelector('input[name="payment"]:checked');
             
-            radioButtons.forEach(button => {
-                button.addEventListener('change', function() {
-                    if (this.value === 'card') {
-                        cardDetails.style.display = 'block';
-                    } else {
-                        cardDetails.style.display = 'none';
-                    }
+            if (!selectedPayment) {
+                e.preventDefault();
+                swal.fire({
+                    icon:"error",
+                    title: "Please select a payment method",
+                    showConfirmButton:false,
+                    timer:1500
                 });
-            });
+                return;
+            }
+            
+            if (selectedPayment.value === "razorpay") {
+                e.preventDefault();
+                openRazorpay();
+            }
         });
+
+        async function openRazorpay() {
+    try {
+        const response = await fetch("/create-order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: <%- totalAmount.total %> }),
+        });
+
+        const order = await response.json();
+        var options = {
+            key: order.key,
+            amount: order.order.amount,
+            currency: "INR",
+            name: "Dialogue Digital",
+            description: "Purchase Payment",
+            order_id: order.order.id,
+            handler: async function (response) {
+                try {
+                    const verifyRes = await fetch("/verify-payment", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(response),
+                    });
+
+                    const verifyData = await verifyRes.json();
+
+                    if (verifyRes.ok) {
+                        window.location.href = "/ordersuccess";
+                    } else {
+                        window.location.href = "/checkout?error=" + verifyData.message;
+                    }
+                } catch (error) {
+                    console.error("Error verifying payment:", error);
+                    window.location.href = "/checkout?error=Payment verification failed.";
+                }
+            },
+            modal: {
+            ondismiss: function () {
+                window.location.href = "/orderfailed";
+                }
+            },
+            theme: {
+                color: "#E6D587",
+            },
+        };
+
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+    } catch (error) {
+        console.error("Error processing payment:", error);
+        swal.fire({
+            icon: "error",
+            title: "Unable to process payment. Please try again.",
+            showConfirmButton: false,
+            timer: 1500,
+        });
+    }
+}
+
     </script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
+
 </html>

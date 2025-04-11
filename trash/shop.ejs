@@ -1,0 +1,193 @@
+<!-- <%- include("../../views/partials/user/header") %>
+
+  <style>
+    .selector {
+      width: 13em;
+      border-radius: 5em;
+      padding: .2em;
+      border-color: rgb(199, 209, 199);
+    }
+
+    .page-button-shop {
+      color: #000000;
+      text-align: center;
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      border-radius: 50%;
+      border: 1px solid #e6e6e6;
+      background: #fff;
+    }
+
+    .page-button-shop:active {
+      background: #000000;
+      color: #fff;
+      border: 1px solid transparent;
+    }
+
+    .minmax {
+      margin-bottom: 1em;
+      width: 13em;
+      border-style: solid;
+      border-radius: 5em;
+      padding: .2em;
+      border-color: rgb(199, 209, 199);
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <div class="hero-wrap hero-bread" style="background-image: url('/images/bg_6.jpg');">
+    <div class="container">
+      <div class="row no-gutters slider-text align-items-center justify-content-center">
+        <div class="col-md-9 ftco-animate text-center">
+          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Shop</span></p>
+          <h1 class="mb-0 bread">Shop</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="ftco-section bg-light">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8 col-lg-9 order-md-last">
+          <div class="row">
+            <% products.forEach(product=> { %>
+              <div class="col-sm-12 col-md-12 col-lg-4 ftco-animate d-flex">
+                <div class="product d-flex flex-column">
+                  <a href="/product/<%= product._id %>" class="img-prod">
+                    <img class="img-fluid" src="../uploads/<%= product.productImage[0] %>"
+                      alt="<%= product.productName %>">
+                    <div class="overlay"></div>
+                  </a>
+                  <div class="text py-3 pb-4 px-3">
+                    <div class="d-flex">
+                      <div class="cat">
+                        <span>
+                          <%= product.brand.name %>
+                        </span>
+                      </div>
+                      <div class="rating">
+                        <p class="text-right mb-0">
+                          <span class="ion-ios-star-outline"></span>
+                          <span class="ion-ios-star-outline"></span>
+                          <span class="ion-ios-star-outline"></span>
+                          <span class="ion-ios-star-outline"></span>
+                          <span class="ion-ios-star-outline"></span>
+                        </p>
+                      </div>
+                    </div>
+                    <h3><a href="/product/<%= product._id %>">
+                        <%= product.productName %>
+                      </a></h3>
+                    <div class="pricing">
+                      <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
+                    </div>
+                    <p class="bottom-area d-flex px-3">
+                      <a href="/addtocart?productId=<%= product._id %>&quantity=1" class="add-to-cart text-center py-2 mr-1">
+                        <span>Add to cart <i class="ion-ios-add ml-1"></i></span>
+                      </a>
+                      <a href="/addtowishlist?productId=<%= product._id %>" class="buy-now text-center py-2">
+                        <span>Wishlist<i class="ion-ios-heart ml-1"></i></span>
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <% }) %>
+          </div>
+          <div class="row mt-5">
+            <div class="col text-center">
+              <div class="block-27">
+                <% for (let j=1; j <=totalPages; j++) { %>
+                  <a href="?page=<%= j %>" style="text-decoration: none;">
+                    <button class="page-button-shop <%= (j === currentPage) ? 'active' : '' %>">
+                      <%= j %>
+                    </button>
+                  </a>
+                  <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 col-lg-3">
+
+          <div class="sidebar">
+            <h3>Filter Products</h3>
+            <form action="/shop" method="get">
+              <div class="sidebar-box-2">
+                <h6>Search</h6>
+                <input name="search" type="text" class="selector" value="<%= search || '' %>">
+              </div>
+              <div class="sidebar-box-2">
+                <h6>Categories</h6>
+                <select name="categoryf" id="" class="selector">
+                  <option value="" <%=category._id==='' ? 'selected' : '' %>>Select</option>
+                  <% category.forEach((category)=>{%>
+                    <option value="<%= category._id %>" <%=category._id==categoryf ? 'selected' : '' %>>
+                      <%= category.name %>
+                    </option>
+                    <%})%>
+                </select>
+              </div>
+              <div class="sidebar-box-2">
+                <h6>Brands</h6>
+                <select name="brandf" id="" class="selector">
+                  <option value="" <%=brand._id==='' ? 'selected' : '' %>>Select</option>
+                  <% brand.forEach((brand)=>{ %>
+                    <option value="<%= brand._id %>" <%=brand._id==brandf ? 'selected' : '' %>>
+                      <%= brand.name %>
+                    </option>
+                    <%})%>
+                </select>
+              </div>
+              <div class="sidebar-box-2">
+                <h6>Sort By</h6>
+                <select name="sort" id="" class="selector">
+                  <option value="" <%=sort==='' ? 'selected' : '' %>>Select</option>
+                  <option value="A-Z" <%=sort==='A-Z' ? 'selected' : '' %>>A-Z</option>
+                  <option value="Z-A" <%=sort==='Z-A' ? 'selected' : '' %>>Z-A</option>
+                  <option value="Price : low - high" <%=sort==='Price : low - high' ? 'selected' : '' %>>Price : low -
+                    high</option>
+                  <option value="Price : high - low" <%=sort==='Price : high - low' ? 'selected' : '' %>>Price : high -
+                    low</option>
+                </select>
+              </div>
+              <div class="sidebar-box-2">
+                <h6>Price Range</h6>
+                <input type="number" class="minmax" value="" name="minValue" placeholder="Minumum Value">
+                <input type="number" class="minmax" value="" name="maxValue" placeholder="Maximum Value">
+              </div>
+              <button class="btn btn-primary" id="submitbtn" type="submit">Apply filters</button>
+              <button class="btn btn-light" onclick="clearFilters()" type="button">Clear filters</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <input type="hidden" value="<%= message %>" id="err">
+  <script>
+    const message = document.getElementById('err').value
+    if(message){
+      swal.fire(message)
+    }
+
+    function clearFilters() {
+      // For single elements, use querySelector
+      document.querySelector('input[name="search"]').value = '';
+      document.querySelector('select[name="categoryf"]').value = '';
+      document.querySelector('select[name="brandf"]').value = '';
+      document.querySelector('select[name="sort"]').value = '';
+      document.querySelector('input[name="minValue"]').value = '';
+      document.querySelector('input[name="maxValue"]').value = '';
+
+      // Submit the form
+      document.getElementById('submitbtn').click();
+    }
+  </script>
+
+  <%- include("../../views/partials/user/footer") %>
+
+    </html> -->

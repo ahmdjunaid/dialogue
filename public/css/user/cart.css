@@ -226,3 +226,85 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+.coupon-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+.coupon-modal-content {
+  background-color: #fff;
+  width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.coupon-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.coupon-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.coupon-code {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-btn {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.open-coupon-btn {
+  padding: 10px 15px;
+  cursor: pointer;
+  background-color: #e0d5a0;
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 5px;
+}
+
+#toggleBtn {
+  height: 45px;
+}
+
+.copy-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.copy-btn:hover {
+  background-color: #45a049;
+}
+
+.copy-btn:active {
+  transform: scale(0.95);
+}

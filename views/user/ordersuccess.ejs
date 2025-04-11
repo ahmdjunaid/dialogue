@@ -8,7 +8,7 @@
         
         .successcontainer {
             max-width: 600px;
-            margin: 20px auto;
+            margin: 6em auto;
             padding: 20px;
             background: white;
             border-radius: 8px;
@@ -108,30 +108,32 @@
         <div class="success-icon">✓</div>
         <h1>Order Placed Successfully!</h1>
         <p>Thank you for your purchase. Your order has been received and is being processed.</p>
-        <p>A confirmation email has been sent to your registered email address.</p>
         
         <div class="order-details">
             <div class="order-detail-item">
                 <span>Order ID:</span>
-                <span>#ORD-23879456</span>
+                <span>#ORD-<%= orderDetails.orderId %></span>
             </div>
             <div class="order-detail-item">
                 <span>Order Date:</span>
-                <span>March 20, 2025</span>
+                <span><%= orderDetails.createdOn.toLocaleDateString('en-US', { year: 'numeric' ,
+                    month: 'short' , day: 'numeric' })%></span>
             </div>
             <div class="order-detail-item">
                 <span>Payment Method:</span>
-                <span>Credit Card (VISA ****4589)</span>
+                <span><%= orderDetails.paymentMethod %></span>
             </div>
             <div class="order-detail-item">
                 <span>Shipping Address:</span>
-                <span>123 Main St, Anytown, AN 12345</span>
+                <span><% if (orderDetails.shippingaddress.landmark) { %> <%= orderDetails.shippingaddress.landmark %><% } %> - <%= orderDetails.shippingaddress.city %>, 
+                    <%= orderDetails.shippingaddress.state %> - <%= orderDetails.shippingaddress.pincode %>
+                <%= orderDetails.shippingaddress.mobile %> <% if (orderDetails.shippingaddress.altNumber) { %>, <%= orderDetails.shippingaddress.altNumber %><% } %></span>
             </div>
         </div>
         
         <div class="buttons">
-            <a href="#" class="button secondary-button">Order Details</a>
-            <a href="#" class="button primary-button">Continue Shopping</a>
+            <a href="/trackorder?orderId=<%= orderDetails.orderId %>" class="button secondary-button">Order Details</a>
+            <a href="/shop" class="button primary-button">Continue Shopping</a>
         </div>
     </div>
     

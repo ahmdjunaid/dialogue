@@ -1,12 +1,7 @@
-const brandModel = require('../models/brandModel')
+const brandModel = require('../../models/brandModel')
 
 const brandInfo = async (req, res) => {
     try {
-
-        if(!req.session.admin){
-            res.redirect('/admin/login')
-            return;
-        }
 
         let search = '';
         if(req.query.search){
@@ -51,40 +46,30 @@ const brandInfo = async (req, res) => {
     }
 }
 
-const addBrand = async (req, res) => {
-
-    if(!req.session.admin){
-        res.redirect('/admin/login')
-        return;
-    }
-
-    let { categoryname, categorydescription, offer } = req.body
-
-    const nameRegex = /^[a-zA-Z0-9\-_&/ ]+$/; // Allows letters, numbers, -, /, _, &, and spaces
-    offer=parseFloat(offer)
-    
-    if (typeof offer !== 'number' || offer < 0 || offer > 100) {
-        req.session.admMsg = 'Enter a valid offer percentage (0-100)';
-        return res.redirect('/admin/brands');
-    }
-    
-    if (!categoryname.trim() || !categorydescription.trim()) {
-        req.session.admMsg = 'All fields are required';
-        return res.redirect('/admin/brands');
-    }
-    
-    if (!nameRegex.test(categoryname.trim())) {
-        req.session.admMsg = 'Category name can only contain letters, numbers, and (- / _ &) symbols';
-        return res.redirect('/admin/brands');
-    }    
+const addBrand = async (req, res) => {  
 
 
     try {
+        let { categoryname, categorydescription } = req.body
+
+        const nameRegex = /^[a-zA-Z0-9\-_&/ ]+$/; // Allows letters, numbers, -, /, _, &, and spaces
+
+        if (!categoryname.trim() || !categorydescription.trim()) {
+            req.session.admMsg = 'All fields are required';
+            return res.redirect('/admin/brands');
+        }
+        
+        if (!nameRegex.test(categoryname.trim())) {
+            req.session.admMsg = 'Category name can only contain letters, numbers, and (- / _ &) symbols';
+            return res.redirect('/admin/brands');
+        }  
+
+
         const existingBrand = await brandModel.findOne({ name:categoryname.trim() })
         
         if (existingBrand) {
             if (existingBrand.isDeleted == true) {
-                await brandModel.findOneAndUpdate({ name: categoryname }, { $set: { description: categorydescription, brandOffer: offer, isDeleted:false } })
+                await brandModel.findOneAndUpdate({ name: categoryname }, { $set: { description: categorydescription, isDeleted:false } })
                 req.session.admMsg = 'Brand added successfully'
                 return res.redirect('/admin/brands')
             }
@@ -95,7 +80,6 @@ const addBrand = async (req, res) => {
         const newBrand = new brandModel({
             name: categoryname,
             description: categorydescription,
-            brandOffer: offer
         })
 
 
@@ -114,11 +98,6 @@ const addBrand = async (req, res) => {
 const listBrand = async (req, res) => {
     try {
 
-        if(!req.session.admin){
-            res.redirect('/admin/login')
-            return;
-        }
-
         let id = req.query.id;
 
         await brandModel.findOneAndUpdate({ _id: id }, { $set: { isListed: true } })
@@ -131,11 +110,6 @@ const listBrand = async (req, res) => {
 
 const unlistBrand = async (req, res) => {
     try {
-
-        if(!req.session.admin){
-            res.redirect('/admin/login')
-            return;
-        }
 
         let id = req.query.id;
 
@@ -151,20 +125,9 @@ const editBrand = async (req, res) => {
 
     try {
 
-        let { categoryname, catdescription, offer, id } = req.body
-
-        if(!req.session.admin){
-            res.redirect('/admin/login')
-            return;
-        }
+        let { categoryname, catdescription, id } = req.body
 
         const nameRegex = /^[a-zA-Z0-9\-_&/ ]+$/; // Allows letters, numbers, -, /, _, &, and spaces
-        offer=parseFloat(offer)
-        
-        if (typeof offer !== 'number' || offer < 0 || offer > 100) {
-            req.session.admMsg = 'Enter a valid offer percentage (0-100)';
-            return res.redirect('/admin/brands');
-        }
         
         if (!categoryname.trim() || !catdescription.trim()) {
             req.session.admMsg = 'All fields are required';
@@ -175,15 +138,20 @@ const editBrand = async (req, res) => {
             req.session.admMsg = 'Category name can only contain letters, numbers, and (- / _ &) symbols';
             return res.redirect('/admin/brands');
         }
-    
-        const existingBrand = await brandModel.findOne({name:categoryname.trim(),isDeleted:false})
+
+        const existingBrand = await brandModel.findOne({
+            _id: { $ne: id },
+            name: categoryname.trim(),
+            isDeleted: false
+          });
+          
     
         if(existingBrand){
             req.session.admMsg = 'Brand already exist!'
             return res.redirect('/admin/brands')
         }
     
-        await brandModel.findOneAndUpdate({ _id: id }, { $set: { name: categoryname, description: catdescription, brandOffer: offer } })
+        await brandModel.findOneAndUpdate({ _id: id }, { $set: { name: categoryname, description: catdescription } })
     
         req.session.admMsg = 'Brand edited successfully'
         return res.redirect('/admin/brands')
@@ -201,11 +169,6 @@ const deleteBrand = async (req, res) => {
 
     try {
 
-        if(!req.session.admin){
-            res.redirect('/admin/login')
-            return;
-        }
-    
         const { id } = req.body
     
         await brandModel.findOneAndUpdate({ _id: id }, { $set: { isDeleted: true } })

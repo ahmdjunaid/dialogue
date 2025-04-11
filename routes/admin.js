@@ -1,18 +1,20 @@
 const express = require('express')
 const router = express.Router()
-const adminController = require('../controller/adminController');
-const { adminAuth } = require('../middlewares/auth');
-const customerController = require('../controller/customerController')
-const brandController = require('../controller/brandController')
-const productController = require('../controller/productController')
-const categoryController = require('../controller/categoryController')
+const adminController = require('../controller/adminController/adminController');
+const { adminAuth , adminIsLogged } = require('../middlewares/auth');
+const customerController = require('../controller/adminController/customerController')
+const brandController = require('../controller/adminController/brandController')
+const productController = require('../controller/adminController/productController')
+const categoryController = require('../controller/adminController/categoryController')
+const orderController = require('../controller/adminController/orderController')
+const couponController = require('../controller/adminController/couponController')
 const path = require('path')
 const { upload } = require('../config/multer')
 
 
 //login management
 
-router.get('/login',adminController.loadLogin);
+router.get('/login',adminIsLogged,adminController.loadLogin);
 
 router.post('/login',adminController.login);
 
@@ -66,7 +68,7 @@ router.get('/products',adminAuth,productController.loadProduct)
 
 router.get('/addproduct',adminAuth,productController.loadAddProduct)
 
-router.post('/addproduct', upload, productController.addProduct);
+router.post('/addproduct',adminAuth, upload, productController.addProduct);
 
 router.get('/editproduct/:id',adminAuth, productController.editProductPage);
 
@@ -76,7 +78,35 @@ router.delete('/remove-product-image/:productId/:imageIndex', adminAuth,productC
 
 router.post('/deleteproduct',adminAuth,productController.deleteProduct)
 
+//order management
+
+router.get('/orders',adminAuth ,orderController.loadOrders)
+
+router.get('/vieworder',adminAuth ,orderController.viewOrder)
+
+router.post('/update-order-status',adminAuth ,orderController.updateStatus)
+
+router.post('/process-order-return',adminAuth ,orderController.returnOrder)
+
+router.post('/process-product-return',adminAuth ,orderController.returnItem)
+
+//coupons
+
+router.get('/coupon',adminAuth, couponController.loadCoupon)
+
+router.post('/addcoupon',adminAuth, couponController.addCoupon)
+
+router.post('/editcoupon',adminAuth, couponController.editCoupon)
+
+router.get('/couponListing',adminAuth, couponController.couponListing)
 
 
+// offer management
+
+router.get('/offers',adminAuth, couponController.loadOffers)
+
+router.post('/add-offer',adminAuth, couponController.addOffers)
+
+router.post('/edit-offer',adminAuth, couponController.editOffers)
 
 module.exports = router;

@@ -1,6 +1,6 @@
 <%- include("../../views/partials/user/header") %>
 
-<link rel="stylesheet" href="/css/user/prodList.css">
+  <link rel="stylesheet" href="/css/user/prodList.css">
   <div class="hero-wrap hero-bread" style="background-image: url();">
     <div class="container">
       <div class="row no-gutters slider-text align-items-center justify-content-center">
@@ -16,7 +16,7 @@
 
   <section class="ftco-section">
     <div class="container">
-      <div class="row">
+      <div class="row" style="height: 42em;">
         <div class="col-lg-6 mb-5 ftco-animate zoom-container" id="prod-image">
           <% if (product.productImage && product.productImage.length> 0) { %>
             <% product.productImage.forEach((image)=> { %>
@@ -28,8 +28,8 @@
               <% }); %>
                 <% } else { %>
                   Default Image When No Product Image Exists
-                  <img src="../../uploads/default.jpg" class="img-fluid w-100"
-                    style="height: 650px; object-fit: cover;" alt="No Image Available">
+                  <img src="../../uploads/default.jpg" class="img-fluid w-100" style="height: 650px; object-fit: cover;"
+                    alt="No Image Available">
                   <% } %>
         </div>
 
@@ -47,140 +47,237 @@
               <a href="#"><span class="ion-ios-star-outline"></span></a>
             </p>
           </div>
-          <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
-          <p>
-            <%= product.description %>
-          </p>
-          <div class="row mt-4">
-            <div class="w-100"></div>
-            <div class="input-group col-md-6 d-flex mb-3">
-              <span class="input-group-btn mr-2">
-                <button type="button" class="quantity-left-minus btn" data-type="minus" data-field="">
-                  <i class="ion-ios-remove"></i>
-                </button>
-              </span>
-              <input type="text" id="quantity" name="quantity" class="quantity form-control input-number" value="1"
-                min="1" max="<%= product.stock %>">
-              <span class="input-group-btn ml-2">
-                <button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
-                  <i class="ion-ios-add"></i>
-                </button>
-              </span>
-            </div>
-            <div class="w-100"></div>
-            <div class="col-md-12">
-              <p style="color: #000;">
-                <%= product.stock %> pieces available
-              </p>
-              <p style="color: #0f4f0b;">
-                <%if(product.regularPrice - product.salePrice >= 500){%>
-                Save upto ₹<%= product.regularPrice - product.salePrice %>
-                <%}%>
-              </p>
-            </div>
-          </div>
-          <p>
-            <%if( product.stock <=0){%>
-              <a href="" class="btn btn-warning py-3 px-5 mr-2">STOCK OUT</a>
-              <%}else{%>
-              <form id="cartForm" action="/addtocart" method="get">
-                <input type="hidden" name="quantity" id="addtocart">
-                <input type="hidden" name="productId" value="<%= product._id %>">
-                <a href="" class="btn btn-black py-3 px-5 my-2" id="addToCart" >Add to Cart</a>
-              </form>
-                <a href="/checkout/<%= product._id %>" class="btn btn-primary py-3 px-5">Wishlist <i class="ion-ios-heart ml-1"></i></a>
-                <%}%>
-          </p>
-          <div class="mt-4">
-            <p><strong>Brand:</strong>
-              <%= product.brand %>
-            </p>
-            <p><strong>Storage:</strong>
-              <%= product.storage %>
-            </p>
-            <p><strong>RAM:</strong>
-              <%= product.ram %>
-            </p>
-            <p><strong>Camera:</strong>
-              <%= product.camera %> MP
-            </p>
-            <p><strong>CPU:</strong>
-              <%= product.cpu %>
-            </p>
-          </div>
-        </div>
-      </div>
+          <% const salePrice=Number(product?.salePrice) || 0; const discountAmount=Number(bestOffer?.discountAmount) ||
+            0; let discountedPrice=salePrice; if (bestOffer) { if (bestOffer.discountType==='flat' ) {
+            discountedPrice=salePrice - discountAmount; } else if (bestOffer.discountType==='percentage' ) {
+            discountedPrice=salePrice - ((discountAmount * salePrice) / 100); } } %>
 
-      <div class="row mt-5">
-        <div class="col-md-12 nav-link-wrap">
-          <div class="nav nav-pills d-flex text-center" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-            <a class="nav-link ftco-animate active mr-lg-1" id="v-pills-1-tab" data-toggle="pill" href="#v-pills-1"
-              role="tab" aria-controls="v-pills-1" aria-selected="true">Description</a>
-            <a class="nav-link ftco-animate mr-lg-1" id="v-pills-2-tab" data-toggle="pill" href="#v-pills-2" role="tab"
-              aria-controls="v-pills-2" aria-selected="false">Specifications</a>
-            <a class="nav-link ftco-animate" id="v-pills-3-tab" data-toggle="pill" href="#v-pills-3" role="tab"
-              aria-controls="v-pills-3" aria-selected="false">Reviews</a>
-          </div>
-        </div>
-        <div class="col-md-12 tab-wrap">
-          <div class="tab-content bg-light" id="v-pills-tabContent">
-            <div class="tab-pane fade show active" id="v-pills-1" role="tabpanel" aria-labelledby="v-pills-1-tab">
-              <div class="p-4">
-                <h3 class="mb-4">
-                  <%= product.productName %>
-                </h3>
-                <p>
-                  <%= product.description %>
+            <p class="price">
+              <% if (discountedPrice < salePrice) { %>
+                <span class="text-muted me-2" style="text-decoration-line:line-through">₹<%= salePrice.toFixed(2) %>
+                </span>
+                <span class="fw-bold text-success">₹<%= discountedPrice.toFixed(2) %></span>
+                <% } else { %>
+                  <span class="fw-bold">₹<%= salePrice.toFixed(2) %></span>
+                  <% } %>
+            </p>
+
+            <p>
+              <%= product.description %>
+            </p>
+            <div class="row mt-4">
+              <div class="w-100"></div>
+              <div class="input-group col-md-6 d-flex mb-3">
+                <span class="input-group-btn mr-2">
+                  <button type="button" class="quantity-left-minus btn" data-type="minus" data-field="">
+                    <i class="ion-ios-remove"></i>
+                  </button>
+                </span>
+                <input type="text" id="quantity" name="quantity" class="quantity form-control input-number" value="1"
+                  min="1" max="<%= product.stock %>">
+                <span class="input-group-btn ml-2">
+                  <button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
+                    <i class="ion-ios-add"></i>
+                  </button>
+                </span>
+              </div>
+              <div class="w-100"></div>
+              <div class="col-md-12">
+                <p style="color: #000;">
+                  <%= product.stock %> pieces available
+                </p>
+                <p><strong>Storage & RAM</strong>
+                  <%= product.storage %>, <%= product.ram %>
                 </p>
               </div>
             </div>
-            <div class="tab-pane fade" id="v-pills-2" role="tabpanel" aria-labelledby="v-pills-2-tab">
-              <div class="p-4">
-                <h3 class="mb-4">Product Specifications</h3>
-                <ul>
-                  <li><strong>Brand:</strong>
-                    <%= product.brand %>
-                  </li>
-                  <li><strong>Storage:</strong>
-                    <%= product.storage %>
-                  </li>
-                  <li><strong>RAM:</strong>
-                    <%= product.ram %>
-                  </li>
-                  <li><strong>Camera:</strong>
-                    <%= product.camera %> MP
-                  </li>
-                  <li><strong>CPU:</strong>
-                    <%= product.cpu %>
-                  </li>
-                  <li><strong>Stock:</strong>
-                    <%= product.stock %>
-                  </li>
-                </ul>
-              </div>
+            <p>
+              <%if( product.stock <=0){%>
+                <a href="" class="btn btn-warning py-3 px-5 mr-2">STOCK OUT</a>
+                <%}else{%>
+                  <form id="cartForm" action="/addtocart" method="get">
+                    <input type="hidden" name="quantity" id="addtocart">
+                    <input type="hidden" name="productId" value="<%= product._id %>">
+                    <a href="" class="btn btn-black py-3 px-5 my-2" id="addToCart">Add to Cart</a>
+                  </form>
+                  <a href="/addtowishlist?productId=<%= product._id %>" class="btn btn-primary py-3 px-5">Wishlist <i
+                      class="ion-ios-heart ml-1"></i></a>
+                  <%}%>
+            </p>
+        </div>
+      </div>
+
+      <div class="po-wrapper">
+        <div class="po-container">
+          <%if(offers && offers.length> 0){%>
+            <% for (let i=0; i < Math.min(3, offers.length); i++) { %>
+              <a href="#" class="po-offer-trigger" data-offer='<%- JSON.stringify(offers[i]) %>'>
+                <div class="po-item" data-index="0">
+                  <% if (offers[i].discountType==='flat' ) { %>
+                    <span class="po-tag">₹<%= offers[i].discountAmount %></span>
+                    <% } else { %>
+                      <span class="po-tag">
+                        <%= offers[i].discountAmount %>%
+                      </span>
+                      <% } %>
+                        <div class="po-info">
+                          <h4 class="po-title">
+                            <%= offers[i].offerName %>
+                          </h4>
+                          <div class="po-details">Applicable to selected
+                            <span class="po-highlight">
+                              <%= offers[i].offerTypeRef %>
+                            </span>
+                          </div>
+                          <span style="font-size: 9px;">Click here to know more.</span>
+                          <% if (offers[i]._id.toString()===bestOffer._id.toString()) { %>
+                            <span class="po-applied-badge ms-auto" style="height: 15px;">
+                              <i class="fa fa-check-circle me-1"></i>Applied
+                            </span>
+                            <% } %>
+                        </div>
+                </div>
+              </a>
+
+              <%}%>
+                <%}%>
+                  <%if(offers && offers.length> 3){%>
+                    <button class="po-view-all-btn">View All Offers</button>
+                    <%}%>
+        </div>
+        <!-- Modal for offer details -->
+        <div class="po-modal" id="poDetailModal">
+          <div class="po-modal-content">
+            <div class="po-modal-header">
+              <h3 class="po-modal-title">
+                <span class="po-tag po-modal-tag"></span>
+                <span class="po-modal-title-text">Offer Details</span>
+              </h3>
+              <button class="po-modal-close">&times;</button>
             </div>
-            <div class="tab-pane fade" id="v-pills-3" role="tabpanel" aria-labelledby="v-pills-3-tab">
-              <div class="row p-4">
-                <div class="col-md-7">
-                  <h3 class="mb-4">Reviews</h3>
-                  <div class="review">
-                    <div class="user-img" style="background-image: url(/images/person_1.jpg)"></div>
-                    <div class="desc">
-                      <h4>
-                        <!-- <span class="text-left">Jacob Webb</span>
-                        <span class="text-right">14 March 2018</span> -->
-                      </h4>
-                      <p class="star">
-                        <span>
-                          <i class="ion-ios-star-outline"></i>
-                          <i class="ion-ios-star-outline"></i>
-                          <i class="ion-ios-star-outline"></i>
-                          <i class="ion-ios-star-outline"></i>
-                          <i class="ion-ios-star-outline"></i>
+            <div class="po-modal-body">
+              <!-- Content will be dynamically inserted here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal for all offers -->
+        <div class="po-modal po-all-modal" id="poAllModal">
+          <div class="po-modal-content">
+            <div class="po-modal-header">
+              <h3 class="po-modal-title">All Product Offers</h3>
+              <button class="po-modal-close">&times;</button>
+            </div>
+            <div class="po-container">
+              <%if(offers && offers.length> 0){%>
+                <% for(let i=0; i < offers.length; i++){%>
+                  <div class="po-item" data-index="0" style="width: 100% !important;">
+                    <% if (offers[i].discountType==='flat' ) { %>
+                      <span class="po-tag">₹<%= offers[i].discountAmount %></span>
+                      <% } else { %>
+                        <span class="po-tag">
+                          <%= offers[i].discountAmount %>%
                         </span>
-                        <span class="text-right"><a href="#" class="reply"><i class="icon-reply"></i></a></span>
-                      </p>
-                      <!-- <p>When she reached the first hills of the Italic Mountains...</p> -->
+                        <% } %>
+                          <div class="po-info">
+                            <h4 class="po-title">
+                              <%= offers[i].offerName %>
+                            </h4>
+                            <div class="po-details">Applicable to:
+                              <span class="po-highlight">
+                                <%= offers[i].applicableTo?.name || offers[i].applicableTo?.productName || 'Unknown' %>
+                              </span>
+                            </div>
+                            <div class="po-details">Offer description:
+                              <span class="po-highlight">
+                                <%= offers[i].description %>
+                              </span>
+                            </div>
+                            <% if (offers[i]._id.toString()===bestOffer._id.toString()) { %>
+                              <span class="po-applied-badge ms-auto" style="height: 15px;">
+                                <i class="fa fa-check-circle me-1"></i>Applied
+                              </span>
+                              <% } %>
+                          </div>
+                  </div>
+
+                  <%}%>
+                    <%}%>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-5">
+          <div class="col-md-12 nav-link-wrap">
+            <div class="nav nav-pills d-flex text-center" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+              <a class="nav-link ftco-animate active mr-lg-1" id="v-pills-1-tab" data-toggle="pill" href="#v-pills-1"
+                role="tab" aria-controls="v-pills-1" aria-selected="true">Description</a>
+              <a class="nav-link ftco-animate mr-lg-1" id="v-pills-2-tab" data-toggle="pill" href="#v-pills-2"
+                role="tab" aria-controls="v-pills-2" aria-selected="false">Specifications</a>
+              <a class="nav-link ftco-animate" id="v-pills-3-tab" data-toggle="pill" href="#v-pills-3" role="tab"
+                aria-controls="v-pills-3" aria-selected="false">Reviews</a>
+            </div>
+          </div>
+          <div class="col-md-12 tab-wrap">
+            <div class="tab-content bg-light" id="v-pills-tabContent">
+              <div class="tab-pane fade show active" id="v-pills-1" role="tabpanel" aria-labelledby="v-pills-1-tab">
+                <div class="p-4">
+                  <h3 class="mb-4">
+                    <%= product.productName %>
+                  </h3>
+                  <p>
+                    <%= product.description %>
+                  </p>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="v-pills-2" role="tabpanel" aria-labelledby="v-pills-2-tab">
+                <div class="p-4">
+                  <h3 class="mb-4">Product Specifications</h3>
+                  <ul>
+                    <li><strong>Brand:</strong>
+                      <%= product.brand.name %>
+                    </li>
+                    <li><strong>Storage:</strong>
+                      <%= product.storage %>
+                    </li>
+                    <li><strong>RAM:</strong>
+                      <%= product.ram %>
+                    </li>
+                    <li><strong>Camera:</strong>
+                      <%= product.camera %> MP
+                    </li>
+                    <li><strong>CPU:</strong>
+                      <%= product.cpu %>
+                    </li>
+                    <li><strong>Stock:</strong>
+                      <%= product.stock %>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="tab-pane fade" id="v-pills-3" role="tabpanel" aria-labelledby="v-pills-3-tab">
+                <div class="row p-4">
+                  <div class="col-md-7">
+                    <h3 class="mb-4">Reviews</h3>
+                    <div class="review">
+                      <div class="user-img" style="background-image: url(/images/person_1.jpg)"></div>
+                      <div class="desc">
+                        <h4>
+                          <!-- <span class="text-left">Jacob Webb</span>
+                        <span class="text-right">14 March 2018</span> -->
+                        </h4>
+                        <p class="star">
+                          <span>
+                            <i class="ion-ios-star-outline"></i>
+                            <i class="ion-ios-star-outline"></i>
+                            <i class="ion-ios-star-outline"></i>
+                            <i class="ion-ios-star-outline"></i>
+                            <i class="ion-ios-star-outline"></i>
+                          </span>
+                          <span class="text-right"><a href="#" class="reply"><i class="icon-reply"></i></a></span>
+                        </p>
+                        <!-- <p>When she reached the first hills of the Italic Mountains...</p> -->
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -188,54 +285,53 @@
             </div>
           </div>
         </div>
-      </div>
-      <h3 class="text-center p-4"><b>Others also bought</b></h3>
-      <div class="row justify-content-center">
-        <% relatedProducts.forEach(product=> { %>
-          <div class="col-sm-12 col-md-12 col-lg-3 ftco-animate d-flex">
-            <div class="product d-flex flex-column">
-              <a href="/product/<%= product._id %>" class="img-prod">
-                <img class="img-fluid" src="../uploads/<%= product.productImage[0] %>"
-                  alt="<%= product.productName %>">
-                <div class="overlay"></div>
-              </a>
-              <div class="text py-3 pb-4 px-3">
-                <div class="d-flex">
-                  <div class="cat">
-                    <span>
-                      <%= product.brand %>
-                    </span>
+        <h3 class="text-center p-4"><b>Others also bought</b></h3>
+        <div class="row justify-content-center">
+          <% relatedProducts.forEach(product=> { %>
+            <div class="col-sm-12 col-md-12 col-lg-3 ftco-animate d-flex">
+              <div class="product d-flex flex-column">
+                <a href="/product/<%= product._id %>" class="img-prod">
+                  <img class="img-fluid" src="../uploads/<%= product.productImage[0] %>"
+                    alt="<%= product.productName %>">
+                  <div class="overlay"></div>
+                </a>
+                <div class="text py-3 pb-4 px-3">
+                  <div class="d-flex">
+                    <div class="cat">
+                      <span>
+                        <%= product.brand.name %>
+                      </span>
+                    </div>
+                    <div class="rating">
+                      <p class="text-right mb-0">
+                        <span class="ion-ios-star-outline"></span>
+                        <span class="ion-ios-star-outline"></span>
+                        <span class="ion-ios-star-outline"></span>
+                        <span class="ion-ios-star-outline"></span>
+                        <span class="ion-ios-star-outline"></span>
+                      </p>
+                    </div>
                   </div>
-                  <div class="rating">
-                    <p class="text-right mb-0">
-                      <span class="ion-ios-star-outline"></span>
-                      <span class="ion-ios-star-outline"></span>
-                      <span class="ion-ios-star-outline"></span>
-                      <span class="ion-ios-star-outline"></span>
-                      <span class="ion-ios-star-outline"></span>
-                    </p>
+                  <h3><a href="/product/<%= product._id %>">
+                      <%= product.productName %>
+                    </a></h3>
+                  <div class="pricing">
+                    <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
                   </div>
+                  <p class="bottom-area d-flex px-3">
+                    <a href="/cart/add/<%= product._id %>" class="add-to-cart text-center py-2 mr-1">
+                      <span>Add to cart <i class="ion-ios-add ml-1"></i></span>
+                    </a>
+                    <a href="/checkout/<%= product._id %>" class="buy-now text-center py-2">
+                      <span>Buy now<i class="ion-ios-cart ml-1"></i></span>
+                    </a>
+                  </p>
                 </div>
-                <h3><a href="/product/<%= product._id %>">
-                    <%= product.productName %>
-                  </a></h3>
-                <div class="pricing">
-                  <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
-                </div>
-                <p class="bottom-area d-flex px-3">
-                  <a href="/cart/add/<%= product._id %>" class="add-to-cart text-center py-2 mr-1">
-                    <span>Add to cart <i class="ion-ios-add ml-1"></i></span>
-                  </a>
-                  <a href="/checkout/<%= product._id %>" class="buy-now text-center py-2">
-                    <span>Buy now<i class="ion-ios-cart ml-1"></i></span>
-                  </a>
-                </p>
               </div>
             </div>
-          </div>
-          <% }) %>
+            <% }) %>
+        </div>
       </div>
-    </div>
   </section>
 
   <%- include("../../views/partials/user/footer") %>
@@ -283,19 +379,81 @@
         });
       });
 
-      function quantityAdd(){
+      function quantityAdd() {
         const quantitiy = document.getElementById('quantity').value;
         document.getElementById('addtocart').value = quantitiy
         return true
       }
 
-      document.getElementById('addToCart').addEventListener('click', function(event) {
-      event.preventDefault();
-      const quantitiy = document.getElementById('quantity').value;
-      document.getElementById('addtocart').value = quantitiy
-      document.getElementById('cartForm').submit();
+      document.getElementById('addToCart').addEventListener('click', function (event) {
+        event.preventDefault();
+        const quantitiy = document.getElementById('quantity').value;
+        document.getElementById('addtocart').value = quantitiy
+        document.getElementById('cartForm').submit();
 
       });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const offerLinks = document.querySelectorAll('.po-offer-trigger');
+        const modal = document.getElementById('poDetailModal');
+        const modalBody = modal.querySelector('.po-modal-body');
+        const modalTag = modal.querySelector('.po-modal-tag');
+        const closeModalBtn = modal.querySelector('.po-modal-close');
+
+        offerLinks.forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const offer = JSON.parse(e.currentTarget.getAttribute('data-offer'));
+
+            // Set modal content
+            modalTag.textContent = offer.offerName;
+            modalBody.innerHTML = `
+          <p><strong>Description:</strong> ${offer.description}</p>
+          <p><strong>Discount:</strong> ${offer.discountType === 'flat' ? '₹' + offer.discountAmount : offer.discountAmount + '%'}</p>
+          <p><strong>Applicable to:</strong> ${(offer.applicableTo?.name || offer.applicableTo?.productName || 'Unknown')} product's.</p>
+          <p><strong>Offer validUpto:</strong> ${new Date(offer.validUpto).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+        `;
+
+            // Show modal
+            modal.style.display = 'block';
+          });
+        });
+
+        // Close modal when clicking the close button
+        closeModalBtn.addEventListener('click', () => {
+          modal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside the modal content
+        window.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.style.display = 'none';
+          }
+        });
+      });
+
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const viewAllBtn = document.querySelector('.po-view-all-btn');
+        const poModal = document.getElementById('poAllModal');
+        const closeBtn = poModal.querySelector('.po-modal-close');
+
+        viewAllBtn.addEventListener('click', () => {
+          poModal.style.display = 'block';
+        });
+
+        closeBtn.addEventListener('click', () => {
+          poModal.style.display = 'none';
+        });
+
+        // Optional: Close modal when clicking outside of it
+        window.addEventListener('click', function (e) {
+          if (e.target === poModal) {
+            poModal.style.display = 'none';
+          }
+        });
+      });
+
     </script>
     </body>
 

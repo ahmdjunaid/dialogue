@@ -28,22 +28,22 @@ const userAuth = async (req, res, next) => {
 
 
 const adminAuth = async (req, res, next) => {
-    await userModel.findOne({ isAdmin: true })
-        .then(data => {
-            if (data) {
-                next()
-            } else {
-                res.redirect('/admin/login')
-            }
-        })
-        .catch(error => {
-            console.log('Error in admin auth middleware')
-            res.redirect('/admin/loaderror')
-        })
+        if (!req.session.admin) {
+            return res.redirect('/admin/login')
+        }
+        next()
+}
+
+const adminIsLogged = async (req, res, next) => {
+    if (req.session.admin) {
+        return res.redirect('/admin/dashboard')
+    }
+    next()
 }
 
 
 module.exports = {
     userAuth,
-    adminAuth
+    adminAuth,
+    adminIsLogged
 }

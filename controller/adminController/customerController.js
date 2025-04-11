@@ -1,11 +1,6 @@
-const userModel = require('../models/userModel')
+const userModel = require('../../models/userModel')
 
 const customerInfo = async (req,res)=>{
-
-    if(!req.session.admin){
-        res.redirect('/admin/login')
-        return;
-    }
 
     try {
 
@@ -51,12 +46,6 @@ const customerInfo = async (req,res)=>{
 
 const blockUser = async (req,res)=>{
 
-    if(!req.session.admin){
-        res.redirect('/admin/login')
-        return;
-    }
-
-
     try {
         let id = req.query.id;
         
@@ -64,17 +53,12 @@ const blockUser = async (req,res)=>{
         res.redirect('/admin/users')
         return;
     } catch (error) {
+        console.error(error)
         res.redirect('/admin/loaderror')
     }
 }
 
 const unblockUser = async (req,res)=>{
-
-    if(!req.session.admin){
-        res.redirect('/admin/login')
-        return;
-    }
-
 
     try {
         let id = req.query.id;
@@ -83,6 +67,7 @@ const unblockUser = async (req,res)=>{
         res.redirect('/admin/users')
         return;
     } catch (error) {
+        console.error(error)
         res.redirect('/admin/loaderror')
     }
 }

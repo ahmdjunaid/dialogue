@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialogue Digital - Coupons</title>
+    <link rel="stylesheet" href="/css/admin/brands.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        /* Common button base style */
+        .action-button {
+            padding: 6px 14px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s ease;
+            margin-right: 8px;
+        }
+
+        /* Edit button */
+        .edit-button {
+            background-color: #0d6efd;
+        }
+
+        .edit-button:hover {
+            background-color: #0b5ed7;
+        }
+
+        /* Activate button */
+        .activate-button {
+            background-color: #28a745;
+            /* Bootstrap Success Green */
+        }
+
+        .activate-button:hover {
+            background-color: #218838;
+        }
+
+        /* Deactivate button */
+        .deactivate-button {
+            background-color: #dc3545;
+            /* Bootstrap Danger Red */
+        }
+
+        .deactivate-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <%-include("../../views/partials/admin/aside")%>
+
+        <!-- Main content area -->
+        <div class="main-content">
+            <!-- Header with search -->
+            <div class="header">
+                <div class="search-container">
+                    <form action="/admin/coupon" method="GET">
+                        <input class="search-input" type="text" name="search" id="searchInput"
+                            placeholder="Search for Coupons">
+                        <button type="submit" id="searchBtn" class="btn btn-success">Search</button>
+                        <button type="button" class="btn btn-secondary" onclick="clearSearch()">Clear</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-success" button type="button" data-bs-toggle="modal"
+                    data-bs-target="#addCoupon">ADD COUPONS +</button>
+            </div>
+            <!-- Categories section -->
+            <div class="categories-container">
+                <div class="categories-header">
+                    <div class="categories-title">Coupons</div>
+                </div>
+                <table class="categories-table">
+                    <thead>
+                        <tr>
+                            <th>COUPON NAME</th>
+                            <th>COUPON CODE</th>
+                            <th>MIN CART VALUE</th>
+                            <th>COUPON AMOUNT</th>
+                            <th>VALID FROM</th>
+                            <th>VALID UPTO</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="justify-content-center" id="couponTableBody">
+                        <%if(coupons && coupons.length>0){%>
+                            <%coupons.forEach(items=>{%>
+                                <tr>
+                                    <td>
+                                        <%= items.couponName %>
+                                    </td>
+                                    <td>
+                                        <%= items.couponCode %>
+                                    </td>
+                                    <td>₹ <%= items.minCartValue %>
+                                    </td>
+                                    <td>₹ <%= items.offerAmount %>
+                                    </td>
+                                    <td>
+                                        <%= items.validFrom.toLocaleDateString('en-US', { year: 'numeric' ,
+                                            month: 'short' , day: 'numeric' }) %>
+                                    </td>
+                                    <td>
+                                        <%= items.validUpto.toLocaleDateString('en-US', { year: 'numeric' ,
+                                            month: 'short' , day: 'numeric' }) %>
+                                    </td>
+                                    <td><button class="action-button edit-button"
+                                            onclick='openEditForm(<%- JSON.stringify(items) %>)'>Edit</button>
+                                        <%if(items.isList==true){%>
+                                            <button onclick="Listing('<%= items._id %>')"
+                                                class="action-button activate-button">Unlist</button>
+                                            <%}else{%>
+                                                <button onclick="Listing('<%= items._id %>')"
+                                                    class="action-button deactivate-button">List</button>
+                                                <%}%>
+                                    </td>
+                                </tr>
+                                <%})%>
+                                    <%}%>
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <div class="page-numbers">
+                        <div class="page-nav"></div>
+                        <% for (let j=1; j <=totalPages; j++) { %>
+                            <a href="?page=<%= j %>" style="text-decoration: none;">
+                                <button class="page-button <%= (j === currentPage) ? 'active' : '' %>">
+                                    <%= j %>
+                                </button>
+                            </a>
+                            <% } %>
+                                <div class="page-nav"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- addModal -->
+        <div class="modal fade" id="addCoupon" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" style="background-color: #1e2027;">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Coupon</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-container">
+                            <h1 class="form-title">Add Coupon</h1>
+                            <form id="couponAddForm" onsubmit="return false;">
+                                <div class="form-group">
+                                    <label class="form-label">Coupon Name: <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-input" name="couponName">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Description: <span class="text-danger">*</span></label>
+                                    <textarea class="form-input" name="couponDescription"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Coupon Code: <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-input" name="couponCode"
+                                        placeholder="It should be 6 characters including numbers and letters">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Valid from: <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-input" name="validFrom">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Valid Upto: <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-input" name="validUpto">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Minimum cart value: <span
+                                            class="text-danger">*</span></label>
+                                    <input type="number" class="form-input" name="cartValue">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Offer Amount: <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-input" name="offerAmount">
+                                </div>
+
+                                <div class="button-container">
+                                    <button type="submit" onclick="validateFormAndSubmit()" class="submit-button"
+                                        data-bs-dismiss="modal">ADD
+                                        COUPON</button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- editModal -->
+        <div class="modal fade" id="editCoupon" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" style="background-color: #1e2027;">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Coupon</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-container">
+                            <h1 class="form-title">Edit Coupon</h1>
+                            <form id="editForm" onsubmit="return false;">
+                                <div class="form-group">
+                                    <label class="form-label">Coupon Name: <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-input" name="couponName">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Description: <span class="text-danger">*</span></label>
+                                    <textarea class="form-input" name="couponDescription"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Coupon Code: <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-input" name="couponCode"
+                                        placeholder="It should be 6 characters including numbers and letters">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Valid from: <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-input" name="validFrom">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Valid Upto: <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-input" name="validUpto">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Minimum cart value: <span
+                                            class="text-danger">*</span></label>
+                                    <input type="number" class="form-input" name="cartValue">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Offer Amount: <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-input" name="offerAmount">
+                                </div>
+
+                                <input type="hidden" id="couponId" name="couponId">
+
+                                <div class="button-container">
+                                    <button type="submit" onclick="validateEditFormAndSubmit()" class="submit-button"
+                                        data-bs-dismiss="modal">Update</button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+        <script>
+            function validateFormAndSubmit() {
+                const form = document.getElementById('couponAddForm');
+                const formData = new FormData(form);
+
+                const couponName = formData.get('couponName').trim();
+                const couponDescription = formData.get('couponDescription').trim();
+                const couponCode = formData.get('couponCode').trim();
+                const validFrom = formData.get('validFrom').trim();
+                const validUpto = formData.get('validUpto').trim();
+                const cartValue = formData.get('cartValue').trim();
+                const offerAmount = formData.get('offerAmount').trim();
+
+                let isValid = true;
+                const regex = /^[A-Za-z0-9 ]+$/;
+                const couponRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6}$/;
+                const descriptionRegex = /^[A-Za-z0-9 ₹.,!'"()-]+$/;
+
+
+                if (!couponName || !couponDescription || !couponCode || !validFrom || !validUpto || !cartValue || !offerAmount) {
+                    Swal.fire("Error", "All fields are required", "error");
+                    return;
+                }
+
+                if (!regex.test(couponName)) {
+                    Swal.fire("Error", "Name should only contain letters and numbers", "error");
+                    return;
+                }
+
+                if (!descriptionRegex.test(couponDescription)) {
+                    Swal.fire("Error", "Description should only contain letters and numbers", "error");
+                    return;
+                }
+
+                if (!couponRegex.test(couponCode)) {
+                    Swal.fire("Error", "Coupon code must be exactly 6 characters (letters & numbers)", "error");
+                    return;
+                }
+
+                if ( validFrom < getTodayDate()) {
+                    Swal.fire("Invalid Date", "Starting date should be today or a future date.", "error");
+                    return;
+                }
+
+                if (new Date(validFrom) > new Date(validUpto)) {
+                    Swal.fire("Invalid Date", "Valid Upto should be later than Valid From.", "error");
+                    return;
+                }
+
+                fetch('/admin/addcoupon', {
+                    method: 'POST',
+                    body: new URLSearchParams([...formData])
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Coupon added successfully!",
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            form.reset();
+
+                            const tbody = document.getElementById('couponTableBody');
+                            const newRow = document.createElement('tr');
+
+                            const validFromFormatted = new Date(data.newCoupon.validFrom).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                            const validUptoFormatted = new Date(data.newCoupon.validUpto).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+                            newRow.innerHTML = `
+                                <td>${data.newCoupon.couponName}</td>
+                                <td>${data.newCoupon.couponCode}</td>
+                                <td>₹ ${data.newCoupon.minCartValue}</td>
+                                <td>₹ ${data.newCoupon.offerAmount}</td>
+                                <td>${validFromFormatted}</td>
+                                <td>${validUptoFormatted}</td>
+                                <td>
+                                    <button class="action-button edit-button" onclick='openEditForm(${JSON.stringify(data.newCoupon)})'>Edit</button>
+                                    <button class="action-button ${data.newCoupon.isList ? 'activate-button' : 'deactivate-button'}">
+                                    ${data.newCoupon.isList ? 'Unlist' : 'List'}
+                                    </button>
+                                </td>
+                            `;
+
+                            tbody.prepend(newRow);
+
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: data.message || "Failed to add coupon",
+                                showConfirmButton: true
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error submitting form:", error);
+                        Swal.fire("Error", "Something went wrong! Please try again.", "error");
+                    });
+            }
+
+            function openEditForm(couponData) {
+
+                const form = document.getElementById('editForm');
+
+                form.elements['couponName'].value = couponData.couponName || '';
+                form.elements['couponDescription'].value = couponData.description || '';
+                form.elements['couponCode'].value = couponData.couponCode || '';
+                form.elements['validFrom'].value = couponData.validFrom?.substring(0, 10) || '';
+                form.elements['validUpto'].value = couponData.validUpto?.substring(0, 10) || '';
+                form.elements['cartValue'].value = couponData.minCartValue || '';
+                form.elements['offerAmount'].value = couponData.offerAmount || '';
+                form.elements['couponId'].value = couponData._id || '';
+
+                const modal = new bootstrap.Modal(document.getElementById('editCoupon'));
+                modal.show();
+            }
+
+            function validateEditFormAndSubmit() {
+                const form = document.getElementById('editForm');
+                const formData = new FormData(form);
+
+                const couponName = formData.get('couponName').trim();
+                const couponDescription = formData.get('couponDescription').trim();
+                const couponCode = formData.get('couponCode').trim();
+                const validFrom = formData.get('validFrom').trim();
+                const validUpto = formData.get('validUpto').trim();
+                const cartValue = formData.get('cartValue').trim();
+                const offerAmount = formData.get('offerAmount').trim();
+
+                let isValid = true;
+                const regex = /^[A-Za-z0-9 ]+$/;
+                const couponRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6}$/;
+                const descriptionRegex = /^[A-Za-z0-9 ₹.,!'"()-]+$/;
+
+                if (!couponName || !couponDescription || !couponCode || !validFrom || !validUpto || !cartValue || !offerAmount) {
+                    Swal.fire("Error", "All fields are required", "error");
+                    return;
+                }
+
+                if (!regex.test(couponName)) {
+                    Swal.fire("Error", "Name should only contain letters and numbers", "error");
+                    return;
+                }
+
+                if (!descriptionRegex.test(couponDescription)) {
+                    Swal.fire("Error", "Description can contain letters, numbers, spaces, and basic punctuation (!, ., ₹, etc.).", "error");
+                    return;
+                }
+
+                if (!couponRegex.test(couponCode)) {
+                    Swal.fire("Error", "Coupon code must be exactly 6 characters (letters & numbers)", "error");
+                    return;
+                }
+
+                if (new Date(validFrom) > new Date(validUpto)) {
+                    Swal.fire("Invalid Date", "Valid Upto should be later than Valid From.", "error");
+                    return;
+                }
+
+                fetch('/admin/editcoupon', {
+                    method: 'POST',
+                    body: new URLSearchParams([...formData])
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Coupon edited successfully!",
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                form.reset();
+                                location.reload()
+                            })
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: data.message || "Failed to edit coupon",
+                                showConfirmButton: true
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error submitting form:", error);
+                        Swal.fire("Error", "Something went wrong! Please try again.", "error");
+                    });
+            }
+
+            function Listing(couponId) {
+                fetch(`/admin/couponListing?couponId=${couponId}`, {
+                    method: 'GET'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Status updated successfully",
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: data.message || "Failed to edit coupon",
+                                showConfirmButton: true
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error in Listing function:", error);
+                        Swal.fire({
+                            icon: "error",
+                            title: "Something went wrong!",
+                            showConfirmButton: true
+                        });
+                    });
+            }
+
+            function clearSearch() {
+                document.getElementById("searchInput").value = "";
+                document.getElementById('searchBtn').click();
+
+            }
+
+            function getTodayDate() {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+
+
+        </script>

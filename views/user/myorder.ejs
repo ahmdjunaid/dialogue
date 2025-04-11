@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders | Dialog </title>
+    <style>
+.main-container {
+    margin-top: 3em;
+    display: flex;
+    min-height: calc(100vh - 300px);
+    background-color: #f5f5f5;
+}
+.edit-container{
+    display: flex; 
+    justify-content: end;
+}
+
+.sidebar {
+    width: 200px;
+    background-color: #f6f6f6;
+    padding: 20px;
+}
+
+.sidebar h3 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.sidebar-item {
+    margin-bottom: 15px;
+    padding-left: 10px;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-item a {
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    display: block;
+}
+
+.sidebar-item a:hover {
+    color: #192857;
+}
+
+.sidebar-item a.active {
+    color: #192857;
+    font-weight: 600;
+}
+
+.sidebar-item:hover {
+    border-left-color: #192857;
+}
+
+.order_main_container {
+  padding: 20px;
+  background-color: #f5f5f5;
+  width: 83em;
+}
+
+.order_heading {
+    line-height: 1.5;
+    font-weight: 400;
+    color: #000000;
+}
+
+.order_table_wrapper {
+  overflow-x: auto;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.order_table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.order_table_header {
+  background-color: #dbcc8f;
+}
+
+.order_header_row {
+  text-align: left;
+}
+
+.order_header_cell {
+  padding: 12px 15px;
+  font-weight: 700;
+  color: white;
+  font-size: 14px;
+}
+
+.order_row {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.order_row:last-child {
+  border-bottom: none;
+}
+
+.order_cell {
+  padding: 15px;
+  vertical-align: middle;
+}
+
+.order_product_id_cell {
+  color: #333;
+  font-weight: 500;
+}
+
+.order_price_cell {
+  font-weight: 500;
+}
+
+.order_status_badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: white;
+}
+
+.delivered_status {
+  background-color: #00c853;
+}
+
+.pending_status {
+  background-color: #ffc107;
+}
+
+.cancelled_status {
+  background-color: #f44336;
+}
+
+.processing_status {
+  background-color: #ff9800;
+}
+
+.shipped_status {
+  background-color: #2196f3;
+}
+
+.return-requested_status {
+  background-color: #9c27b0;
+}
+
+.return-rejected_status {
+  background-color: #8d0000;
+}
+
+.returned_status {
+  background-color: #795548;
+}
+
+
+.order_product_thumbnails {
+  display: flex;
+  align-items: center;
+}
+
+.order_product_thumbnail {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 5px;
+  border: 1px solid #e0e0e0;
+}
+
+.order_more_info_btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+}
+
+.order_more_info_btn:hover {
+  background-color: #f5f5f5;
+}
+
+.order_info_icon::before {
+  content: "ⓘ";
+  font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .order_header_cell, .order_cell {
+    padding: 10px;
+  }
+  
+  .order_product_thumbnail {
+    width: 30px;
+    height: 30px;
+  }
+}
+    </style>
+</head>
+<body>
+
+<%- include('../../views/partials/user/header') %>
+
+<div class="main-container">
+
+    <%- include('../../views/partials/user/profileaside') %>
+
+    <div class="order_main_container">
+        <h2 class="order_heading">MY ORDERS</h2>
+        <div class="order_table_wrapper">
+          <%if(orders.length>0){%>
+          <table class="order_table">
+            <thead class="order_table_header">
+              <tr class="order_header_row">
+                <th class="order_header_cell order_product_id">ORDER ID</th>
+                <th class="order_header_cell order_delivery_date">ORDER DATE</th>
+                <th class="order_header_cell order_status">STATUS</th>
+                <th class="order_header_cell order_product_images">PRODUCTS</th>
+                <th class="order_header_cell order_price">TOTAL AMOUNT</th>
+                <th class="order_header_cell order_actions"></th>
+              </tr>
+            </thead>
+            <tbody class="order_table_body">
+              <% orders.forEach(order => { %>
+                <tr class="order_row">
+                  <td class="order_cell order_product_id_cell">#<%= order.orderId %></td>
+                  <td class="order_cell order_delivery_date_cell"><%= order.createdOn.toLocaleDateString('en-US', { year: 'numeric' ,
+                    month: 'short' , day: 'numeric' })%></td>
+                    <td class="order_cell order_status_cell">
+                      <span class="order_status_badge <%= order.status.toLowerCase().replace(/\s+/g, '-') %>_status">
+                        <%= order.status %>
+                      </span>
+                    </td>
+                    
+                  <td class="order_cell order_product_images_cell">
+                    <div class="order_product_thumbnails">
+                        <% order.orderedItems.forEach(item => { %>
+                            <img 
+                              src="../uploads/<%= item.product.productImage[0] %>" 
+                              alt="<%= item.product.productName %>" 
+                              class="order_product_thumbnail"
+                            >
+                          <% }) %>
+                                               
+                    </div>
+                  </td>
+                  <td class="order_cell order_price_cell">₹<%= order.finalAmount.toLocaleString() %></td>
+                  <td class="order_cell order_actions_cell">
+                  <a href="/trackorder?orderId=<%= order.orderId %>">
+                    <button class="order_more_info_btn" aria-label="More Information">
+                      <i class="order_info_icon"></i>
+                    </button>
+                  </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <%}else{%>
+            <h4 class="text-center p-5">No orders available</h4>
+            <div class="d-flex justify-content-center p-2"><br>
+              <a href="/shop"><button class="btn btn-primary">Continue shopping</button></a>
+            </div>
+          <%}%>
+        </div>
+      </div>
+</div>
+
+<%- include('../../views/partials/user/footer') %>
+    
+</body>
+</html>

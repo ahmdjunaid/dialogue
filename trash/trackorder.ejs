@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link rel="stylesheet" href="/css/user/trackorder.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <%- include('../../views/partials/user/header') %>
+
+        <div class="main-container">
+            <%- include('../../views/partials/user/profileaside') %>
+
+                <!-- Wrapper to center the order-details section -->
+                <div class="order-details-wrapper">
+                    <section class="order-details">
+                        <div class="order-header">
+                            <div class="order-title">
+                                <h2 class="pt-3">ORDER DETAILS</h2>
+                                <div class="order-id text-success"><b>• Order id #<%= order.orderId %></b>
+                                </div>
+                            </div>
+                            <% if(order.status=='Pending' || order.status=='Processing' ){ %>
+                                <button type="button" class="product-cancel-btn mt-3" 
+                                        onclick="cancelEntireOrder('<%= order.orderId %>')">
+                                    Cancel Order
+                                </button>
+                            <% } else if(order.status=='Delivered') { %>
+                                <button type="button" class="product-cancel-btn mt-3" 
+                                        onclick="returnEntireOrder('<%= order.orderId %>')">
+                                    Return Order
+                                </button>
+                            <%}else{%>
+                                <button type="button" class="btn btn-info mt-3" disabled>
+                                    <%= order.status %>
+                                </button>
+                            <%}%>
+                        </div>
+
+                        <div class="order-timeline">
+                            <div class="timeline-line"></div>
+
+                            <div class="timeline-step">
+                                <div id="pending" class="step-indicator"></div>
+                                <div class="step-label">ORDER PLACED</div>
+                            </div>
+
+                            <div class="timeline-step">
+                                <div id="processing" class="step-indicator"></div>
+                                <div class="step-label">PROCESSING</div>
+                            </div>
+
+                            <div class="timeline-step">
+                                <div id="shipped" class="step-indicator"></div>
+                                <div class="step-label">SHIPPED</div>
+                            </div>
+
+                            <div class="timeline-step">
+                                <div id="delivered" class="step-indicator"></div>
+                                <div class="step-label">DELIVERED</div>
+                            </div>
+
+                            <div class="timeline-step">
+                                <div id="cancelled" class="step-indicator"></div>
+                                <div class="step-label">CANCELLED</div>
+                            </div>
+
+                            <div class="timeline-step">
+                                <div id="returnRequested" class="step-indicator"></div>
+                                <div class="step-label">RETURN REQUESTED</div>
+                            </div>
+
+                            <div class="timeline-step">
+                                <div id="returned" class="step-indicator"></div>
+                                <div class="step-label">RETURNED</div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="orderStatus" value="<%= order.status %>">
+
+                        <div class="products-container">
+                            <% order.orderedItems.forEach(product=> { %>
+                                <div class="product">
+                                    <img src="../uploads/<%= product.imageurl[0] %>"
+                                        alt="<%= product.product.productName %>" class="product-image">
+                                    <div class="product-details">
+                                        <div class="product-name">
+                                            <%= product.product.productName %>
+                                        </div>
+                                        <div class="product-specs">Quantity: <%= product.quantity %>
+                                        </div>
+                                        <div class="product-specs">
+                                            <%= product.product.description %>
+                                        </div>
+                                        <div class="product-specs">Mode of Payment: <%= order.paymentMethod %>
+                                        </div>
+                                        <div class="product-price">₹<%= product.price.toLocaleString() %>
+                                        </div>
+                                    </div>
+                                    <div class="product-action">
+                                        <% if(order.status=='Pending' || order.status=='Processing' ){ %>
+                                            <button type="button" class="product-cancel-btn" onclick="cancelItem('<%= order.orderId %>','<%= product.product._id %>')">
+                                                Cancel Item
+                                            </button>
+                                            <%}else if(order.status=='Delivered' ){%>
+                                                <button type="button" class="product-return-btn" onclick="returnItem('<%= order.orderId %>','<%= product.product._id %>')">
+                                                    Return Item
+                                                </button>
+                                                <%}else{%>
+                                                <button class="btn btn-info info" disabled>Item <%= order.status %></button>
+                                                <%}%>
+                                    </div>
+                                </div>
+                                <% }) %>
+                        </div>
+                    </section>
+                </div>
+        </div>
+
+        <%- include('../../views/partials/user/footer') %>
+
+            <!-- Cancel Modal -->
+            <div class="modal" tabindex="-1" id="myModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Reason for Cancellation</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <textarea name="cancelreason" placeholder="Reason for Cancellation" id=""></textarea>
+                            <input type="hidden" name="orderId" id="can_orderId">
+                            <input type="hidden" name="productId" id="can_productId">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Return modal -->
+            <div class="modal" tabindex="-1" id="RtnModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="" onclick="return returnValidate()" method="post"></form>
+                        <div class="modal-header">
+                            <h5 class="modal-title">Reason for Return</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            
+                            <textarea name="cancelreason" placeholder="Reason for Return" id=""></textarea>
+                            <input type="hidden" name="orderId" id="rtn_orderId">
+                            <input type="hidden" name="productId" id="rtn_productId">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Return</button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    let orderStatus = document.getElementById('orderStatus').value;
+
+                    const orderSteps = [
+                        "Pending",
+                        "Processing",
+                        "Shipped",
+                        "Delivered",
+                        "Cancelled",
+                        "Return Requested",
+                        "Returned"
+                    ];
+
+                    function activateSteps(status) {
+                        let statusIndex = orderSteps.indexOf(status);
+
+                        if (statusIndex !== -1) {
+                            for (let i = 0; i <= statusIndex; i++) {
+                                let stepId = orderSteps[i].toLowerCase().replace(/\s+/g, "");
+                                let stepElement = document.getElementById(stepId);
+                                if (stepElement) {
+                                    stepElement.classList.add("active");
+                                }
+                            }
+                        }
+                    }
+
+                    activateSteps(orderStatus);
+                });
+
+                function cancelItem(orderId,productId){
+                    document.getElementById('can_orderId').value = orderId
+                    document.getElementById('can_productId').value = productId
+
+                    var modal = bootstrap.Modal(document.getElementById('myModal'))
+                    modal.show()
+                }
+
+                function returnItem(orderId,productId){
+                    document.getElementById('rtn_orderId').value = orderId
+                    document.getElementById('rtn_productId').value = productId
+
+                    var modal = bootstrap.Modal(document.getElementById('RtnModal'))
+                    modal.show()
+                }
+
+                function returnValidate(){
+                    const reason = document.getElementsByName('cancelreason').value.trim();
+                    if(!reason){
+                        swal.fire('Enter a valid reason for return')
+                        return false
+                    }
+                    return true
+                }
+
+
+            </script>
+</body>
+
+</html>
