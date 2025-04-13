@@ -75,39 +75,43 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% selectedProduct.forEach(item => {
-                        const product = item.product;
+                    <% selectedProduct.forEach(item=> {
+                        const product = item.product.product;
                         const offer = item.bestOffer;
-                        const price = product.price;
-                        const quantity = product.quantity;
+                        const price = item.product.product.salePrice;
+                        const quantity = item.product.quantity;
                         let finalPrice = price;
-                
+
                         if (offer) {
-                            if (offer.discountType === 'flat') {
-                                finalPrice = price - offer.discountAmount;
-                            } else if (offer.discountType === 'percentage') {
-                                finalPrice = price - (price * offer.discountAmount) / 100;
-                            }
-                            finalPrice = Math.round(finalPrice); // Optional rounding
+                        if (offer.discountType === 'flat') {
+                        finalPrice = price - offer.discountAmount;
+                        } else if (offer.discountType === 'percentage') {
+                        finalPrice = price - (price * offer.discountAmount) / 100;
                         }
-                
+                        finalPrice = Math.round(finalPrice); // Optional rounding
+                        }
+
                         const totalPrice = finalPrice * quantity;
-                    %>
+                        %>
                         <tr>
                             <td>
                                 <div class="product-row">
-                                    <img src="../uploads/<%= product.productId.productImage[0] %>" alt="<%= product.name %>" class="product-image">
+                                    <img src="../uploads/<%= product.productImage[0] %>" alt="<%= product.name %>"
+                                        class="product-image">
                                     <div>
                                         <div class="product-name">
-                                            <%= product.name %>
+                                            <%= product.productName %>
                                         </div>
                                         <% if (offer) { %>
                                             <div class="offer-badge text-success">
-                                                <strong><%= offer.offerName %></strong><br>
-                                                <strong>Discount:</strong> 
-                                                <%= offer ? offer.discountType === 'flat' ? `₹${offer.discountAmount}` : `${offer.discountAmount}%` : 'No offers are available' %> OFF
+                                                <strong>
+                                                    <%= offer.offerName %>
+                                                </strong><br>
+                                                <strong>Discount:</strong>
+                                                <%= offer ? offer.discountType==='flat' ? `₹${offer.discountAmount}` :
+                                                    `${offer.discountAmount}%` : 'No offers are available' %> OFF
                                             </div>
-                                        <% } %>
+                                            <% } %>
                                     </div>
                                 </div>
                             </td>
@@ -115,9 +119,9 @@
                                 <% if (offer) { %>
                                     <span class="text-muted"><s>₹<%= price.toLocaleString() %></s></span><br>
                                     <strong>₹<%= finalPrice.toLocaleString() %></strong>
-                                <% } else { %>
-                                    ₹<%= price.toLocaleString() %>
-                                <% } %>
+                                    <% } else { %>
+                                        ₹<%= price.toLocaleString() %>
+                                            <% } %>
                             </td>
                             <td class="quantity-cell">
                                 <%= quantity %>
@@ -126,9 +130,9 @@
                                 ₹<%= totalPrice.toLocaleString() %>
                             </td>
                         </tr>
-                    <% }) %>
-                </tbody>                  
-                  
+                        <% }) %>
+                </tbody>
+
             </table>
 
             <!-- Order Summary -->
@@ -267,7 +271,6 @@
                         }
                     });
 
-                    // Send AJAX request
                     fetch("/payment", {
                         method: "POST",
                         headers: {
@@ -280,17 +283,16 @@
                             if (result.success) {
                                 proceedForPayment(result.availableProducts, result.selectedAddress)
                             } else {
-                                // Some products have insufficient stock
                                 const insufficientItems = result.insufficientStock || [];
 
                                 if (insufficientItems.length > 0) {
                                     let message = 'The following items have insufficient stock:<br><br><ul style="text-align:left;">';
 
                                     insufficientItems.forEach(item => {
-                                        message += `<li>${item.name}: You requested ${item.quantity}, but only ${item.availableStock} are available</li>`;
+                                        message += `<li>${item.product.name}: You requested ${item.product.quantity}, but only ${item.availableStock} are available</li>`;
                                     });
 
-                                    message += '</ul><br>Would you like to adjust these items to the maximum available quantity?';
+                                    message += '</ul><br>Would you like to return to the cart and adjust the quantities?';
 
                                     Swal.fire({
                                         title: 'Stock Changed',
@@ -299,11 +301,12 @@
                                         showCancelButton: true,
                                         confirmButtonColor: '#3085d6',
                                         cancelButtonColor: '#d33',
-                                        confirmButtonText: 'Adjust Quantities',
+                                        confirmButtonText: 'Back to cart?',
                                         cancelButtonText: 'Cancel'
                                     }).then((result) => {
                                         if (result.isConfirmed) {
-                                            adjustQuantities(insufficientItems);
+                                            // adjustQuantities(insufficientItems);
+                                            window.location.href = '/cart';
                                         }
                                     });
                                 } else {
@@ -322,100 +325,6 @@
                                 text: 'Error while validating stock. Please try again.'
                             });
                         });
-
-                    function adjustQuantities(insufficientStock) {
-                        const adjustPromises = insufficientStock.map(item => {
-                            return fetch('/update-checkout', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    productId: item.productId._id,
-                                    quantity: item.availableStock
-                                }),
-                            }).then(response => response.json());
-                        });
-
-                        Promise.all(adjustPromises)
-                            .then(results => {
-                                const allSuccessful = results.every(result => result.success);
-
-                                if (allSuccessful) {
-                                    window.location.reload()
-                                    updatePageContent(insufficientStock);
-
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Quantity updated',
-                                        text: 'Quantities have been adjusted to match available stock.',
-                                        timer:1500,
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: 'Failed to adjust some quantities. Please try again.'
-                                    });
-                                }
-                            })
-                            .catch(error => {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'Failed to adjust quantities. Please try again.'
-                                });
-                            });
-                    }
-
-                    function updatePageContent(insufficientStock) {
-                        // Update checkout table
-                        const checkoutTable = document.querySelector('.checkout-table tbody');
-
-                        insufficientStock.forEach(item => {
-                            const productRow = Array.from(checkoutTable.querySelectorAll('tr'))
-                                .find(row => row.querySelector('.product-name').textContent.trim() === item.name);
-
-                            if (productRow) {
-                                // Update quantity cell
-                                const quantityCell = productRow.querySelector('.quantity-cell');
-                                quantityCell.textContent = item.availableStock;
-
-                                // Update total price cell
-                                const priceCell = productRow.querySelector('.price-cell');
-                                const price = parseFloat(priceCell.textContent.replace('₹', ''));
-                                const totalCell = productRow.querySelector('.total-cell');
-                                totalCell.textContent = `₹${(price * item.availableStock).toFixed(2)}`;
-                            }
-                        });
-
-                        // Recalculate and update order summary
-                        updateOrderSummary();
-                    }
-
-                    function updateOrderSummary() {
-                        const checkoutTable = document.querySelector('.checkout-table tbody');
-                        const rows = checkoutTable.querySelectorAll('tr');
-
-                        let subtotal = 0;
-                        rows.forEach(row => {
-                            const price = parseFloat(row.querySelector('.price-cell').textContent.replace('₹', ''));
-                            const quantity = parseInt(row.querySelector('.quantity-cell').textContent);
-                            subtotal += price * quantity;
-                        });
-
-                        // Assuming there's a fixed discount (you might need to adjust this logic)
-                        const discountElement = document.querySelector('.price-summary .price-row:nth-child(2) span:last-child');
-                        const discount = parseFloat(discountElement.textContent.replace('₹', ''));
-
-                        // Update subtotal
-                        const subtotalElement = document.querySelector('.price-summary .price-row:first-child span:last-child');
-                        subtotalElement.textContent = `₹${subtotal.toFixed(2)}`;
-
-                        // Update total
-                        const totalElement = document.querySelector('.price-summary .total-row span:last-child');
-                        totalElement.textContent = `₹${(subtotal - discount).toFixed(2)}`;
-                    }
                 })
 
                 const message = document.getElementById('err').value

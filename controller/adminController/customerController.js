@@ -72,7 +72,6 @@ const unblockUser = async (req,res)=>{
     }
 }
 
-
 module.exports = {
     customerInfo,
     blockUser,

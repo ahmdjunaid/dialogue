@@ -127,7 +127,6 @@ const updateStatus = async (req, res) => {
     }
 };
 
-
 const returnOrder = async (req, res) => {
     try {
         const { orderId, action } = req.body
@@ -239,9 +238,6 @@ const returnItem = async (req, res) => {
         return res.redirect('/admin/loaderror');
     }
 };
-
-
-
 
 module.exports = {
     loadOrders,

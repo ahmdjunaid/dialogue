@@ -172,6 +172,10 @@ const loadcart = async (req, res) => {
 
         const availableCoupons = await couponModel.find({ isList: true })
 
+        if(req.session.couponApplied && req.session.couponApplied.minValue > products.cartTotals){
+            req.session.couponApplied = null
+        }
+
         const couponApplied = req.session.couponApplied || {}
 
         let coupon = {}
@@ -239,7 +243,6 @@ const loadcart = async (req, res) => {
         return res.redirect('/pagenotfound')
     }
 }
-
 
 const addToCart = async (req, res) => {
     try {
@@ -397,6 +400,10 @@ const updateCartQuantity = async (req, res) => {
 
         cart.totalPrice = cart.items.reduce((total, item) => total + item.totalPrice, 0);
 
+        if(req.session.couponApplied && req.session.couponApplied.minValue > cart.totalPrice){
+            req.session.couponApplied = null
+        }
+
         await cart.save();
 
         const currentDate = new Date();
@@ -407,8 +414,6 @@ const updateCartQuantity = async (req, res) => {
             validUpto: { $gte: new Date(currentDate.setHours(0, 0, 0, 0)) }
         }).populate('applicableTo') || [];
 
-
-        
 
         const offers = allOffers.filter(item => {
             const offerId = item.applicableTo?._id?.toString();
@@ -421,7 +426,7 @@ const updateCartQuantity = async (req, res) => {
 
         let cartItems = cart.items;
 
-        const total = calculateTotalOfferAmount(cartItems, allOffers);
+        const totalOffer = calculateTotalOfferAmount(cartItems, allOffers);
 
         const bestOffer = getBestOffer(offers, product)
 
@@ -436,14 +441,16 @@ const updateCartQuantity = async (req, res) => {
             }
         }
 
+        const couponAmount = req.session.couponApplied? req.session.couponApplied.offerAmount : 0;
+
         res.json({
             success: true,
             message: 'Cart updated successfully',
             newQuantity: cart.items[productIndex].quantity,
             newTotalPrice: cart.items[productIndex].totalPrice - offerAmount,
             cartTotal: cart.totalPrice,
-            offerAmount : total,
-            bestOffer
+            offerAmount : totalOffer,
+            couponAmount
         });
 
     } catch (error) {
@@ -463,20 +470,22 @@ const removeFromCart = async (req, res) => {
 
         const cart = await cartModel.findOne({ userId: userId });
 
+
         if (!cart) {
             return res.status(404).json({ success: false, message: 'Cart not found' });
         }
 
-        const initialLength = cart.items.length;
-        cart.items = cart.items.filter(item => item.productId.toString() !== productId);
+        const item = cart.items.find(item=>item.productId.toString()===productId.toString())
 
-        if (cart.items.length === initialLength) {
-            return res.status(404).json({ success: false, message: 'Product not found in cart' });
+        if(!item){
+            return res.status(404).json({ success: false, message: 'Product not found in cart' })
         }
+
+        cart.items = cart.items.filter(item => item.productId.toString() !== productId.toString());
 
         cart.totalPrice = cart.items.reduce((total, item) => total + item.totalPrice, 0);
 
-        await cart.save();
+        await cart.save()
 
         res.json({
             success: true,
@@ -489,6 +498,7 @@ const removeFromCart = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
+
 const validateCartStock = async (req, res) => {
     try {
         const { products } = req.body;
@@ -581,7 +591,6 @@ const updateCartItem = async (req, res) => {
 
         cart.items[productIndex].quantity = quantity;
 
-
         cart.items[productIndex].totalPrice =
             cart.items[productIndex].price * quantity;
 
@@ -612,7 +621,7 @@ const Checkout = async (req, res) => {
             return res.redirect('/login');
         }
 
-        let selectedProduct = req.body.products ? req.body.products.map(item => JSON.parse(item)) : [];
+        let selectedProduct = req.body.products
 
         if (selectedProduct.length === 0) {
             req.session.userMsg = "Out-of-stock and unlisted products won't proceed to checkout, Remove product from cart!";
@@ -625,19 +634,23 @@ const Checkout = async (req, res) => {
             addresses = addresses.address;
         }
 
+        const productIds = selectedProduct.map(item => item.productId);
 
-        let cartTotals = {
-            subtotal: selectedProduct.reduce((acc, item) => acc + item.totalPrice, 0),
-            discount: 0,
-            total: selectedProduct.reduce((acc, item) => acc + item.totalPrice, 0),
-        }
+        const products = await productModel.find({ _id: { $in: productIds } });
+        
+        const populatedSelectedProducts = selectedProduct.map(item => {
+          const fullProduct = products.find(p => p._id.toString() === item.productId);
+          return {
+            ...item,
+            product: fullProduct
+          };
+        });
 
         req.session.checkOut = {
-            selectedProduct,
-            cartTotals,
+            selectedProduct:populatedSelectedProducts
         }
 
-        return res.redirect('/checkout')
+        return res.json({ redirectUrl: '/checkout' });
 
     } catch (error) {
         console.error(error)
@@ -679,9 +692,9 @@ const loadCheckout = async (req, res) => {
                 .filter(item => {
                     const offerId = item.applicableTo?._id?.toString();
                     return (
-                        offerId === product.productId.category.toString() ||
-                        offerId === product.productId.brand.toString() ||
-                        offerId === product.productId._id.toString()
+                        offerId === product.product?.category.toString() ||
+                        offerId === product.product?.brand.toString() ||
+                        offerId === product.product?._id.toString()
                     );
                 })
         
@@ -693,7 +706,7 @@ const loadCheckout = async (req, res) => {
             };
         });
 
-        const cartTotals = calculateCartTotals(result,req.session.couponApplied)
+        const cartTotals = calculateCheckoutTotals(result,req.session.couponApplied)
 
         let message;
         if (req.session.userMsg) {
@@ -734,7 +747,7 @@ const proceedToPayment = async (req, res) => {
         let insufficientStock = [];
 
         const productIds = selectedProduct.map(item => {
-            return item.product.productId._id
+            return item.product.productId
         });
 
         const products = await productModel.find({ _id: { $in: productIds } });
@@ -744,7 +757,7 @@ const proceedToPayment = async (req, res) => {
         }
 
         selectedProduct.forEach(item => {
-            const product = products.find(p => p._id.toString() === item.product.productId._id.toString());
+            const product = products.find(p => p._id.toString() === item.product.productId.toString());
 
             if (product) {
                 if (product.stock >= item.product.quantity && product.isDeleted == false) {
@@ -825,7 +838,7 @@ const paymentPage = async (req, res) => {
             return res.redirect('/login');
         }
 
-        req.session.selectedProducts = req.body.selected;
+        req.session.forPayment = req.body.selected;
         req.session.selectedAddress = req.body.address;
 
         return res.redirect('/paymentpage');
@@ -850,12 +863,12 @@ const renderPaymentPage = async (req, res) => {
             return res.redirect('/cart');
         }
 
-        const selectedProduct = req.session.selectedProducts || [];
+        const selectedProduct = req.session.forPayment || [];
         if (!Array.isArray(selectedProduct)) {
             return res.status(400).send("Invalid product data");
         }
 
-        const totalAmount = calculateCartTotals(selectedProduct,req.session.couponApplied)
+        const totalAmount = calculateCheckoutTotals(selectedProduct,req.session.couponApplied)
 
         return res.render('user/payment', { findUser, totalAmount });
 
@@ -876,7 +889,7 @@ function getBestOffer(applicableOffers, product) {
         if (offer.discountType === 'flat') {
             discount = offer.discountAmount;
         } else if (offer.discountType === 'percentage') {
-            const salePrice = product.productId?.salePrice || product.salePrice || 0;
+            const salePrice = product.product?.salePrice || product.productId?.salePrice || product.salePrice || 0;
             discount = (salePrice * offer.discountAmount) / 100;
         }
 
@@ -902,6 +915,38 @@ function calculateCartTotals(products, sessionCoupon = null) {
         if (offer) {
             if (offer.discountType === 'percentage') {
                 offerDiscount += Math.round((price * offer.discountAmount / 100) * quantity);
+            } else if (offer.discountType === 'flat') {
+                offerDiscount += offer.discountAmount * quantity;
+            }
+        }
+    });
+
+    const couponDiscount = sessionCoupon?.offerAmount || 0;
+
+    const total = subtotal - offerDiscount - couponDiscount;
+
+    return {
+        subtotal,
+        offerDiscount,
+        couponDiscount,
+        total
+    };
+}
+
+function calculateCheckoutTotals(products, sessionCoupon = null) {
+    let subtotal = 0;
+    let offerDiscount = 0;
+
+    products.forEach(item => {
+        const { quantity } = item.product;
+        const { salePrice } = item.product.product;
+        const totalPrice = salePrice * quantity;
+        subtotal += totalPrice;
+
+        const offer = item.bestOffer;
+        if (offer) {
+            if (offer.discountType === 'percentage') {
+                offerDiscount += Math.round((salePrice * offer.discountAmount / 100) * quantity);
             } else if (offer.discountType === 'flat') {
                 offerDiscount += offer.discountAmount * quantity;
             }
@@ -969,8 +1014,6 @@ function calculateTotalOfferAmount(cartItems, allOffers) {
 
     return totalOfferAmount;
 }
-
-
 
 module.exports = {
     loadcart,

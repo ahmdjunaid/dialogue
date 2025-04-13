@@ -52,8 +52,7 @@
                             <select name="brandId" class="form-control" id="brandId">
                                 <option value="" disabled>Select Brand</option>
                                 <% for(let i=0; i < brand.length; i++) { %>
-                                    <option value="<%= brand[i]._id %>" <%=product.brand===brand[i].name ? 'selected'
-                                        : '' %>>
+                                    <option value="<%= brand[i]._id %>" <%= String(product.brand) === String(brand[i]._id) ? 'selected' : '' %>>
                                         <%= brand[i].name %>
                                     </option>
                                     <% } %>
@@ -66,8 +65,7 @@
                             <select name="categoryId" class="form-control" id="categoryId">
                                 <option value="" disabled>Select Category</option>
                                 <% for(let i=0; i < category.length; i++) { %>
-                                    <option value="<%= category[i]._id %>" <%=product.category===category[i].name
-                                        ? 'selected' : '' %>>
+                                    <option value="<%= category[i]._id %>" <%= String(product.category) === String(category[i]._id) ? 'selected' : '' %>>
                                         <%= category[i].name %>
                                     </option>
                                     <% } %>

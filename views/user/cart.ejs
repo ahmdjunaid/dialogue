@@ -92,7 +92,7 @@
                                         <td class="cart_price_cell">
                                             <% if (offer) { %>
                                                 <span class="text-muted"><s>₹<%= product.price.toLocaleString() %>
-                                                            </s></span><br>
+                                                    </s></span><br>
                                                 <strong>₹<%= finalPrice.toLocaleString() %></strong>
                                                 <% } else { %>
                                                     ₹<%= product.price.toLocaleString() %>
@@ -114,10 +114,12 @@
                                                     <% } else { %>
                                                         <% stockOut.push(product) %>
                                                             <button class="quantity_btn decrease_btn"
-                                                                style="display: none;"></button>
+                                                                style="display: none;"
+                                                                data-product-id="<%= product.productId._id %>"></button>
                                                             <span class="quantity_value">0</span>
                                                             <button class="quantity_btn increase_btn"
-                                                                style="display: none;"></button>
+                                                                style="display: none;"
+                                                                data-product-id="<%= product.productId._id %>"></button>
                                                             <% } %>
                                         </td>
 
@@ -132,20 +134,10 @@
                                     </tr>
                                     <% }); %>
                     </tbody>
-                    <form action="/checkout" method="post">
-                        <% availableProducts.forEach(product=> { %>
-                            <input type="hidden" name="products[]" value="<%= JSON.stringify(product) %>">
-                            <% }) %>
-                                <% stockOut.forEach(product=> { %>
-                                    <input type="hidden" name="stockOut[]" value="<%= JSON.stringify(product) %>">
-                                    <% }) %>
-                                        <button id="submitBtn" hidden></button>
-                    </form>
-
                 </table>
                 <%if(coupon){%>
                     <div class="coupCOntainer">
-                        <div class="card p-3 my-3 shadow-sm border-success innerCoup">
+                        <div class="card p-3 my-3 shadow-sm border-success innerCoup" id="coupon-card">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="text-success mb-1">
@@ -207,35 +199,33 @@
                                         </td>
                                     </tr>
 
-                                    <% if(cartTotals.offerDiscount> 0) { %>
+
+                                    <tr class="cart_totals_row">
+                                        <td class="cart_totals_label">Offer Discount</td>
+                                        <td class="cart_totals_value" id="offerVal">- ₹<%=
+                                                cartTotals.offerDiscount.toLocaleString() %>
+                                        </td>
+                                    </tr>
+
+
                                         <tr class="cart_totals_row">
-                                            <td class="cart_totals_label">Offer Discount</td>
-                                            <td class="cart_totals_value" id="offerAmount">- ₹<%=
-                                                    cartTotals.offerDiscount.toLocaleString() %>
+                                            <td class="cart_totals_label">Coupon Applied</td>
+                                            <td class="cart_totals_value" id="couponVal">- ₹<%=
+                                                    cartTotals.couponDiscount.toLocaleString() %>
                                             </td>
                                         </tr>
-                                        <% } %>
 
-                                            <% if(cartTotals.couponDiscount> 0) { %>
-                                                <tr class="cart_totals_row">
-                                                    <td class="cart_totals_label">Coupon Applied</td>
-                                                    <td class="cart_totals_value">- ₹<%=
-                                                            cartTotals.couponDiscount.toLocaleString() %>
-                                                    </td>
-                                                </tr>
-                                                <% } %>
+                                            <tr class="cart_totals_row">
+                                                <td class="cart_totals_label">Delivery</td>
+                                                <td class="cart_totals_value">FREE</td>
+                                            </tr>
 
-                                                    <tr class="cart_totals_row">
-                                                        <td class="cart_totals_label">Delivery</td>
-                                                        <td class="cart_totals_value">FREE</td>
-                                                    </tr>
-
-                                                    <tr class="cart_totals_row cart_grand_total_row">
-                                                        <td class="cart_totals_label cart_grand_total_label">TOTAL</td>
-                                                        <td class="cart_totals_value cart_grand_total_value">₹<%=
-                                                                cartTotals.total.toLocaleString() %>
-                                                        </td>
-                                                    </tr>
+                                            <tr class="cart_totals_row cart_grand_total_row">
+                                                <td class="cart_totals_label cart_grand_total_label">TOTAL</td>
+                                                <td class="cart_totals_value cart_grand_total_value">₹<%=
+                                                        cartTotals.total.toLocaleString() %>
+                                                </td>
+                                            </tr>
                                 </table>
 
                                 <div class="cart_coupon_wrapper"
@@ -423,7 +413,7 @@
                                 .then(data => {
                                     if (data.success) {
 
-                                        updateCartUI(productId, data.newQuantity, data.newTotalPrice, data.cartTotal, data.offerAmount);
+                                        updateCartUI(productId, data.newQuantity, data.newTotalPrice, data.cartTotal, data.offerAmount, data.couponAmount);
 
                                         Swal.fire({
                                             icon: 'success',
@@ -449,7 +439,7 @@
                         }
 
 
-                        function updateCartUI(productId, newQuantity, newItemTotal, cartTotal, offer) {
+                        function updateCartUI(productId, newQuantity, newItemTotal, cartTotal, offerAmount, couponAmount) {
 
                             const quantityBtn = document.querySelector(`.quantity_btn[data-product-id="${productId}"]`);
                             const productRow = quantityBtn.closest('.cart_item_row');
@@ -460,12 +450,18 @@
                             const totalPriceCell = productRow.querySelector('.cart_total_cell');
                             totalPriceCell.textContent = `₹${parseFloat(newItemTotal).toLocaleString()}`;
 
-                            document.getElementById('offerAmount').textContent = `₹${parseFloat(offer).toLocaleString()}`;
+                            if (couponAmount !== undefined && couponAmount === 0) {
+                                const couponCard = document.getElementById('coupon-card');
+                                if (couponCard) {
+                                    couponCard.style.display = 'none';
+                                }
+                            }
 
-                            updateCartTotals(cartTotal);
+
+                            updateCartTotals(cartTotal, offerAmount, couponAmount);
                         }
 
-                        function updateCartTotals(newTotal) {
+                        function updateCartTotals(newTotal, offerAmount, couponAmount) {
 
                             const subtotalElement = document.querySelector('.cart_totals_table .cart_totals_row:nth-child(1) .cart_totals_value');
                             subtotalElement.textContent = `₹${parseFloat(newTotal).toLocaleString()}`;
@@ -474,8 +470,11 @@
                             const discountText = discountElement.textContent;
                             const discountAmount = parseFloat(discountText.replace('₹', '').replace(/,/g, '')) || 0;
 
+                            document.getElementById('offerVal').textContent = `- ₹${parseFloat(offerAmount).toLocaleString() || 0}`;
+                            document.getElementById('couponVal').textContent = `- ₹${parseFloat(couponAmount).toLocaleString() || 0}`;
+                            
                             const grandTotalElement = document.querySelector('.cart_grand_total_value');
-                            const finalTotal = Math.max(0, newTotal - discountAmount);
+                            const finalTotal = Math.max(0, (newTotal - offerAmount) - couponAmount);
                             grandTotalElement.textContent = `₹${finalTotal.toLocaleString()}`;
                         }
 
@@ -519,7 +518,7 @@
                                                     title: 'Item removed from cart',
                                                     showConfirmButton: false,
                                                     timer: 1500,
-                                                });
+                                                }).then(() => location.reload());
                                             } else {
                                                 Swal.fire({
                                                     icon: 'error',
@@ -652,13 +651,12 @@
                                 .then(results => {
                                     const allSuccessful = results.every(result => result.success);
                                     if (allSuccessful) {
-                                        window.location.reload();
                                         Swal.fire({
                                             icon: 'success',
                                             title: 'Cart Updated',
                                             text: 'Quantities have been adjusted to match available stock.',
                                             timer: 1500,
-                                        })
+                                        }).then(() => window.location.reload())
                                     } else {
                                         Swal.fire({
                                             icon: 'error',
@@ -704,14 +702,12 @@
                                     cancelButtonText: 'Cancel'
                                 }).then((result) => {
                                     if (result.isConfirmed) {
-                                        // Remove all sold out/unlisted items
                                         const removePromises = [];
 
                                         soldOutItems.forEach(button => {
                                             const row = button.closest('.cart_item_row');
-                                            const btnWithId = row.querySelector('.quantity_btn[data-product-id]');
-                                            if (btnWithId) {
-                                                const productId = btnWithId.dataset.productId;
+                                            const productId = row.querySelector('.quantity_btn').dataset.productId;
+                                            if (productId) {
                                                 removePromises.push(
                                                     fetch('/remove-from-cart', {
                                                         method: 'POST',
@@ -726,7 +722,6 @@
 
                                         Promise.all(removePromises)
                                             .then(results => {
-                                                // Once all items are removed, proceed to checkout
                                                 submitForm();
                                             })
                                             .catch(error => {
@@ -745,10 +740,49 @@
                         }
 
                         function submitForm() {
-                            // Submit the form to proceed to checkout
-                            document.getElementById('submitBtn').click();
+                            const availableProducts = [];
+
+                            document.querySelectorAll('.cart_item_row').forEach(row => {
+
+                                if (row.querySelector('.btn-danger')) {
+                                    return;
+                                }
+
+                                const quantityBtn = row.querySelector('.quantity_btn');
+                                if (quantityBtn) {
+                                    const productId = quantityBtn.dataset.productId;
+                                    const quantityElement = row.querySelector('.quantity_value');
+                                    const quantity = parseInt(quantityElement.textContent);
+                                    const productName = row.querySelector('.cart_product_title').textContent.trim();
+
+                                    availableProducts.push({
+                                        productId,
+                                        quantity,
+                                        name: productName
+                                    });
+                                }
+                            });
+
+                            fetch('/checkout', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ products: availableProducts }),
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.redirectUrl) {
+                                        window.location.href = data.redirectUrl;
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error('Checkout error:', err);
+                                });
                         }
                     });
+
+
                 </script>
 
 </body>

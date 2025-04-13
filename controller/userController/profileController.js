@@ -341,7 +341,6 @@ const loadWallet = async (req, res) => {
     }
 };
 
-
 module.exports = {
     loadProfile,
     editProfile,

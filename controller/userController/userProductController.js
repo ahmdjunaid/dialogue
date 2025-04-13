@@ -207,8 +207,6 @@ function getBestOffer(applicableOffers, product) {
     return bestOffer;
 }
 
-
-
 module.exports = {
     loadShoppingPage,
     productDetails,

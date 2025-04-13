@@ -149,6 +149,8 @@ router.post('/cancelitem',userAuth, orderController.cancelItem)
 
 router.get('/orderfailed',userAuth, orderController.orderFailed)
 
+router.get('/orders/:orderId/invoice',userAuth,orderController.downloadInvoice)
+
 // coupon management
 
 router.get('/applyCoupon',userAuth, orderController.couponApply)

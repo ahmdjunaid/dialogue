@@ -200,8 +200,6 @@ const updateProduct = async (req, res) => {
             }
         }
 
-        console.log(images);
-
 
         const product = await productModel.findById(productId);
 
@@ -264,7 +262,7 @@ const deleteProduct = async (req, res) => {
         return;
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
         req.session.admMsg = 'An error occured while deleting'
         res.redirect('/admin/products')
     }

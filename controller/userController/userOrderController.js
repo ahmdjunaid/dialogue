@@ -9,6 +9,8 @@ const mongoose = require("mongoose");
 const { login } = require('./userController')
 const razorpay = require('../../config/razorpay')
 const crypto = require("crypto");
+const PDFDocument = require('pdfkit');
+const path = require('path');
 
 
 const payment = async (req, res) => {
@@ -26,27 +28,24 @@ const payment = async (req, res) => {
 
             const selectedAddress = req.session.selectedAddress;
 
-            const selectedProduct = req.session.selectedProducts;
+            const selectedProduct = req.session.forPayment;
 
-            const totalAmount = calculateCartTotals(selectedProduct,req.session.couponApplied)
+            const totalAmount = calculateCheckoutTotals(selectedProduct,req.session.couponApplied)
 
             const userAddresses = await addressModel.findOne({userId:findUser._id})
 
             const deliveryAddress = userAddresses.address.find(
                 address => address._id.toString() === selectedAddress.toString()
               );
-              
-
-            console.log('^^^^^',deliveryAddress,'^^^^^')
 
             const insufficientStock = [];
 
             await Promise.all(
                 selectedProduct.map(async (item) => {
-                    const product = await productModel.findById(item.product.productId._id);
+                    const product = await productModel.findById(item.product.productId);
 
                     if (!product) {
-                        insufficientStock.push(`Product not found: ${item.product.productId._id}`);
+                        insufficientStock.push(`Product not found: ${item.product.productId}`);
                         return;
                     }
 
@@ -65,8 +64,8 @@ const payment = async (req, res) => {
             await Promise.all(
                 selectedProduct.map(async (item) => {
                     await productModel.findOneAndUpdate(
-                        { _id: item.product.productId._id },
-                        { $inc: { stock: -item.product.quantity } }
+                        { _id: item.product.productId },
+                        { $inc: { stock: -item.product.quantity } },
                     );
                 })
             );
@@ -76,34 +75,34 @@ const payment = async (req, res) => {
                 selectedProduct.map(async (item) => {
                     await cartModel.findOneAndUpdate(
                         { userId: findUser._id },
-                        { $pull: { items: { _id: item.product._id } } },
+                        { $pull: { items: { productId: item.product.productId } } },
                     );
                 })
             );
 
-
             const ordered = {
                 orderedItems: selectedProduct.map((item) => {
-                    const product = item.product;
+                    const product = item.product.product;
+                    const order = item.product
                     const offer = item.bestOffer;
-                    let finalPrice = product.price;
+                    let finalPrice = product.salePrice;
             
                     if (offer) {
                         if (offer.discountType === 'flat') {
-                            finalPrice = product.price - offer.discountAmount;
+                            finalPrice = product.salePrice - offer.discountAmount;
                         } else if (offer.discountType === 'percentage') {
-                            finalPrice = product.price - (product.price * offer.discountAmount) / 100;
+                            finalPrice = product.salePrice - (product.salePrice * offer.discountAmount) / 100;
                         }
                         finalPrice = Math.round(finalPrice);
                     }
             
                     return {
-                        product: product.productId._id,
-                        quantity: product.quantity,
+                        product: product._id,
+                        quantity: order.quantity,
                         price: finalPrice,
-                        offerAmount: offer ? offer.discountType === "flat" ? offer.discountAmount : (product.price * offer.discountAmount) / 100 : 0,
+                        offerAmount: offer ? offer.discountType === "flat" ? offer.discountAmount : (product.salePrice * offer.discountAmount) / 100 : 0,
                         offerId: offer ? offer._id : null,
-                        imageurl: product.productId.productImage[0],
+                        imageurl: product.productImage[0],
                         status: 'Pending'
                     };
                 })
@@ -413,20 +412,25 @@ const razorpayPayment = async (req, res) => {
         }
 
         const selectedAddress = req.session.selectedAddress;
-        const selectedProduct = req.session.selectedProducts;
 
-        const totalPrice = selectedProduct.reduce((acc, item) => acc + item.totalPrice, 0);
-        const discount = 0;
-        const finalAmount = totalPrice - discount;
+        const selectedProduct = req.session.forPayment;
+
+        const totalAmount = calculateCheckoutTotals(selectedProduct,req.session.couponApplied)
+
+        const userAddresses = await addressModel.findOne({userId:findUser._id})
+
+        const deliveryAddress = userAddresses.address.find(
+            address => address._id.toString() === selectedAddress.toString()
+          );
 
         const insufficientStock = [];
 
         await Promise.all(
             selectedProduct.map(async (item) => {
-                const product = await productModel.findById(item.productId._id);
+                const product = await productModel.findById(item.product.productId);
 
                 if (!product) {
-                    insufficientStock.push(`Product not found: ${item.productId._id}`);
+                    insufficientStock.push(`Product not found: ${item.product.productId}`);
                     return;
                 }
 
@@ -438,29 +442,74 @@ const razorpayPayment = async (req, res) => {
         );
 
         if (insufficientStock.length > 0) {
-            req.session.userMsg = "Oops!... Some of your required items are sold out.";
+            req.session.userMsg = 'Oops!...  Some of your required items are sold out.';
             return res.redirect("/cart");
         }
 
+        await Promise.all(
+            selectedProduct.map(async (item) => {
+                await productModel.findOneAndUpdate(
+                    { _id: item.product.productId },
+                    { $inc: { stock: -item.product.quantity } },
+                );
+            })
+        );
+
+
+        await Promise.all(
+            selectedProduct.map(async (item) => {
+                await cartModel.findOneAndUpdate(
+                    { userId: findUser._id },
+                    { $pull: { items: { productId: item.product.productId } } },
+                );
+            })
+        );
+
+        const ordered = {
+            orderedItems: selectedProduct.map((item) => {
+                const product = item.product.product;
+                const order = item.product
+                const offer = item.bestOffer;
+                let finalPrice = product.salePrice;
+        
+                if (offer) {
+                    if (offer.discountType === 'flat') {
+                        finalPrice = product.salePrice - offer.discountAmount;
+                    } else if (offer.discountType === 'percentage') {
+                        finalPrice = product.salePrice - (product.salePrice * offer.discountAmount) / 100;
+                    }
+                    finalPrice = Math.round(finalPrice);
+                }
+        
+                return {
+                    product: product._id,
+                    quantity: order.quantity,
+                    price: finalPrice,
+                    offerAmount: offer ? offer.discountType === "flat" ? offer.discountAmount : (product.salePrice * offer.discountAmount) / 100 : 0,
+                    offerId: offer ? offer._id : null,
+                    imageurl: product.productImage[0],
+                    status: 'Pending'
+                };
+            })
+        };
+        
+        payMethod = 'Razorpay'
+
         req.session.newOrder = {
             userId: findUser._id,
-            orderedItems: selectedProduct.map((item) => ({
-                product: item.productId._id,
-                quantity: item.quantity,
-                price: item.price,
-                imageurl: item.productId.productImage[0],
-                status: "Pending",
-            })),
-            totalPrice,
-            discount,
-            finalAmount,
-            paymentMethod: "Razorpay",
-            shippingaddress: selectedAddress,
-            status: "Pending",
-        };
+            orderedItems: ordered.orderedItems,
+            totalPrice:totalAmount.subtotal,
+            discount:totalAmount.offerDiscount,
+            couponDiscount:totalAmount.couponDiscount,
+            couponApplied:req.session.couponApplied ? req.session.couponApplied.couponId : null,
+            finalAmount:totalAmount.total,
+            paymentMethod: payMethod,
+            shippingaddress: deliveryAddress,
+            status: 'Pending'
+        }
 
         const options = {
-            amount: finalAmount * 100,
+            amount: totalAmount.total * 100,
             currency: "INR",
             receipt: `order_${Date.now()}`,
         };
@@ -493,6 +542,8 @@ const verifyPayment = async (req, res) => {
         if (!req.session.newOrder) {
             return res.status(400).json({ message: "Order session expired, please try again." });
         }
+
+        console.log('--',req.session.newOrder,'--')
 
         await Promise.all(
             req.session.newOrder.orderedItems.map(async (item) => {
@@ -582,7 +633,7 @@ const couponApply = async (req, res) => {
             }
         }
 
-        req.session.couponApplied = {couponId:coupon._id,offerAmount:coupon.offerAmount}
+        req.session.couponApplied = {couponId:coupon._id,offerAmount:coupon.offerAmount,minValue:coupon.minCartValue}
 
         return res.json({ success: true, message: "Coupon applied successfully." });
 
@@ -641,6 +692,195 @@ function calculateCartTotals(products, sessionCoupon = null) {
     };
 }
 
+function calculateCheckoutTotals(products, sessionCoupon = null) {
+    let subtotal = 0;
+    let offerDiscount = 0;
+
+    products.forEach(item => {
+        const { quantity } = item.product;
+        const { salePrice } = item.product.product;
+        const totalPrice = salePrice * quantity;
+        subtotal += totalPrice;
+
+        const offer = item.bestOffer;
+        if (offer) {
+            if (offer.discountType === 'percentage') {
+                offerDiscount += Math.round((salePrice * offer.discountAmount / 100) * quantity);
+            } else if (offer.discountType === 'flat') {
+                offerDiscount += offer.discountAmount * quantity;
+            }
+        }
+    });
+
+    const couponDiscount = sessionCoupon?.offerAmount || 0;
+
+    const total = subtotal - offerDiscount - couponDiscount;
+
+    return {
+        subtotal,
+        offerDiscount,
+        couponDiscount,
+        total
+    };
+}
+
+const downloadInvoice = async (req,res) => {
+    try {
+        const orderId = req.params.orderId;
+    
+        // Find the order in the database
+        const order = await orderModel.findOne({ orderId: orderId })
+          .populate('orderedItems.product')
+          .populate('couponApplied');
+        
+        if (!order) {
+          return res.status(404).json({ message: 'Order not found' });
+        }
+        
+        // Set response headers for PDF download
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=invoice-${orderId}.pdf`);
+        
+        // Create PDF document
+        const doc = new PDFDocument({ margin: 50 });
+        
+        // Pipe the PDF to the response
+        doc.pipe(res);
+        
+        // Add company logo or name
+        doc.fontSize(20).text('Dialogue digital', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(12).text('Thamarassery, Kozhikode, Kerala, India - 673585', { align: 'center' });
+        doc.text('Phone: +91 0000000000| Email: info@dialogue.com', { align: 'center' });
+        
+        // Add a horizontal line
+        doc.moveDown();
+        doc.moveTo(50, doc.y)
+           .lineTo(550, doc.y)
+           .stroke();
+        doc.moveDown();
+        
+        // Invoice header
+        doc.font('Helvetica-Bold').fontSize(16).text('INVOICE', { align: 'center' });
+        doc.moveDown();
+        
+        // Order and customer information
+        doc.fontSize(12).text(`Invoice Date: ${new Date().toLocaleDateString()}`);
+        doc.text(`Order ID: ${order.orderId}`);
+        doc.text(`Order Date: ${new Date(order.createdOn).toLocaleDateString()}`);
+        doc.moveDown();
+        
+        // Shipping address
+        doc.font('Helvetica-Bold').fontSize(14).text('Shipping Address:');
+        doc.font('Helvetica').fontSize(12).text(`${order.shippingaddress.name}`);
+        doc.text(`Address Type${order.shippingaddress.addressType}`);
+        if (order.shippingaddress.landmark) {
+          doc.text(`${order.shippingaddress.landmark}`);
+        }
+        doc.text(`${order.shippingaddress.city}, ${order.shippingaddress.state}, ${order.shippingaddress.pincode}`);
+        doc.text(`Phone: ${order.shippingaddress.mobile}`);
+        if (order.shippingaddress.altNumber) {
+          doc.text(`Alt. Phone: ${order.shippingaddress.altNumber}`);
+        }
+        doc.moveDown();
+        
+        // Payment information
+        doc.font('Helvetica-Bold').fontSize(14).text('Payment Information:');
+        doc.font('Helvetica').fontSize(12).text(`Method: ${order.paymentMethod}`);
+        doc.text(`Status: ${order.status}`);
+        doc.moveDown();
+        
+        // Table header for items
+        const itemsTableTop = doc.y;
+        doc.fontSize(12);
+        
+        // Column positions
+        const itemX = 50;
+        const qtyX = 300;
+        const priceX = 380;
+        const totalX = 480;
+        
+        // Draw table headers
+        doc.font('Helvetica-Bold')
+          .text('Item Description', itemX, itemsTableTop)
+          .text('Qty', qtyX, itemsTableTop)
+          .text('Price', priceX, itemsTableTop)
+          .text('Total', totalX, itemsTableTop);
+        
+        // Draw line below headers
+        doc.moveTo(50, doc.y + 5)
+           .lineTo(550, doc.y + 5)
+           .stroke();
+        
+        // Reset font and set initial y position for items
+        doc.font('Helvetica');
+        let itemY = doc.y + 15;
+        
+        // Add each ordered item
+
+        order.orderedItems.forEach(item => {
+          const productName = item.product ? item.product.productName : 'Product';
+          
+          doc.text(productName, itemX, itemY);
+          doc.text(item.quantity.toString(), qtyX, itemY);
+          doc.text(`INR ${item.price.toFixed(2)}`, priceX, itemY);
+          doc.text(`INR ${(item.price * item.quantity).toFixed(2)}`, totalX, itemY);
+          
+          itemY += 20;
+          
+          // Check if we need a new page
+          if (itemY > doc.page.height - 100) {
+            doc.addPage();
+            itemY = 50;
+          }
+        });
+        
+        // Draw line after items
+        doc.moveTo(50, itemY)
+           .lineTo(550, itemY)
+           .stroke();
+        
+        // Summary section
+        let summaryY = itemY + 20;
+        
+        doc.font('Helvetica')
+          .text('Subtotal:', 350, summaryY)
+          .text(`INR ${order.totalPrice.toFixed(2)}`, totalX, summaryY);
+        
+        if (order.discount > 0) {
+          summaryY += 20;
+          doc.text('Discount:', 350, summaryY)
+            .text(`-INR ${order.discount.toFixed(2)}`, totalX, summaryY);
+        }
+        
+        if (order.couponDiscount > 0) {
+          summaryY += 20;
+          const couponCode = order.couponApplied ? order.couponApplied.couponName : 'Coupon';
+          doc.text(`Coupon (${couponCode}):`, 350, summaryY)
+            .text(`-INR ${order.couponDiscount.toFixed(2)}`, totalX, summaryY);
+        }
+        
+        // Final amount
+        summaryY += 25;
+        doc.font('Helvetica-Bold')
+          .text('Total Amount:', 350, summaryY)
+          .text(`INR ${order.finalAmount.toFixed(2)}`, totalX, summaryY);
+        
+        // Footer
+        const footerY = doc.page.height - 100;
+        doc.fontSize(10)
+          .font('Helvetica')
+          .text('Thank you for your purchase!', 50, footerY, { align: 'center' })
+          .text('For any questions or support, please contact our customer service.', 50, footerY + 15, { align: 'center' });
+        
+        // Finalize PDF
+        doc.end();
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+
     module.exports = {
         payment,
         orderSuccess,
@@ -652,5 +892,6 @@ function calculateCartTotals(products, sessionCoupon = null) {
         verifyPayment,
         orderFailed,
         couponApply,
-        couponCancel
+        couponCancel,
+        downloadInvoice
     }

@@ -170,7 +170,7 @@
                                 <div class="form-group">
                                     <label class="form-label">Coupon Code: <span class="text-danger">*</span></label>
                                     <input type="text" class="form-input" name="couponCode"
-                                        placeholder="It should be 6 characters including numbers and letters">
+                                        placeholder="It should be 6 characters including numbers and letters" maxlength="6">
                                 </div>
 
                                 <div class="form-group">
@@ -237,7 +237,7 @@
                                 <div class="form-group">
                                     <label class="form-label">Coupon Code: <span class="text-danger">*</span></label>
                                     <input type="text" class="form-input" name="couponCode"
-                                        placeholder="It should be 6 characters including numbers and letters">
+                                        placeholder="It should be 6 characters including numbers and letters" maxlength="6">
                                 </div>
 
                                 <div class="form-group">
@@ -322,13 +322,19 @@
                     return;
                 }
 
-                if ( validFrom < getTodayDate()) {
+                if (validFrom < getTodayDate()) {
                     Swal.fire("Invalid Date", "Starting date should be today or a future date.", "error");
                     return;
                 }
 
                 if (new Date(validFrom) > new Date(validUpto)) {
                     Swal.fire("Invalid Date", "Valid Upto should be later than Valid From.", "error");
+                    return;
+                }
+
+                const maxAllowed = Math.round(cartValue / 4);
+                if (offerAmount > maxAllowed) {
+                    Swal.fire("Error", "Coupon discount limited to 25% of the total cart value.", "error");
                     return;
                 }
 
@@ -440,6 +446,12 @@
 
                 if (new Date(validFrom) > new Date(validUpto)) {
                     Swal.fire("Invalid Date", "Valid Upto should be later than Valid From.", "error");
+                    return;
+                }
+
+                const maxAllowed = Math.round(cartValue / 4);
+                if (offerAmount > maxAllowed) {
+                    Swal.fire("Error", "Coupon discount limited to 25% of the total cart value.", "error");
                     return;
                 }
 
