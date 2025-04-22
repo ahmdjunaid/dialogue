@@ -198,6 +198,11 @@ function getBestOffer(applicableOffers, product) {
             discount = (product.salePrice * offer.discountAmount) / 100;
         }
 
+        // if ((product.salePrice / 4) < discount) {
+        //     discount = Math.round(product.salePrice / 4);
+        //     return
+        // }
+
         if (discount > maxDiscount) {
             maxDiscount = discount;
             bestOffer = offer;

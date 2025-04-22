@@ -20,9 +20,15 @@ router.post('/login',adminController.login);
 
 router.get('/dashboard',adminAuth,adminController.loadDash);
 
+router.get('/dashboard/data/:filter', adminAuth, adminController.getChartData);
+
 router.get('/loaderror',adminController.loaderror);
 
 router.get('/logout',adminAuth,adminController.logout);
+
+router.get('/sale-report',adminAuth, adminController.getSalesReport)
+
+router.get('/findOrder',adminAuth, adminController.getData)
 
 //user management
 
@@ -31,6 +37,8 @@ router.get('/users',adminAuth,customerController.customerInfo)
 router.get('/blockUser',adminAuth,customerController.blockUser)
 
 router.get('/unblockUser',adminAuth,customerController.unblockUser)
+
+router.get('/userwallet',adminAuth,customerController.walletInfo)
 
 
 //brand management
@@ -108,5 +116,12 @@ router.get('/offers',adminAuth, couponController.loadOffers)
 router.post('/add-offer',adminAuth, couponController.addOffers)
 
 router.post('/edit-offer',adminAuth, couponController.editOffers)
+
+//reports
+
+router.get('/download/pdf',adminAuth, adminController.downloadPDF)
+
+router.get('/download/excel',adminAuth, adminController.downloadExcel)
+
 
 module.exports = router;

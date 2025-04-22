@@ -319,19 +319,29 @@ const loadWallet = async (req, res) => {
         }
 
 
-        const wallet = await walletModel.findOne({ userId: findUser._id }).lean();
+        const wallet = await walletModel.findOne({ userId: findUser._id })
+            .lean()
 
         if (!wallet) {
-
+            const newWallet = new walletModel({
+                userId: findUser._id,
+                balance: 0,
+                transactions: []
+            });
+        
+            await newWallet.save();
+        
             return res.render('user/wallet', {
-                user: findUser,
-                wallet: null,
-                message: "No wallet found. Add funds to create one.",
+                findUser,
+                wallet: newWallet,
+                message: "A new wallet has been created with zero balance.",
             });
         }
 
+        wallet.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
         return res.render('user/wallet', {
-            user: findUser,
+            findUser,
             wallet: wallet,
         });
 

@@ -3,6 +3,7 @@ const userModel = require('../../models/userModel')
 const cartModel = require('../../models/cartModel')
 const addressModel = require('../../models/addressModel')
 const orderModel = require('../../models/orderModel')
+const walletModel = require('../../models/walletModel')
 const wishlistModel = require('../../models/wishlistModel')
 const couponModel = require('../../models/couponModel')
 const mongoose = require("mongoose");
@@ -868,9 +869,23 @@ const renderPaymentPage = async (req, res) => {
             return res.status(400).send("Invalid product data");
         }
 
+        let walletBalance = 0;
+
+        const wallet = await walletModel.findOne({userId:findUser._id})
+
+        if(wallet){
+            walletBalance = wallet.balance;
+        }
+
+        let message;
+        if(req.session.userMsg){
+            message = req.session.userMsg
+            req.session.userMsg = null
+        }
+
         const totalAmount = calculateCheckoutTotals(selectedProduct,req.session.couponApplied)
 
-        return res.render('user/payment', { findUser, totalAmount });
+        return res.render('user/payment', { findUser, totalAmount, walletBalance, message });
 
     } catch (error) {
         console.error("Error in renderPaymentPage:", error);
@@ -885,13 +900,19 @@ function getBestOffer(applicableOffers, product) {
     let maxDiscount = 0;
     for (const offer of applicableOffers) {
         let discount = 0;
+        let salePrice;
 
         if (offer.discountType === 'flat') {
             discount = offer.discountAmount;
         } else if (offer.discountType === 'percentage') {
-            const salePrice = product.product?.salePrice || product.productId?.salePrice || product.salePrice || 0;
+            salePrice = product.product?.salePrice || product.productId?.salePrice || product.salePrice || 0;
             discount = (salePrice * offer.discountAmount) / 100;
         }
+
+        // if ((salePrice / 4) < discount) {
+        //     discount = Math.round(salePrice / 4);
+        //     return
+        // }
 
         if (discount > maxDiscount) {
             maxDiscount = discount;

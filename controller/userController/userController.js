@@ -2,13 +2,13 @@ const userModel = require('../../models/userModel')
 const productModel = require('../../models/productModel')
 const brandModel = require('../../models/brandModel')
 const categoryModel = require('../../models/categoryModel')
+const walletModel = require('../../models/walletModel')
 const nodemailer = require('nodemailer')
 const env = require('dotenv').config()
 const bcrypt = require('bcrypt')
 const saltRounds = 10;
 
 // loding homepage
-
 const loadHome = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -86,15 +86,14 @@ async function sentVerificationEmail(email, otp) { //Generated otp sent to  user
 }
 
 //signup function, here checking regex and removing spaces using trim.
-
 const signup = async (req, res) => {
     try {
 
 
-        const { username, email, password, cpassword } = req.body
+        const { username, email, password, cpassword, refferal } = req.body
 
         let emailRegex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/;
-        let passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
         let nameRegex = /^[A-Za-z\s]+$/;
 
         if (username.trim() === "" || email.trim() === "" || password.trim() === "" || cpassword.trim() === "") {
@@ -115,6 +114,14 @@ const signup = async (req, res) => {
         if (!passwordRegex.test(password.trim())) {
             req.session.userMsg = "Password must be at least 8 characters with numbers!"
             return res.redirect('/signup');
+        }
+
+        if (refferal) {
+            const user = await userModel.find({ randomNumber: refferal })
+            if (!user) {
+                req.session.userMsg = "Refferal code is not valid!"
+                return res.redirect('/signup');
+            }
         }
 
         if (password !== cpassword) {
@@ -141,7 +148,7 @@ const signup = async (req, res) => {
         req.session.resetData = null
         req.session.userOtp = otp;
         req.session.otpExpires = Date.now() + 30 * 1000;
-        req.session.userData = { username, email, password };
+        req.session.userData = { username, email, password, refferal };
 
         res.render('user/otpverification')
         console.log("OTP Sent " + otp);
@@ -187,19 +194,57 @@ const verifyOtp = async (req, res) => {
                 return res.status(400).json({ success: false, message: "User data missing in session" });
             }
 
-            if(!user.username){
-                await userModel.findByIdAndUpdate(req.session.user,{$set:{email:user.email}})
+            if (!user.username) {
+                await userModel.findByIdAndUpdate(req.session.user, { $set: { email: user.email } })
                 req.session.userMsg = 'Email updated successfully'
-                return res.json({ success: true, redirectUrl: "/profile"})
+                return res.json({ success: true, redirectUrl: "/profile" })
             }
-            
+
+            const refferal = user.refferal
+            if (refferal) {
+                const refferedUser = await userModel.findOne({ randomNumber: refferal })
+
+                const userId = refferedUser._id
+
+                let wallet = await walletModel.findOne({ userId });
+                const transactionId = generateCode()
+
+                if (!wallet) {
+                    wallet = new walletModel({
+                        userId,
+                        balance: 1000,
+                        transactions: [{
+                            amount: 1000,
+                            type: 'credit',
+                            description: `Reward for reffering ${user.username}`,
+                            transactionId,
+                            date: new Date()
+                        }]
+                    });
+                } else {
+                    wallet.balance += 1000;
+                    wallet.transactions.push({
+                        amount: 1000,
+                        type: 'credit',
+                        description: `Reward for reffering ${user.username}`,
+                        transactionId,
+                        date: new Date()
+                    });
+                }
+
+                await wallet.save();
+            }
+
+
+            const randomNumber = generateRandom8DigitNumber()
 
             // Hash password before saving
             const hashedPass = await bcrypt.hash(user.password, 10);
             const saveUserData = new userModel({
                 username: user.username,
                 email: user.email,
-                password: hashedPass
+                password: hashedPass,
+                randomNumber
             });
 
             await saveUserData.save();
@@ -220,12 +265,16 @@ const verifyOtp = async (req, res) => {
     }
 };
 
+function generateRandom8DigitNumber() {
+    return Math.floor(10000000 + Math.random() * 90000000);
+}
+
 //If otp timeout, resend otp
 const resendOtp = async (req, res) => {
     try {
 
-        const  {email}  = req.session.userData;
-        
+        const { email } = req.session.userData;
+
         if (!email) {
             req.session.userMsg = "Email not found in session"
             return res.redirect('/forgot')
@@ -234,9 +283,9 @@ const resendOtp = async (req, res) => {
         const otp = generateOtp()
 
         //if session have reset data, otp will be stored to forgotOtp. otherwise otp stored to userOtp.
-        if(req.session.resetData){
+        if (req.session.resetData) {
             req.session.forgotOtp = otp
-        }else{
+        } else {
             req.session.userOtp = otp
         }
 
@@ -282,14 +331,13 @@ const loadLogin = async (req, res) => {
     }
 }
 
-
 //login function, checking username and password.
 const login = async (req, res) => {
     try {
         const { email, password } = req.body
 
         //confirming whether admin or user
-        const findUser = await userModel.findOne({ isAdmin: 0, email: email }) 
+        const findUser = await userModel.findOne({ isAdmin: 0, email: email })
 
         if (!findUser) {
             req.session.userMsg = 'User does not exist!'
@@ -302,7 +350,7 @@ const login = async (req, res) => {
         }
 
         //if user is blocked by admin, a message will displayed
-        if (findUser.isBlocked) { 
+        if (findUser.isBlocked) {
             req.session.userMsg = 'Action restriced by Admin!'
             return res.redirect('/login')
         }
@@ -331,7 +379,6 @@ const login = async (req, res) => {
 
 }
 
-
 //logout function
 const logout = async (req, res) => {
     req.session.user = null
@@ -341,7 +388,7 @@ const logout = async (req, res) => {
 //rendering signup page.
 const loadSignup = async (req, res) => {
 
-    if(req.session.user){
+    if (req.session.user) {
         res.redirect('/')
         return;
     }
@@ -374,11 +421,11 @@ const loadForgot = async (req, res) => {
     try {
         let email = (req.query.email || '').trim();
         let message;
-        if(req.session.userMsg){
+        if (req.session.userMsg) {
             message = req.session.userMsg
             req.session.userMsg = null
         }
-        res.render('user/forgot',{ message ,email})
+        res.render('user/forgot', { message, email })
     } catch (error) {
         console.error(error)
         res.redirect('/pagenotfound')
@@ -446,9 +493,9 @@ const passreset = async (req, res) => {
 
         const { password } = req.body
         let email = req.session.resetData
-        
 
-        if(!email){
+
+        if (!email) {
             req.session.userMsg = 'Session timeout!'
             return res.redirect('/forgot')
         }
@@ -460,7 +507,7 @@ const passreset = async (req, res) => {
 
         await userModel.findOneAndUpdate({ email }, { $set: { password: hashed } })
 
-        if(req.session.user){
+        if (req.session.user) {
             req.session.userMsg = 'Password reset successfully'
             return res.redirect('/profile')
         }
@@ -474,23 +521,23 @@ const passreset = async (req, res) => {
     }
 }
 
-const editcredentials = async (req,res)=>{
+const editcredentials = async (req, res) => {
     try {
         const findUser = await userModel.findById(req.session.user)
-        if(!findUser){
+        if (!findUser) {
             req.session.userMsg = 'Session timeout!'
             return res.redirect('/login')
         }
-        
-        const {email} = req.body
 
-        const exist = await userModel.findOne({email})
-        if(exist){
+        const { email } = req.body
+
+        const exist = await userModel.findOne({ email })
+        if (exist) {
             req.session.userMsg = 'Email already exist!'
             return res.redirect('/profile')
         }
 
-        if(findUser.googleID){
+        if (findUser.googleID) {
             req.session.userMsg = 'Cannot update email since the account was created with Google Sign-In.'
             return res.redirect('/profile')
         }
@@ -515,11 +562,18 @@ const editcredentials = async (req,res)=>{
     } catch (error) {
         console.error(error);
         return res.redirect('/pagenotfound')
-        
+
     }
 }
 
-
+function generateCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'WLT';
+    for (let i = 0; i < 9; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
 
 module.exports = {
     loadLogin,

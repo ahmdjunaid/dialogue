@@ -1,6 +1,7 @@
 const orderModel = require('../../models/orderModel')
 const productModel = require('../../models/productModel')
 const userModel = require('../../models/userModel')
+const walletModel = require('../../models/walletModel')
 
 const loadOrders = async (req, res) => {
     try {
@@ -15,12 +16,12 @@ const loadOrders = async (req, res) => {
         const limit = 4;
         const skip = (page - 1) * limit;
 
-        const users = await userModel.find({ 
-            username: { $regex: ".*" + search + ".*", $options: "i" } 
+        const users = await userModel.find({
+            username: { $regex: ".*" + search + ".*", $options: "i" }
         }).select("_id");
-        
+
         const userIds = users.map(user => user._id);
-        
+
         const orders = await orderModel
             .find({
                 $or: [
@@ -73,10 +74,6 @@ const viewOrder = async (req, res) => {
                 model: 'Product'
             })
             .populate({
-                path: 'shippingaddress',
-                model: 'Address'
-            })
-            .populate({
                 path: 'userId',
                 model: 'User'
             })
@@ -84,7 +81,6 @@ const viewOrder = async (req, res) => {
                 path: 'orderedItems',
                 model: 'Order'
             })
-
 
         if (!order) {
             req.session.admMsg = 'Order not found'
@@ -113,7 +109,9 @@ const updateStatus = async (req, res) => {
 
         if (order.orderedItems && order.orderedItems.length > 0) {
             order.orderedItems.forEach(item => {
-                item.status = status;
+                if(item.status !== 'Cancelled'){
+                    item.status = status;
+                } 
             });
         }
 
@@ -133,6 +131,8 @@ const returnOrder = async (req, res) => {
 
         const order = await orderModel.findOne({ orderId: orderId }).populate('orderedItems')
 
+        const userId = order.userId
+
         if (!order) {
             return res.json({ success: false, message: 'Order not found' })
         }
@@ -141,7 +141,9 @@ const returnOrder = async (req, res) => {
             if (order.status === 'Return Requested') {
                 order.status = "Returned"
                 order.orderedItems.map(items => {
-                    items.status = 'Returned'
+                    if(items.status==='Return Requested'){
+                        items.status = 'Returned'
+                    }
                 })
 
                 await Promise.all(
@@ -154,7 +156,40 @@ const returnOrder = async (req, res) => {
                         )
                 );
 
-                order.finalAmount = 0;
+                const refundAmount = order.finalAmount - order.cancelOrReturn
+                order.revokedCoupon = order.couponDiscount || 0
+
+                let wallet = await walletModel.findOne({ userId });
+                const transactionId = generateCode()
+
+                if (!wallet) {
+                    wallet = new walletModel({
+                        userId,
+                        balance: refundAmount,
+                        transactions: [{
+                            amount: refundAmount,
+                            type: 'credit',
+                            description: `Refund for returned order ORD:${order.orderId}`,
+                            transactionId:transactionId,
+                            orderId:order.orderId,
+                            date: new Date()
+                        }]
+                    });
+                } else {
+                    wallet.balance += refundAmount;
+                    wallet.transactions.push({
+                        amount: refundAmount,
+                        type: 'credit',
+                        description: `Refund for cancelled order ORD:${order.orderId}`,
+                        transactionId:transactionId,
+                        orderId:order.orderId,
+                        date: new Date()
+                    });
+                }
+
+                await wallet.save();
+
+                order.cancelOrReturn += order.finalAmount - order.cancelOrReturn;
 
                 await order.save({ suppressWarning: true })
 
@@ -174,7 +209,7 @@ const returnOrder = async (req, res) => {
 
                 await order.save({ suppressWarning: true })
 
-                return res.json({ success: true, message: 'Return request accepted succesfully' })
+                return res.json({ success: false, message: 'Return request rejected!' })
 
             } else {
 
@@ -195,7 +230,10 @@ const returnItem = async (req, res) => {
         const { orderId, productId, action } = req.body;
 
         const order = await orderModel.findOne({ orderId: orderId })
-            .populate('orderedItems.product');
+            .populate('orderedItems.product')
+            .populate('couponApplied')
+
+        const userId = order.userId
 
         if (!order) {
             return res.json({ success: false, message: 'Order not found' });
@@ -207,6 +245,10 @@ const returnItem = async (req, res) => {
             return res.json({ success: false, message: "Product not found in this order" });
         }
 
+        if (item.status !== 'Return Requested') {
+            return res.json({ success: false, message: "Item cannot be returned at this stage" });
+        }
+
         if (action === 'accept') {
 
             item.status = 'Returned';
@@ -215,10 +257,58 @@ const returnItem = async (req, res) => {
                 { _id: productId },
                 { $inc: { stock: item.quantity } }
             );
+            const returnedValue = item.price * item.quantity
 
-            order.finalAmount = order.finalAmount - item.price
+            order.cancelOrReturn += returnedValue
 
-            if(order.finalAmount == 0){
+            const finalAmount = order.finalAmount - order.cancelOrReturn
+
+            let couponRedeemed = 0;
+
+            if (order.couponApplied && finalAmount < order.couponApplied.minCartValue) {
+                couponRedeemed = order.couponDiscount;
+
+                order.couponApplied = null;
+                order.revokedCoupon = couponRedeemed || 0
+                order.cancelOrReturn -= order.revokedCoupon || 0
+
+                order.finalAmount = Math.max(0, order.finalAmount);
+            }
+
+            const refundAmount = returnedValue - couponRedeemed;
+
+            let wallet = await walletModel.findOne({ userId });
+            const transactionId = generateCode();
+            
+            if (!wallet) {
+              wallet = new walletModel({
+                userId,
+                balance: refundAmount,
+                transactions: [{
+                  amount: refundAmount,
+                  type: 'credit',
+                  description: `Refund for cancelled order ORD:${order.orderId}`,
+                  transactionId,
+                  orderId: order.orderId,
+                  date: new Date()
+                }]
+              });
+            } else {
+              wallet.balance += refundAmount;
+              wallet.transactions.push({
+                amount: refundAmount,
+                type: 'credit',
+                description: `Refund for cancelled order ORD:${order.orderId}`,
+                transactionId,
+                orderId: order.orderId,
+                date: new Date()
+              });
+            }
+
+            await wallet.save();
+
+
+            if (finalAmount == 0) {
                 order.status = 'Returned'
             }
 
@@ -226,7 +316,7 @@ const returnItem = async (req, res) => {
 
             return res.json({ success: true, message: "Return request accepted" });
         } else {
- 
+
             item.status = 'Return Rejected';
 
             await order.save();
@@ -238,6 +328,15 @@ const returnItem = async (req, res) => {
         return res.redirect('/admin/loaderror');
     }
 };
+
+function generateCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'WLT';
+    for (let i = 0; i < 9; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
 
 module.exports = {
     loadOrders,

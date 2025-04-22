@@ -1,0 +1,264 @@
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --border-color: #e0e0e0;
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  
+  body {
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    background-color: var(--light-bg);
+    margin: 0;
+    padding: 20px;
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+
+  .dashboard-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    margin-left: 263px;
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+  }
+
+  .filter-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .filter-controls select {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-controls select:hover {
+    border-color: var(--primary-color);
+  }
+
+  .filter-controls select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+  }
+
+  .filter-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .chart-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 24px;
+    flex: 1 1 45%;
+    max-width: 48%;
+    min-width: 300px;
+    margin-bottom: 24px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .chart-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  }
+
+  .chart-container {
+    position: relative;
+    height: 300px;
+    margin-top: 15px;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .chart-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .chart-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 4px 0 0 0;
+  }
+
+  .charts-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: space-between;
+    margin-top: 30px;
+  }
+
+  .big-chart {
+    max-width: 100%;
+    margin-bottom: 30px;
+  }
+
+  canvas {
+    background-color: #fafafa;
+    border-radius: 10px;
+  }
+
+  .table-container {
+    margin-top: 40px;
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .orders-table th {
+    background-color: #f5f7fa;
+    padding: 14px 12px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 14px;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .orders-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+    color: white;
+    text-align: center;
+  }
+
+  .orders-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .orders-table tr:hover {
+    background-color: rgba(67, 97, 238, 0.05);
+  }
+
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    font-size: 13px;
+    display: inline-block;
+    text-align: center;
+    min-width: 80px;
+  }
+
+  .status-delivered { background-color: var(--success-color); }
+  .status-processing { background-color: var(--warning-color); color: #333; }
+  .status-cancelled { background-color: var(--danger-color); }
+
+  .action-btn {
+    cursor: pointer;
+    margin: 0 5px;
+    padding: 8px;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+  }
+
+  .action-btn:hover {
+    color: var(--primary-color);
+  }
+
+  .amount {
+    font-weight: 600;
+  }
+
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 12px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: 6px;
+  }
+
+  .data-label {
+    position: absolute;
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.7);
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    .chart-card {
+      max-width: 100%;
+    }
+    
+    .filter-controls {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    
+    .orders-table {
+      display: block;
+      overflow-x: auto;
+    }
+  }

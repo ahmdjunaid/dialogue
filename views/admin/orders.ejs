@@ -43,7 +43,7 @@
                             <th>ORDER ID</th>
                             <th>CUSTOMER NAME</th>
                             <th>ORDER DATE</th>
-                            <th>TOTAL AMOUNT</th>
+                            <th class="text-center">TOTAL AMOUNT</th>
                             <th>STATUS</th>
                             <th></th>
                         </tr>
@@ -53,8 +53,8 @@
                             <tr>
                                 <td>
                                     <%item.orderedItems.forEach(product=>{%>
-                                        <img src="../uploads/<%= product.product.productImage[0] %>" 
-                                        alt="<%= product.product.productName %>" width="25px">
+                                        <img src="../uploads/<%= product.product.productImage[0] %>"
+                                            alt="<%= product.product.productName %>" width="25px">
                                         <%})%>
                                 </td>
                                 <td>
@@ -64,17 +64,30 @@
                                     <%= item.userId.username %>
                                 </td>
                                 <td>
-                                    <%= item.createdOn.toLocaleDateString('en-US', { year: 'numeric' ,
-                                    month: 'short' , day: 'numeric' }) %>
+                                    <%= item.createdOn.toLocaleDateString('en-US', { year: 'numeric' , month: 'short' ,
+                                        day: 'numeric' }) %>
                                 </td>
-                                <td>
-                                    <%= item.finalAmount %>
+                                <td class="text-center">
+                                    ₹ <%= item.finalAmount %>
                                 </td>
                                 <td>
                                     <%= item.status %>
                                 </td>
                                 <td>
-                                    <a href="/admin/vieworder?orderId=<%= item.orderId %>"><button class="btn btn-success">View</button></a>
+                                    <a href="/admin/vieworder?orderId=<%= item.orderId %>"
+                                        style="text-decoration: none;">
+                                        <% let req=0; %>
+                                            <% item.orderedItems.forEach(product=> { %>
+                                                <% if (product.status==='Return Requested' ) { %>
+                                                    <% req++; %>
+                                                        <% } %>
+                                                            <% }); %>
+                                                                <button class="btn btn-success">View
+                                                                    <% if (req> 0) { %>
+                                                                        <span class="text-danger">*</span>
+                                                                        <% } %>
+                                                                </button>
+                                    </a>
                                 </td>
                             </tr>
                             <% }) %>

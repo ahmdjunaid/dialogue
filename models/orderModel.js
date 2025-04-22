@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
+const counterModel = require('../models/counterModel')
 const {Schema} = mongoose
-const {v4:uuidv4} = require('uuid')
 
 const orderSchema = new Schema({
     userId:{
@@ -9,7 +9,6 @@ const orderSchema = new Schema({
     },
     orderId:{
         type:String,
-        default:()=>uuidv4(),
         unique:true
     },
     orderedItems:[{
@@ -65,6 +64,10 @@ const orderSchema = new Schema({
         type:Number,
         default:0
     },
+    revokedCoupon:{
+        type:Number,
+        default:0
+    },
     couponApplied:{
         type: Schema.Types.ObjectId, 
         ref: "Coupon",
@@ -73,6 +76,10 @@ const orderSchema = new Schema({
     finalAmount:{
         type:Number,
         required:true
+    },
+    cancelOrReturn:{
+        type:Number,
+        default:0
     },
     paymentMethod:{
         type:String,
@@ -106,6 +113,29 @@ const orderSchema = new Schema({
         required:false
     }
 })
+
+orderSchema.pre('save', async function (next) {
+    const order = this;
+
+    if (!order.orderId) {
+        try {
+            const counter = await counterModel.findOneAndUpdate(
+                { id: 'order' },
+                { $inc: { seq: 1 } },
+                { new: true, upsert: true }
+            );
+
+            const paddedId = String(counter.seq).padStart(7, '0');
+            order.orderId = paddedId;
+
+            next();
+        } catch (err) {
+            next(err);
+        }
+    } else {
+        next();
+    }
+});
 
 
 const Order = mongoose.model("Order",orderSchema)

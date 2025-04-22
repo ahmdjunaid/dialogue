@@ -13,19 +13,17 @@
 </head>
 
 <body>
-    <!-- Include header partial -->
     <%- include('../../views/partials/user/header') %>
 
         <div class="main-container">
-            <!-- Include sidebar partial -->
             <%- include('../../views/partials/user/profileaside') %>
 
                 <main class="content">
                     <section class="basic-info">
                         <h2>BASIC INFO</h2>
-                        <div class="edit-container">
+                        <span class="edit-container">
                             <a href="/editprofile"><button class="edit-btn">EDIT DETAILS</button></a>
-                        </div>
+                        </span>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="image">Image</label>
@@ -44,6 +42,17 @@
                                 </div>
                             </div>
                         </div>
+                        <span style="display: flex; align-items: center; gap: 10px;">
+                            <h6 >Referral Code</h6>
+                            <div id="referralCode"
+                                style="padding: 10px 20px; background: #f0f0f0; border-radius: 8px; font-weight: bold;">
+                                <%= findUser.randomNumber%>
+                            </div>
+                            <button onclick="copyReferralCode()"
+                                style="padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                Copy
+                            </button>
+                        </span>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="firstName">First Name</label>
@@ -128,6 +137,31 @@
                 let message = document.getElementById('err').value;
                 if (message) {
                     swal.fire(message)
+                }
+
+                function copyReferralCode() {
+                    const code = document.getElementById("referralCode").innerText;
+                    navigator.clipboard.writeText(code).then(() => {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Referral code copied!',
+                            showConfirmButton: false,
+                            timer: 1500,
+                            timerProgressBar: true,
+                        });
+                    }).catch(err => {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Failed to copy',
+                            showConfirmButton: false,
+                            timer: 1500,
+                            timerProgressBar: true,
+                        });
+                    });
                 }
             </script>
 </body>

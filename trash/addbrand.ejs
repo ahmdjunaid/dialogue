@@ -1,125 +1,99 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Brands</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #121418;
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+<form id="filterForm" method="GET" action="/admin/sale-report" class="dd_control_bar">
+    <select name="range" id="dateFilter" class="dd_time_filter">
+        <option value="">Select Range</option>
+        <option value="1" <%=range==1 ? "selected" : "" %>>Last Day</option>
+        <option value="7" <%=range==7 ? "selected" : "" %>>Last 7 Days</option>
+        <option value="30" <%=range==30 ? "selected" : "" %>>Last 30 Days</option>
+        <option value="custom" <%=start && end ? "selected" : "" %>>Custom Range</option>
+    </select>
 
-        .header {
-            position: absolute;
-            top: 0;
-            right: 0;
-            padding: 20px;
-        }
+    <input type="date" name="start" id="startDate" class="form-control" style="width:20% !important;"
+        value="<%= start || '' %>" />
+    <input type="date" name="end" id="endDate" class="form-control" style="width:20% !important;"
+        value="<%= end || '' %>" />
 
-        .user-avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background-color: #f98a3f;
-        }
+    <button type="submit" class="btn btn-primary">Apply</button>
+    <button type="button" id="clearFilter" class="btn btn-secondary">Clear Filter</button>
 
-        .form-container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .form-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 40px;
-        }
-
-        .form-group {
-            margin-bottom: 30px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 5px;
-            border: none;
-            background-color: #fff;
-            font-size: 16px;
-        }
-
-        textarea.form-input {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 40px;
-        }
-
-        .submit-button {
-            background-color: #9deca2;
-            color: #000;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="user-avatar"></div>
+    <div class="dd_action_buttons">
+        <a href="/admin/download/pdf" id="downloadPdf" class="dd_download_pdf">
+            <i class="fas fa-file-pdf"></i> Download PDF
+        </a>
+        <a href="#" id="downloadExcel" class="dd_download_excel">
+            <i class="fas fa-file-excel"></i> Download Excel
+        </a>
     </div>
+</form>
 
-    <div class="form-container">
-        <h1 class="form-title">Add Brands</h1>
-        <form action="/admin/addbrand" method="post">
-            <div class="form-group">
-                <label class="form-label">Brand Name:</label>
-                <input type="text" class="form-input" name="categoryname" id="name">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Description:</label>
-                <textarea class="form-input" name="categorydescription" id="description"></textarea>
-            </div>
-            
-            <div class="button-container">
-                <button type="submit" class="submit-button">ADD BRAND</button>
-            </div>
-        </form>
-                
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateFilter = document.getElementById('dateFilter');
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        const downloadPdf = document.getElementById('downloadPdf');
+        const downloadExcel = document.getElementById('downloadExcel');
+        const clearFilter = document.getElementById('clearFilter');
         
-    </div>
-    <input type="hidden"  id="message" value="<%= message %>">
-
-    <script>
-        const message = document.getElementById('message').value;
-        if(message){
-            swal.fire(message)
+        // Show/hide date inputs based on dropdown selection
+        dateFilter.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                startDate.style.display = 'inline-block';
+                endDate.style.display = 'inline-block';
+            } else {
+                startDate.style.display = this.value === '' ? 'inline-block' : 'none';
+                endDate.style.display = this.value === '' ? 'inline-block' : 'none';
+            }
+        });
+        
+        // Initialize display state
+        if (dateFilter.value === 'custom' || dateFilter.value === '') {
+            startDate.style.display = 'inline-block';
+            endDate.style.display = 'inline-block';
+        } else {
+            startDate.style.display = 'none';
+            endDate.style.display = 'none';
         }
-    </script>
-
-</body>
-</html> -->
+        
+        // Update download links with current filter parameters
+        function updateDownloadLinks() {
+            const params = new URLSearchParams();
+            
+            if (dateFilter.value) {
+                if (dateFilter.value === 'custom') {
+                    if (startDate.value) params.append('start', startDate.value);
+                    if (endDate.value) params.append('end', endDate.value);
+                } else {
+                    params.append('range', dateFilter.value);
+                }
+            }
+            
+            const queryString = params.toString();
+            downloadPdf.href = `/admin/download/pdf${queryString ? '?' + queryString : ''}`;
+            downloadExcel.href = `/admin/download/excel${queryString ? '?' + queryString : ''}`;
+        }
+        
+        // Update download links when form values change
+        dateFilter.addEventListener('change', updateDownloadLinks);
+        startDate.addEventListener('change', updateDownloadLinks);
+        endDate.addEventListener('change', updateDownloadLinks);
+        
+        // Initialize download links
+        updateDownloadLinks();
+        
+        // Excel download handler
+        downloadExcel.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = this.href;
+        });
+        
+        // Clear filter button
+        clearFilter.addEventListener('click', function() {
+            dateFilter.value = '';
+            startDate.value = '';
+            endDate.value = '';
+            startDate.style.display = 'inline-block';
+            endDate.style.display = 'inline-block';
+            updateDownloadLinks();
+        });
+    });
+</script>

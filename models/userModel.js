@@ -63,7 +63,11 @@ appliedCoupons:[{
     type: Schema.Types.ObjectId,
     ref: 'Coupon',
     required:false
-}]
+}],
+randomNumber:{
+    type:Number,
+    required:true
+}
 });
 
 const User = mongoose.model('User', userSchema);

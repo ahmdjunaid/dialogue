@@ -44,6 +44,7 @@
               <th>EMAIL</th>
               <th>MOBILE</th>
               <th>DATE OF CREATION</th>
+              <th>WALLET</th>
               <th>ACTION</th>
             </tr>
           </thead>
@@ -67,6 +68,9 @@
                 <td>
                   <%= data[i].createdOn.toLocaleDateString('en-US', { year: 'numeric' , month: 'short' , day: 'numeric'
                     }) %>
+                </td>
+                <td>
+                  <a href="/admin/userwallet?id=<%= data[i]._id %>"><button class="btn btn-info">Details</button></a>
                 </td>
                 <td>
                   <% if(data[i].isBlocked==false) { %>

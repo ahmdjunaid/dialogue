@@ -187,7 +187,7 @@
                                     <label for="discountType" class="form-label">Discount Type</label>
                                     <select class="form-select" id="discountType" name="discountType"
                                         onchange="updateDiscountInput()">
-                                        <option value="flat">Flat</option>
+                                        <!-- <option value="flat">Flat</option> -->
                                         <option value="percentage">Percentage</option>
                                     </select>
                                 </div>
@@ -195,7 +195,7 @@
                                 <div class="col-md-6">
                                     <label for="discountAmount" class="form-label">Discount Amount</label>
                                     <input type="number" class="form-control" id="discountAmount" name="discountAmount"
-                                        placeholder="Amount in ₹">
+                                        placeholder='Enter % (e.g., 10)'>
                                 </div>
 
                                 <div class="col-md-6">
@@ -296,15 +296,15 @@
                                     <label for="discountType" class="form-label">Discount Type</label>
                                     <select class="form-select" id="discountType" name="discountType"
                                         onchange="updateDiscountInput()">
-                                        <option value="flat">Flat</option>
-                                        <option value="percentage">Percentage</option>
+                                        <!-- <option value="flat">Flat</option> -->
+                                        <option value="percentage" selected>Percentage</option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label for="discountAmount" class="form-label">Discount Amount</label>
                                     <input type="number" class="form-control" id="discountAmount" name="discountAmount"
-                                        placeholder="Amount in ₹">
+                                        placeholder='Enter % (e.g., 10)'>
                                 </div>
 
                                 <div class="col-md-6">
@@ -381,12 +381,12 @@
             crossorigin="anonymous"></script>
         <script>
 
-            function updateDiscountInput() {
-                const type = document.getElementById('discountType').value;
-                const input = document.getElementById('discountAmount');
+            // function updateDiscountInput() {
+            //     const type = document.getElementById('discountType').value;
+            //     const input = document.getElementById('discountAmount');
 
-                input.placeholder = type === 'percentage' ? 'Enter % (e.g., 10)' : 'Amount in ₹';
-            }
+            //     input.placeholder = type === 'percentage' ? 'Enter % (e.g., 10)' : 'Amount in ₹';
+            // }
 
             function handleOfferTypeChange() {
                 const typeSelect = document.getElementById('offerType');
@@ -464,8 +464,8 @@
                         return;
                     }
 
-                    if (discountType == 'percentage' && discountAmount > 100) {
-                        Swal.fire("Invalid Percentage", "Offer percentage must be 100 or less.", "error");
+                    if (discountType == 'percentage' && discountAmount > 25) {
+                        Swal.fire("Invalid Percentage", "Offer percentage must be 25% or less.", "error");
                         return;
                     }
 
@@ -566,8 +566,8 @@
                         return;
                     }
 
-                    if (discountType == 'percentage' && discountAmount > 100) {
-                        Swal.fire("Invalid Percentage", "Offer percentage must be 100 or less.", "error");
+                    if (discountType == 'percentage' && discountAmount > 25) {
+                        Swal.fire("Invalid Percentage", "Offer percentage must be 25% or less.", "error");
                         return;
                     }
 

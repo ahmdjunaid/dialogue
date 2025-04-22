@@ -26,7 +26,9 @@
                                 <div class="order-id text-success"><b>• Order id #<%= order.orderId %></b>
                                 </div>
                             </div>
-                            <a href="/orders/<%= order.orderId %>/invoice"><button class="btn btn-danger mt-3 me-2">Invoice <i class="fa fa-download" aria-hidden="true"></i></button></a>
+                            <a href="/orders/<%= order.orderId %>/invoice"><button
+                                    class="btn btn-danger mt-3 me-2">Invoice <i class="fa fa-download"
+                                        aria-hidden="true"></i></button></a>
                             <% if(order.status=='Pending' || order.status=='Processing' ){ %>
                                 <button type="button" class="product-cancel-btn mt-3"
                                     onclick="cancelEntireOrder('<%= order.orderId %>')">
@@ -102,21 +104,23 @@
                         <div class="shipping-details">
                             <h3>Shipping Address</h3>
                             <div class="address-box">
-                                <p><strong><%= findUser.username %></strong></p>
+                                <p><strong>
+                                        <%= findUser.username %>
+                                    </strong></p>
                                 <p>
                                     <% if (order.shippingaddress.landmark) { %>
                                         <%= order.shippingaddress.landmark %> -
-                                    <% } %>
-                                    <%= order.shippingaddress.city %>
+                                            <% } %>
+                                                <%= order.shippingaddress.city %>
                                 </p>
                                 <p>
                                     <%= order.shippingaddress.state %> - <%= order.shippingaddress.pincode %>
                                 </p>
                                 <p>
                                     Phone: <%= order.shippingaddress.mobile %>
-                                    <% if (order.shippingaddress.altNumber) { %>,
-                                        <%= order.shippingaddress.altNumber %>
-                                    <% } %>
+                                        <% if (order.shippingaddress.altNumber) { %>,
+                                            <%= order.shippingaddress.altNumber %>
+                                                <% } %>
                                 </p>
                             </div>
                         </div>
@@ -146,7 +150,7 @@
                                                 onclick="cancelItem('<%= order.orderId %>','<%= product.product._id %>')">
                                                 Cancel Item
                                             </button>
-                                            <%}else if(product.status=='Delivered' ){%>
+                                            <%}else if(product.status=='Delivered' && order.status=='Delivered' ){%>
                                                 <button type="button" class="product-return-btn"
                                                     onclick="returnItem('<%= order.orderId %>','<%= product.product._id %>')">
                                                     Return Item
@@ -181,6 +185,13 @@
                                                         order.couponDiscount.toLocaleString() %></span>
                                             </div>
                                             <% } %>
+                                            <% if(order.revokedCoupon> 0) { %>
+                                                <div class="summary-row">
+                                                    <span>Revoked Coupon</span>
+                                                    <span class="amount discount text-danger">+₹<%=
+                                                            order.revokedCoupon.toLocaleString() %></span>
+                                                </div>
+                                                <% } %>
                                                 <% if(order.offerAmount> 0) { %>
                                                     <div class="summary-row">
                                                         <span>Offer Discount</span>
@@ -188,18 +199,26 @@
                                                                 order.offerAmount.toLocaleString() %></span>
                                                     </div>
                                                     <% } %>
+                                                        <div class="summary-row">
+                                                            <span>Cancelled/Returned</span>
+                                                            <span class="amount text-danger">₹<%=
+                                                                order.cancelOrReturn.toLocaleString() %>
+                                                            </span>
+                                                        </div>
                                                         <div class="summary-row shipping">
                                                             <span>Shipping Fee</span>
                                                             <span class="amount">
                                                                 <%= order.shippingFee> 0 ? '₹' +
-                                                                    order.shippingFee.toLocaleString() : 'FREE' %>
+                                                                    order.shippingFee.toLocaleString()
+                                                                    : 'FREE' %>
                                                             </span>
                                                         </div>
                                                         <div class="summary-row total">
-                                                            <span><strong>Order Total</strong></span>
-                                                            <span class="amount total-amount"><strong>₹<%=
-                                                                        order.finalAmount.toLocaleString() %>
-                                                                        </strong></span>
+                                                            <span><strong>Order
+                                                                    Total</strong></span>
+                                                            <span class="amount total-amount"><strong>₹
+                                                                    <%= order.finalAmount -  order.cancelOrReturn %>
+                                                                </strong></span>
                                                         </div>
                             </div>
                         </div>

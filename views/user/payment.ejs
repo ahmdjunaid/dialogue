@@ -241,7 +241,7 @@
                             <i class="fas fa-wallet"></i>
                         </div>
                         <div class="payment-text">
-                            <div class="payment-title">Wallet Balance</div>
+                            <div class="payment-title">Wallet Balance : <span class="text-success">₹ <%= walletBalance %></span></div>
                             <div class="payment-description">Use your available wallet balance</div>
                         </div>
                         <i class="fas fa-chevron-right"></i>
@@ -273,9 +273,17 @@
         </div>
     </div>
 
+    <input type="hidden" id="err" value="<%= message %>">
+
     <%- include('../../views/partials/user/footer') %>
 
     <script>
+
+        const message = document.getElementById('err').value
+        if(message){
+            swal.fire(message)
+        }
+
         document.getElementById("payment-form").addEventListener("submit", function(e) {
             // Get the selected payment method
             const selectedPayment = document.querySelector('input[name="payment"]:checked');
