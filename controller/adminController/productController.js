@@ -34,8 +34,11 @@ const addProduct = async (req, res) => {
     try {
         const productData = req.body;
 
+        const trimmedName = productData.productName.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+
         const productExist = await productModel.findOne({
-            productName: productData.productName.trim(),isDeleted:false
+            isDeleted:false,
+            productName: { $regex: `^${trimmedName}$`, $options: 'i' },
         });
 
         if (productExist) {
@@ -44,7 +47,7 @@ const addProduct = async (req, res) => {
         }
 
         const newProduct = new productModel({
-            productName: productData.productName,
+            productName: productData.productName.trim(),
             description: productData.productDescription,
             brand: productData.brandId,
             category: productData.categoryId,
@@ -168,11 +171,15 @@ const updateProduct = async (req, res) => {
         const productId = req.params.id;
         const { productName, productDescription, brandId, categoryId, productAmount, offerAmount, stockCount, storage, ram, camera, cpu } = req.body;
 
+        const trimmedName = productName.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+
         const existing = await productModel.findOne({
             _id: { $ne: productId },
-            productName:productName.trim(),
+            productName: { $regex: `^${trimmedName}$`, $options: 'i' },
             isDeleted:false
         })
+
+
 
         if(existing){
             req.session.admMsg = 'Product already exist'
@@ -180,7 +187,7 @@ const updateProduct = async (req, res) => {
         }
 
         const updatedData = {
-            productName,
+            productName:trimmedName,
             description: productDescription,
             brand: brandId,
             category: categoryId,

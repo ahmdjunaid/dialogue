@@ -37,7 +37,7 @@
             <div class="divider">
                 <span>or</span>
             </div>
-            <form method="post" action="/signup">
+            <form method="post" onsubmit="return validateForm()" action="/signup">
                 <div class="input-group">
                     <label for="username">Username:</label>
                     <input type="text" id="username" name="username">
@@ -50,7 +50,8 @@
                     <label for="password">Password:</label>
                     <input type="password" id="password" name="password">
                     <div class="password-requirements">
-                        Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.
+                        Password must be at least 8 characters long and include at least one uppercase letter, one
+                        lowercase letter, one number, and one special character.
                     </div>
                 </div>
                 <div class="input-group">
@@ -76,11 +77,91 @@
 <script>
 
     const userMsg = document.getElementById('userMsg').value;
-    
+
 
     if (userMsg) {
-            swal.fire(userMsg)
+        swal.fire(userMsg)
+    }
+
+
+    function validateForm() {
+        const username = document.getElementById('username').value.trim()
+        const email = document.getElementById('email').value.trim()
+        const password = document.getElementById('password').value.trim()
+        const cpassword = document.getElementById('cpassword').value.trim()
+
+
+        let emailRegex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/;
+        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
+        let nameRegex = /^[A-Za-z\s]+$/;
+
+        if (username.trim() === "" || email.trim() === "" || password.trim() === "" || cpassword.trim() === "") {
+            Swal.fire({
+                icon: 'error',
+                title: 'All fields are required!',
+                toast: true,
+                position: 'top-start',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            })
+            return false
         }
 
+        if (!nameRegex.test(username.trim())) {
+            Swal.fire({
+                icon: 'error',
+                title: "Name can only contain alphabets and spaces",
+                toast: true,
+                position: 'top-start',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            })
+            return false
+        }
+
+        if (!emailRegex.test(email.trim())) {
+            Swal.fire({
+                icon: 'error',
+                title: "Invalid email!",
+                toast: true,
+                position: 'top-start',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            })
+            return false
+    }
+
+    if (!passwordRegex.test(password.trim())) {
+        Swal.fire({
+                icon: 'error',
+                title: "Password must be at least 8 characters with numbers!",
+                toast: true,
+                position: 'top-start',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            })
+            return false
+    }
+
+    if (password !== cpassword) {
+
+        Swal.fire({
+                icon: 'error',
+                title: "Passwords do not match!",
+                toast: true,
+                position: 'top-start',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            })
+            return false
+    }
+}
+
 </script>
+
 </html>

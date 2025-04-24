@@ -92,41 +92,12 @@ const signup = async (req, res) => {
 
         const { username, email, password, cpassword, refferal } = req.body
 
-        let emailRegex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$/;
-        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
-        let nameRegex = /^[A-Za-z\s]+$/;
-
-        if (username.trim() === "" || email.trim() === "" || password.trim() === "" || cpassword.trim() === "") {
-            req.session.userMsg = "All fields are required!"
-            return res.redirect('/signup');
-        }
-
-        if (!nameRegex.test(username.trim())) {
-            req.session.userMsg = "Name can only contain alphabets and spaces"
-            return res.redirect('/signup');
-        }
-
-        if (!emailRegex.test(email.trim())) {
-            req.session.userMsg = "Invalid email!"
-            return res.redirect('/signup');
-        }
-
-        if (!passwordRegex.test(password.trim())) {
-            req.session.userMsg = "Password must be at least 8 characters with numbers!"
-            return res.redirect('/signup');
-        }
-
         if (refferal) {
             const user = await userModel.find({ randomNumber: refferal })
             if (!user) {
                 req.session.userMsg = "Refferal code is not valid!"
                 return res.redirect('/signup');
             }
-        }
-
-        if (password !== cpassword) {
-            req.session.userMsg = "Passwords do not match!"
-            return res.redirect('/signup');
         }
 
         const findUser = await userModel.findOne({ email })
@@ -521,6 +492,48 @@ const passreset = async (req, res) => {
     }
 }
 
+const loadAbout = async (req,res) => {
+    try {
+        const userId = req.session.user;
+
+        let userData = null;
+        if (userId) {
+            userData = await userModel.findById(userId);
+            if (!userData) {
+
+                req.session.user = null;
+                console.warn('User not found for session ID:', userId);
+            }
+        }
+
+        res.render('user/about',{findUser:userData})
+        
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+const loadContact = async (req,res) => {
+    try {
+        const userId = req.session.user;
+
+        let userData = null;
+        if (userId) {
+            userData = await userModel.findById(userId);
+            if (!userData) {
+
+                req.session.user = null;
+                console.warn('User not found for session ID:', userId);
+            }
+        }
+
+        res.render('user/contactUs',{findUser:userData})
+        
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 const editcredentials = async (req, res) => {
     try {
         const findUser = await userModel.findById(req.session.user)
@@ -589,5 +602,7 @@ module.exports = {
     forgot,
     loadreset,
     passreset,
-    editcredentials
+    editcredentials,
+    loadAbout,
+    loadContact
 }

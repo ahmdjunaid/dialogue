@@ -483,7 +483,6 @@ const downloadExcel = async (req, res) => {
   res.end();
 };
 
-
 const downloadPDF = async (req, res) => {
   const { range, start, end } = req.query;
 
@@ -712,17 +711,18 @@ function calculateSales(orders) {
   let netSales = 0;
   let pendingOrders = 0
   let itemsSold = 0
+  let couponRevoked = 0
+  let finalAmount = 0
 
   orders.forEach(order => {
     totalSales += order.totalPrice || 0;
-    coupons += order.couponDiscount - order.revokedCoupon || 0;
+    coupons += order.couponDiscount || 0;
     cancelOrReturn += order.cancelOrReturn || 0
+    finalAmount += order.finalAmount || 0
+    couponRevoked += order.revokedCoupon || 0
+    discounts += order.discount
 
     order.orderedItems.forEach(item => {
-      const offerAmount = item.offerAmount || 0;
-      const itemTotal = (item.price - offerAmount) * item.quantity;
-      discounts += offerAmount * item.quantity;
-
     if (item.status === 'Pending') {
         pendingOrders++
       } else {
@@ -732,7 +732,8 @@ function calculateSales(orders) {
 
   });
 
-  netSales = totalSales - (coupons + discounts + cancelOrReturn);
+
+  netSales = finalAmount - (cancelOrReturn);
 
   return {
     totalSales,

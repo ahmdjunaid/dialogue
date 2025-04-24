@@ -157,5 +157,9 @@ router.get('/applyCoupon',userAuth, orderController.couponApply)
 
 router.get('/cancel-coupon',userAuth, orderController.couponCancel)
 
+router.get('/about',userController.loadAbout)
+
+router.get('/contact',userController.loadContact)
+
 
 module.exports = router;

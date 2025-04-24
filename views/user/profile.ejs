@@ -42,17 +42,6 @@
                                 </div>
                             </div>
                         </div>
-                        <span style="display: flex; align-items: center; gap: 10px;">
-                            <h6 >Referral Code</h6>
-                            <div id="referralCode"
-                                style="padding: 10px 20px; background: #f0f0f0; border-radius: 8px; font-weight: bold;">
-                                <%= findUser.randomNumber%>
-                            </div>
-                            <button onclick="copyReferralCode()"
-                                style="padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                Copy
-                            </button>
-                        </span>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="firstName">First Name</label>
@@ -105,6 +94,23 @@
                             </div>
                         </div>
                     </section>
+                    <div class="referral-container">
+                        <h4 class="referral-title">Invite & Earn</h4>
+                        <p class="referral-info">
+                            Share your referral code with friends and earn <strong>₹1000</strong> for each successful referral!
+                        </p>
+                    
+                        <div class="referral-code-box">
+                            <h6 class="referral-label">Your Referral Code:</h6>
+                            <div id="referralCode" class="referral-code">
+                                <%= findUser.randomNumber %>
+                            </div>
+                            <button onclick="copyReferralCode()" class="copy-btn">
+                                Copy
+                            </button>
+                        </div>
+                        <p id="copyMessage" class="copy-message">Referral code copied!</p>
+                    </div>
                 </main>
         </div>
         <div class="modal fade" id="myModal">
