@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empty Wishlist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .wishlist-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .wishlist-header h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .empty-wishlist {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .empty-wishlist-icon {
+            font-size: 60px;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        
+        .empty-wishlist h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .empty-wishlist p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .continue-shopping {
+            display: inline-block;
+            background-color: #e0d49c;
+            color: #333;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .continue-shopping:hover {
+            background-color: #d4c682;
+        }
+        
+        .wishlist-items {
+            margin-top: 40px;
+        }
+        
+        .wishlist-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+        
+        .wishlist-table th {
+            background-color: #e0d49c;
+            color: #333;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .wishlist-summary {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .wishlist-summary h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .wishlist-summary p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="wishlist-header">
+            <h1>MY WISHLIST</h1>
+        </div>
+        
+        <div class="empty-wishlist">
+            <div class="empty-wishlist-icon">❤️</div>
+            <h2>Your wishlist is empty</h2>
+            <p>Looks like you haven't added any items to your wishlist yet.</p>
+            <a href="#" class="continue-shopping">CONTINUE SHOPPING</a>
+        </div>
+        
+        <div class="wishlist-summary">
+            <h2>WISHLIST SUMMARY</h2>
+            <p>Save items you love to your wishlist. All your favorites in one place!</p>
+            <p>When you're ready, you can move them to your cart for checkout.</p>
+        </div>
+    </div>
+</body>
+</html>

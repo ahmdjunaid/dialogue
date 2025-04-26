@@ -7,6 +7,12 @@
     <title>Sign Up - Dialogue</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="/css/user/signup.css">
+    <style>
+        .errorMsg{
+            color: red;
+            font-size: small;
+        }
+    </style>
 </head>
 
 <body>
@@ -41,10 +47,12 @@
                 <div class="input-group">
                     <label for="username">Username:</label>
                     <input type="text" id="username" name="username">
+                    <p class="errorMsg" id="usernameerror"></p>
                 </div>
                 <div class="input-group">
                     <label for="email">Email:</label>
                     <input type="email" id="email" name="email">
+                    <p class="errorMsg" id="emailerror"></p>
                 </div>
                 <div class="input-group">
                     <label for="password">Password:</label>
@@ -53,10 +61,12 @@
                         Password must be at least 8 characters long and include at least one uppercase letter, one
                         lowercase letter, one number, and one special character.
                     </div>
+                    <p class="errorMsg" id="passworderror"></p>
                 </div>
                 <div class="input-group">
                     <label for="confirm-password">Confirm Password:</label>
                     <input type="password" id="cpassword" name="cpassword">
+                    <p class="errorMsg" id="cpassworderror"></p>
                 </div>
                 <div class="input-group">
                     <label for="Referralcode">Referral Code:</label>
@@ -95,71 +105,38 @@
         let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
         let nameRegex = /^[A-Za-z\s]+$/;
 
-        if (username.trim() === "" || email.trim() === "" || password.trim() === "" || cpassword.trim() === "") {
-            Swal.fire({
-                icon: 'error',
-                title: 'All fields are required!',
-                toast: true,
-                position: 'top-start',
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true
-            })
-            return false
-        }
+        const usernameerror = document.getElementById('usernameerror')
+        const emailerror = document.getElementById('emailerror')
+        const passworderror = document.getElementById('passworderror')
+        const cpassworderror = document.getElementById('cpassworderror')
+
+        usernameerror.textContent = ''
+        emailerror.textContent = ''
+        passworderror.textContent = ''
+        cpassworderror.textContent = ''
+
+        let hasError = false
 
         if (!nameRegex.test(username.trim())) {
-            Swal.fire({
-                icon: 'error',
-                title: "Name can only contain alphabets and spaces",
-                toast: true,
-                position: 'top-start',
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true
-            })
-            return false
+            usernameerror.textContent = "Name can only contain alphabets and spaces"
+            hasError = true
         }
 
         if (!emailRegex.test(email.trim())) {
-            Swal.fire({
-                icon: 'error',
-                title: "Invalid email!",
-                toast: true,
-                position: 'top-start',
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true
-            })
-            return false
-    }
+            emailerror.textContent = "Invalid email!"
+            hasError = true
+        }
 
-    if (!passwordRegex.test(password.trim())) {
-        Swal.fire({
-                icon: 'error',
-                title: "Password must be at least 8 characters with numbers!",
-                toast: true,
-                position: 'top-start',
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true
-            })
-            return false
-    }
+        if (!passwordRegex.test(password.trim())) {
+            passworderror.textContent = "Password doesnt meet the criteria!"
+            hasError = true
+        }
 
-    if (password !== cpassword) {
-
-        Swal.fire({
-                icon: 'error',
-                title: "Passwords do not match!",
-                toast: true,
-                position: 'top-start',
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true
-            })
-            return false
-    }
+        if (!cpassword || password !== cpassword) {
+            cpassworderror.textContent = "Passwords do not match!"
+            hasError = true
+        }
+        return !hasError
 }
 
 </script>

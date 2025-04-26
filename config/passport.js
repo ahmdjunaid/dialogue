@@ -23,12 +23,14 @@ passport.use(new GoogleStrategy({
                 await user.save();
                 return done(null, user);
             }
+            const randomNumber = generateRandom8DigitNumber()
 
             // create new one if no user exists
             user = new userModel({
                 username: profile.displayName,
                 email: profile.emails[0].value,
                 googleId: profile.id,
+                randomNumber,
                 isVerified: true
             });
             await user.save();
@@ -45,7 +47,9 @@ passport.use(new GoogleStrategy({
     }
 }));
 
-
+function generateRandom8DigitNumber() {
+    return Math.floor(10000000 + Math.random() * 90000000);
+}
 
 passport.serializeUser((user, done) => {
 

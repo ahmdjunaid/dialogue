@@ -70,7 +70,7 @@ const loadWishlist = async (req, res) => {
         const findUser = await userModel.findOne({ _id: req.session.user });
 
         if (!findUser) {
-            req.session.userMsg = 'Session expired!';
+            req.session.userMsg = 'Login to see your wishlist';
             return res.redirect('/login');
         }
 
@@ -79,8 +79,7 @@ const loadWishlist = async (req, res) => {
             .populate("products.productId");
 
         if (!products) {
-            req.session.userMsg = 'Wishlist is empty, Continue shopping!';
-            return res.redirect('/shop');
+            return res.redirect('user/wishlistEmpty');
         }
 
         const currentDate = new Date();
@@ -163,7 +162,7 @@ const loadcart = async (req, res) => {
         const findUser = await userModel.findOne({ _id: req.session.user });
 
         if (!findUser) {
-            req.session.userMsg = 'Session expired!';
+            req.session.userMsg = 'Login to see your cart';
             return res.redirect('/login');
         }
 
@@ -186,8 +185,7 @@ const loadcart = async (req, res) => {
         }
 
         if (!products) {
-            req.session.userMsg = 'Cart is empty, Continue shopping!';
-            return res.redirect('/shop');
+            return res.render('user/cartEmpty');
         }
 
         const currentDate = new Date();

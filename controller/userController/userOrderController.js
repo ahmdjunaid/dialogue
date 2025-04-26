@@ -721,7 +721,8 @@ const orderFailed = async (req, res) => {
 
 const couponApply = async (req, res) => {
     try {
-        const couponCode = req.query.code;
+        const {couponCode, cartVal} = req.query;
+        
 
         const userId = req.session.user;
 
@@ -742,7 +743,7 @@ const couponApply = async (req, res) => {
             return res.json({ success: false, message: "Cart not found." });
         }
 
-        if (cart.cartTotals < coupon.minCartValue) {
+        if (cartVal < coupon.minCartValue) {
             return res.json({ success: false, message: "Coupon criteria not fulfilled." });
         }
 
@@ -763,7 +764,14 @@ const couponApply = async (req, res) => {
 
         req.session.couponApplied = { couponId: coupon._id, offerAmount: coupon.offerAmount, minValue: coupon.minCartValue }
 
-        return res.json({ success: true, message: "Coupon applied successfully." });
+        return res.json({ 
+            success: true, 
+            message: "Coupon applied successfully.",
+            couponAmount: coupon.offerAmount,
+            couponName: coupon.couponName,
+            valid:coupon.validUpto,
+            couponId:coupon._id
+        });
 
     } catch (error) {
         console.error(error);
@@ -779,9 +787,11 @@ const couponCancel = async (req, res) => {
             return res.json({ success: false, message: "Coupon doesn/t found!." });
         }
 
+        const cancelled = req.session.couponApplied ? req.session.couponApplied.offerAmount : 0
+
         req.session.couponApplied = null
 
-        return res.json({ success: true, message: "Coupon cancelled successfully." });
+        return res.json({ success: true, message: "Coupon cancelled successfully.", cancelledAmount:cancelled });
 
     } catch (error) {
         console.error(error);

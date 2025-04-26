@@ -135,119 +135,123 @@
                                     <% }); %>
                     </tbody>
                 </table>
-                <%if(coupon){%>
-                    <div class="coupCOntainer">
-                        <div class="card p-3 my-3 shadow-sm border-success innerCoup" id="coupon-card">
-                            <div class="d-flex justify-content-between align-items-center">
+                <div class="coupCOntainer">
+                    <div class="card p-3 my-3 shadow-sm border-success innerCoup" id="coupon-cards"
+                        style="display: <%= coupon ? 'block' : 'none' %>;">
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div id="coupon-details">
                                 <div>
                                     <h5 class="text-success mb-1">
-                                        <%= coupon.couponName %>
+                                        <%= coupon ? coupon.couponName : '' %>
                                     </h5>
-                                    <p class="mb-1">Offer: ₹<%= coupon.offerAmount %>
+                                    <p class="mb-1">Offer: ₹<%= coupon ? coupon.offerAmount : '' %>
                                     </p>
                                     <p class="mb-0 text-muted">Valid Until: <%=
-                                            coupon.validUpto.toLocaleDateString('en-US', { year: 'numeric' ,
-                                            month: 'short' , day: 'numeric' }) %>
+                                            coupon ? coupon.validUpto.toLocaleDateString('en-US', { year: 'numeric' ,
+                                            month: 'short' , day: 'numeric' }) : '' %>
                                     </p>
                                 </div>
-                                <input type="hidden" name="couponId" value="<%= coupon._id %>">
-                                <button type="button" class="btn btn-outline-danger"
-                                    onclick="cancelCoupon('<%= coupon._id %>')">Cancel Coupon</button>
+                            </div>
+
+                            <button type="button" class="btn btn-outline-danger" id="cancel-btn" 
+                                onclick="cancelCoupon('<%= coupon ? coupon._id : '' %>')">
+                                Cancel Coupon
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- Coupon Modal -->
+                    <div id="couponModal" class="coupon-modal">
+                        <div class="coupon-modal-content">
+                            <span class="close-btn" onclick="toggleCoupons()">&times;</span>
+                            <h3>Available Coupons</h3>
+                            <div id="couponContainer" class="coupon-list">
+                                <% availableCoupons.forEach(coupon=> { %>
+                                    <div class="coupon-card">
+                                        <p><strong>
+                                                <%= coupon.couponName %>
+                                            </strong></p>
+                                        <p>
+                                            <%= coupon.description %>
+                                        </p>
+                                        <p>
+                                            Get ₹<%= coupon.offerAmount %> off instantly by using this coupon.
+                                        </p>
+                                        <div class="coupon-code">
+                                            <span>
+                                                <%= coupon.couponCode %>
+                                            </span>
+                                            <button onclick="copyCoupon('<%= coupon.couponCode %>')"
+                                                class="copy-btn">Copy</button>
+                                        </div>
+                                    </div>
+                                    <% }) %>
                             </div>
                         </div>
-                        <%}%>
-
-                            <!-- Coupon Modal -->
-                            <div id="couponModal" class="coupon-modal">
-                                <div class="coupon-modal-content">
-                                    <span class="close-btn" onclick="toggleCoupons()">&times;</span>
-                                    <h3>Available Coupons</h3>
-                                    <div id="couponContainer" class="coupon-list">
-                                        <% availableCoupons.forEach(coupon=> { %>
-                                            <div class="coupon-card">
-                                                <p><strong>
-                                                        <%= coupon.couponName %>
-                                                    </strong></p>
-                                                <p>
-                                                    <%= coupon.description %>
-                                                </p>
-                                                <p>
-                                                    Get ₹<%= coupon.offerAmount %> off instantly by using this coupon.
-                                                </p>
-                                                <div class="coupon-code">
-                                                    <span>
-                                                        <%= coupon.couponCode %>
-                                                    </span>
-                                                    <button onclick="copyCoupon('<%= coupon.couponCode %>')"
-                                                        class="copy-btn">Copy</button>
-                                                </div>
-                                            </div>
-                                            <% }) %>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <!-- RIGHT: Cart Totals -->
-                            <div class="cart_summary_wrapper"
-                                style="flex: 1; background-color: #fff; padding: 20px; border-radius: 10px;">
-                                <h2 class="cart_totals_heading">CART TOTALS</h2>
-                                <table class="cart_totals_table">
-                                    <tr class="cart_totals_row">
-                                        <td class="cart_totals_label">Subtotal</td>
-                                        <td class="cart_totals_value">₹<%= cartTotals.subtotal.toLocaleString() %>
-                                        </td>
-                                    </tr>
-
-
-                                    <tr class="cart_totals_row">
-                                        <td class="cart_totals_label">Offer Discount</td>
-                                        <td class="cart_totals_value" id="offerVal">- ₹<%=
-                                                cartTotals.offerDiscount.toLocaleString() %>
-                                        </td>
-                                    </tr>
-
-
-                                        <tr class="cart_totals_row">
-                                            <td class="cart_totals_label">Coupon Applied</td>
-                                            <td class="cart_totals_value" id="couponVal">- ₹<%=
-                                                    cartTotals.couponDiscount.toLocaleString() %>
-                                            </td>
-                                        </tr>
-
-                                            <tr class="cart_totals_row">
-                                                <td class="cart_totals_label">Delivery</td>
-                                                <td class="cart_totals_value">FREE</td>
-                                            </tr>
-
-                                            <tr class="cart_totals_row cart_grand_total_row">
-                                                <td class="cart_totals_label cart_grand_total_label">TOTAL</td>
-                                                <td class="cart_totals_value cart_grand_total_value">₹<%=
-                                                        cartTotals.total.toLocaleString() %>
-                                                </td>
-                                            </tr>
-                                </table>
-
-                                <div class="cart_coupon_wrapper"
-                                    style="margin-top: 15px; display: flex; justify-content: end;">
-                                    <button onclick="toggleCoupons()" id="toggleBtn" class="open-coupon-btn">
-                                        View Available Coupons
-                                    </button>
-                                </div>
-
-                                <div class="cart_coupon_wrapper" style="margin-top: 15px;">
-                                    <input type="text" class="cart_coupon_input" id="couponCode"
-                                        placeholder="Enter Coupon Code" />
-                                    <button onclick="applyCoupon()" class="cart_apply_coupon_btn">Apply Coupon</button>
-                                </div>
-
-                                <button class="cart_checkout_btn" onclick="submitForm()" style="margin-top: 20px;">
-                                    Proceed to Checkout
-                                </button>
-                            </div>
-
-
                     </div>
+
+
+                    <!-- RIGHT: Cart Totals -->
+                    <div class="cart_summary_wrapper"
+                        style="flex: 1; background-color: #fff; padding: 20px; border-radius: 10px;">
+                        <h2 class="cart_totals_heading">CART TOTALS</h2>
+                        <table class="cart_totals_table">
+                            <tr class="cart_totals_row">
+                                <td class="cart_totals_label">Subtotal</td>
+                                <td class="cart_totals_value">₹<%= cartTotals.subtotal.toLocaleString() %>
+                                </td>
+                            </tr>
+
+
+                            <tr class="cart_totals_row">
+                                <td class="cart_totals_label">Offer Discount</td>
+                                <td class="cart_totals_value" id="offerVal">- ₹<%=
+                                        cartTotals.offerDiscount.toLocaleString() %>
+                                </td>
+                            </tr>
+
+
+                            <tr class="cart_totals_row">
+                                <td class="cart_totals_label">Coupon Applied</td>
+                                <td class="cart_totals_value" id="couponVal">- ₹<%=
+                                        cartTotals.couponDiscount.toLocaleString() %>
+                                </td>
+                            </tr>
+
+                            <tr class="cart_totals_row">
+                                <td class="cart_totals_label">Delivery</td>
+                                <td class="cart_totals_value">FREE</td>
+                            </tr>
+
+                            <tr class="cart_totals_row cart_grand_total_row">
+                                <td class="cart_totals_label cart_grand_total_label">TOTAL</td>
+                                <td class="cart_totals_value cart_grand_total_value" id="totalCart">₹<%=
+                                        cartTotals.total.toLocaleString() %>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="cart_coupon_wrapper" style="margin-top: 15px; display: flex; justify-content: end;">
+                            <button onclick="toggleCoupons()" id="toggleBtn" class="open-coupon-btn">
+                                View Available Coupons
+                            </button>
+                        </div>
+
+                        <div class="cart_coupon_wrapper" style="margin-top: 15px;">
+                            <input type="text" class="cart_coupon_input" id="couponCode"
+                                placeholder="Enter Coupon Code" />
+                            <button onclick="applyCoupon()" class="cart_apply_coupon_btn">Apply Coupon</button>
+                        </div>
+
+                        <button class="cart_checkout_btn" onclick="submitForm()" style="margin-top: 20px;">
+                            Proceed to Checkout
+                        </button>
+                    </div>
+
+
+                </div>
 
 
             </div>
@@ -261,8 +265,11 @@
                 <script>
                     function applyCoupon() {
                         const couponCode = document.getElementById('couponCode').value
+                        const couponVal = document.getElementById('couponVal')
+                        const totalText = document.getElementById('totalCart').innerText;
+                        const numericValue = parseFloat(totalText.replace(/[^0-9.]/g, ''));
 
-                        fetch(`/applyCoupon?code=${couponCode}`, {
+                        fetch(`/applyCoupon?couponCode=${couponCode}&cartVal=${numericValue}`, {
                             method: 'GET'
                         })
                             .then(response => response.json())
@@ -274,7 +281,29 @@
                                         showConfirmButton: false,
                                         timer: 1500,
                                     }).then(() => {
-                                        location.reload()
+                                        couponVal.innerText = `- ₹ ${data.couponAmount}`;
+                                        document.getElementById('totalCart').innerText = `₹ ${(numericValue - data.couponAmount).toLocaleString()}`
+
+                                        const validDate = new Date(data.valid);
+                                        const formattedDate = validDate.toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric'
+                                        });
+
+                                        const couponHtml = `
+                                        <div>
+                                                     <h5 class="text-success mb-1">${data.couponName}</h5>
+                                                     <p class="mb-1">Offer: ₹ ${data.couponAmount}</p>
+                                                     <p class="mb-0 text-muted">Valid Until: ${formattedDate}</p>
+                                      </div>
+                                        `;
+
+                                        updateCouponDiv(couponHtml)
+
+                                        // Set Cancel Button separately
+                                        document.getElementById("cancel-btn").setAttribute("onclick", `cancelCoupon('${data.couponId}')`);
+
                                     })
                                 } else {
                                     Swal.fire({
@@ -286,6 +315,16 @@
                                 }
                             })
                     }
+
+                    document.addEventListener("DOMContentLoaded", function () {
+                        window.updateCouponDiv = function (couponHtml) {
+                            if (couponHtml) {
+                                document.getElementById('coupon-details').innerHTML = couponHtml;
+                                document.getElementById('coupon-cards').style.display = 'block'
+                            }
+                        };
+                    });
+
 
                     function cancelCoupon(couponId) {
                         fetch(`/cancel-coupon?couponId=${couponId}`, {
@@ -299,7 +338,15 @@
                                         title: data.message || 'Coupon cancelled successfully!',
                                         showConfirmButton: false,
                                         timer: 1500
-                                    }).then(() => location.reload());
+                                    }).then(() => {
+                                        const totalText = document.getElementById('totalCart').innerText;
+                                        const numericValue = parseFloat(totalText.replace(/[^0-9.]/g, ''));
+                                        document.getElementById('couponVal').innerText = `- ₹ ${0}`;
+
+                                        document.getElementById('totalCart').innerText = `₹ ${(numericValue + data.cancelledAmount).toLocaleString()}`
+                                        document.getElementById('coupon-cards').style.display = 'none'
+
+                                    });
                                 } else {
                                     Swal.fire({
                                         icon: 'error',
@@ -317,6 +364,7 @@
                                 });
                             });
                     }
+
 
 
                     function toggleCoupons() {
@@ -472,7 +520,7 @@
 
                             document.getElementById('offerVal').textContent = `- ₹${parseFloat(offerAmount).toLocaleString() || 0}`;
                             document.getElementById('couponVal').textContent = `- ₹${parseFloat(couponAmount).toLocaleString() || 0}`;
-                            
+
                             const grandTotalElement = document.querySelector('.cart_grand_total_value');
                             const finalTotal = Math.max(0, (newTotal - offerAmount) - couponAmount);
                             grandTotalElement.textContent = `₹${finalTotal.toLocaleString()}`;
