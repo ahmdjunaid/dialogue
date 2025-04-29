@@ -79,7 +79,7 @@ const loadWishlist = async (req, res) => {
             .populate("products.productId");
 
         if (!products) {
-            return res.redirect('user/wishlistEmpty');
+            return res.render('user/wishlistEmpty');
         }
 
         const currentDate = new Date();

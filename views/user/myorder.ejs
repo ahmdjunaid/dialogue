@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders | Dialog </title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
 .main-container {
     margin-top: 3em;
@@ -278,8 +279,15 @@
         </div>
       </div>
 </div>
+<input type="hidden" value="<%= message %>" id="err">
 
 <%- include('../../views/partials/user/footer') %>
+<script>
+  const message = document.getElementById('err').value;
+  if(message){
+    Swal.fire(message)
+  }
+</script>
     
 </body>
 </html>

@@ -11,95 +11,26 @@ const loadShoppingPage = async (req, res) => {
     try {
         const user = req.session.user;
         const userData = await userModel.findById(user);
-        const listedCategories = await categoryModel.find({ isListed: true }).select('_id');
-        const listedBrands = await brandModel.find({ isListed: true }).select('_id');
-
-
-        let { search, sort, brandf, categoryf, minValue, maxValue } = req.query;
-        const page = parseInt(req.query.page) || 1;
-        const perPage = 6;
-
-        if (!minValue) {
-            minValue = 0
-        }
-
-        if (!maxValue) {
-            maxValue = Infinity
-        }
-
-        let filter = {
-            isDeleted: false,
-            stock: { $gt: 0 },
-            category: { $in: listedCategories.map(cat => cat._id) },
-            brand: { $in: listedBrands.map(brand => brand._id) },
-            $and: [
-                { salePrice: { $gte: minValue } },
-                { salePrice: { $lte: maxValue } }
-            ]
-        };
-
-        if (search) {
-            filter.productName = { $regex: search, $options: "i" };
-        }
-
-
-        if (categoryf) {
-            filter.category = categoryf;
-        }
-
-
-        if (brandf) {
-            filter.brand = brandf;
-        }
-
-        let sortOptions = {};
-        switch (sort) {
-            case '':
-                sortOptions = { createdAt: -1 };
-                break;
-            case 'A-Z':
-                sortOptions = { productName: 1 };
-                break;
-            case 'Z-A':
-                sortOptions = { productName: -1 };
-                break;
-            case 'Price : low - high':
-                sortOptions = { salePrice: 1 };
-                break;
-            case 'Price : high - low':
-                sortOptions = { salePrice: -1 };
-                break;
-            default:
-                sortOptions = { createdAt: -1 };
-        }
-
+        
         const brand = await brandModel.find({ isListed: true, isDeleted: false });
         const category = await categoryModel.find({ isListed: true, isDeleted: false });
-
-        const totalProducts = await productModel.countDocuments(filter);
-        const totalPages = Math.ceil(totalProducts / perPage);
-        const currentPage = Math.max(1, Math.min(page, totalPages));
-
+        
         let message;
         if (req.session.userMsg) {
-            message = req.session.userMsg
-            req.session.userMsg = null
+            message = req.session.userMsg;
+            req.session.userMsg = null;
         }
 
-        const products = await productModel.find(filter)
-            .sort(sortOptions)
-            .skip((currentPage - 1) * perPage)
-            .limit(perPage)
-            .populate('category brand');
-
         res.render("user/shop", {
-            products,
-            totalPages,
-            currentPage,
-            search,
-            sort,
-            categoryf,
-            brandf,
+            products: [],
+            totalPages: 0,
+            currentPage: 1,
+            search: '',
+            sort: '',
+            categoryf: '',
+            brandf: '',
+            minValue: '',
+            maxValue: '',
             category,
             brand,
             findUser: userData,
@@ -110,6 +41,97 @@ const loadShoppingPage = async (req, res) => {
         res.redirect('/admin/loaderror');
     }
 }
+
+const fetchProducts = async (req, res) => {
+    try {
+      
+      const listedCategories = await categoryModel.find({ isListed: true, isDeleted: false }).select('_id');
+      const listedBrands = await brandModel.find({ isListed: true, isDeleted: false }).select('_id');
+  
+      let { search, sort, brandf, categoryf, minValue, maxValue } = req.query;
+      const page = parseInt(req.query.page) || 1;
+      const perPage = 6;
+  
+      if (!minValue) {
+        minValue = 0;
+      }
+  
+      if (!maxValue || maxValue === '') {
+        maxValue = Infinity;
+      }
+  
+      let filter = {
+        isDeleted: false,
+        stock: { $gt: 0 },
+        category: { $in: listedCategories.map(cat => cat._id) },
+        brand: { $in: listedBrands.map(brand => brand._id) },
+        $and: [
+          { salePrice: { $gte: minValue } },
+          { salePrice: { $lte: maxValue } }
+        ]
+      };
+  
+      if (search) {
+        filter.productName = { $regex: search, $options: "i" };
+      }
+  
+      if (categoryf) {
+        filter.category = categoryf;
+      }
+  
+      if (brandf) {
+        filter.brand = brandf;
+      }
+  
+      let sortOptions = {};
+      switch (sort) {
+        case '':
+          sortOptions = { createdAt: -1 };
+          break;
+        case 'A-Z':
+          sortOptions = { productName: 1 };
+          break;
+        case 'Z-A':
+          sortOptions = { productName: -1 };
+          break;
+        case 'Price : low - high':
+          sortOptions = { salePrice: 1 };
+          break;
+        case 'Price : high - low':
+          sortOptions = { salePrice: -1 };
+          break;
+        default:
+          sortOptions = { createdAt: -1 };
+      }
+  
+      const totalProducts = await productModel.countDocuments(filter);
+      const totalPages = Math.ceil(totalProducts / perPage);
+      const currentPage = Math.max(1, Math.min(page, totalPages));
+  
+      const products = await productModel.find(filter)
+        .sort(sortOptions)
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage)
+        .populate('category brand');
+      
+
+      res.json({
+        success: true,
+        products,
+        totalPages,
+        currentPage,
+        search,
+        sort,
+        categoryf,
+        brandf,
+        minValue,
+        maxValue
+      });
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ success: false, message: "An error occurred while fetching products" });
+    }
+};
 
 const productDetails = async (req, res) => {
 
@@ -215,4 +237,5 @@ function getBestOffer(applicableOffers, product) {
 module.exports = {
     loadShoppingPage,
     productDetails,
+    fetchProducts
 }

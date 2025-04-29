@@ -69,6 +69,8 @@ router.get("/shop", userAuth, userProductController.loadShoppingPage);
 
 router.get("/product/:id", userAuth, userProductController.productDetails);
 
+router.get('/shop/fetch-products', userProductController.fetchProducts);
+
 // profile management
 
 router.get("/profile", userAuth, profileController.loadProfile);

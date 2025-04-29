@@ -352,6 +352,13 @@
         };
 
         var rzp1 = new Razorpay(options);
+
+
+        rzp1.on('payment.failed', function (response) {
+            const errorMessage = encodeURIComponent(response.error.description)
+            window.location.href = `/orderfailed?error=${errorMessage}`;
+        });
+
         rzp1.open();
     } catch (error) {
         console.error("Error processing payment:", error);

@@ -294,12 +294,19 @@ const loadOrders = async (req,res)=>{
             return res.redirect('/login')
         }
 
+        let message;
+        if(req.session.userMsg){
+            message = req.session.userMsg
+            req.session.userMsg = null
+        }
+
         const orders = await orderModel.find({userId:findUser._id}).populate({path:'orderedItems.product'}).lean();
         
 
         return res.render('user/myorder',{
             findUser,
-            orders
+            orders,
+            message
         })
 
     } catch (error) {

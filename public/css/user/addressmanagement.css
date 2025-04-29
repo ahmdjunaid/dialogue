@@ -276,3 +276,10 @@ select {
         margin-right: 10px;
     }
 }
+
+.errorMsg {
+    color: red;
+    font-size: 0.875em;
+    margin-top: 0.25em;
+    min-height: 1em; /* Reserve space to prevent layout shift */
+}

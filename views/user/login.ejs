@@ -12,7 +12,7 @@
     <div class="container">
         <div class="login-form">
             <div class="logo">
-                <img src="/images/DialogueLogo.png" class="dial-logo" alt="">
+                <img src="/images/DialogueLogo.webp" class="dial-logo" alt="">
             </div>
             <h1>Login</h1>
             <form action="/login" onsubmit="return validateForm()" method="post">
@@ -22,7 +22,10 @@
                 </div>
                 <div class="input-group">
                     <label for="password">Password:</label>
-                    <input type="password" id="password" name="password">
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password">
+                        <button type="button" onclick="togglePasswordVisibility(this)">Show</button>
+                    </div>
                 </div>
                 <button type="submit" class="login-button">Login</button>
                 <a type="button" class="google-button" href="/auth/google">
@@ -49,7 +52,7 @@
             </div>
         </div>
         <div class="image-section">
-            <img src="/images/loginbanner.png" alt="App Preview" class="img-fluid object-fit-cover">
+            <img src="/images/loginbanner.webp" alt="App Preview" class="img-fluid object-fit-cover">
         </div>
     </div>
     <input type="hidden" id="message" value="<%= message %>">
@@ -59,6 +62,18 @@
     if (message) {
         swal.fire(message)
     }
+
+    function togglePasswordVisibility(button) {
+        const input = button.previousElementSibling;
+        if (input.type === "password") {
+            input.type = "text";
+            button.textContent = "Hide";
+        } else {
+            input.type = "password";
+            button.textContent = "Show";
+        }
+    }
+
 
 
     function validateForm() {

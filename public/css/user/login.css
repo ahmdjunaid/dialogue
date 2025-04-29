@@ -30,7 +30,7 @@ body {
     width: 50%;
 }
 
-.dial-logo{
+.dial-logo {
     width: 10em;
 }
 
@@ -71,23 +71,61 @@ h1 {
 }
 
 .input-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     color: #666;
+    font-size: 0.9rem;
 }
 
-input[type="email"],
-input[type="password"] {
+input {
     width: 100%;
-    padding: 0.8rem;
+    padding: 0.7rem;
+    padding-right: 4rem;
+    /* Space for button */
     border: 1px solid #ddd;
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
 }
+
+input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper button {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 0;
+    height: 100%;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.password-wrapper button:hover {
+    color: #0056b3;
+}
+
+.password-wrapper button:focus {
+    outline: none;
+}
+
 
 .login-button {
     background: #007bff;

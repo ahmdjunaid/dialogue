@@ -1,193 +1,341 @@
 <%- include("../../views/partials/user/header") %>
 
-  <style>
-    .selector {
-      width: 13em;
-      border-radius: 5em;
-      padding: .2em;
-      border-color: rgb(199, 209, 199);
-    }
+<style>
+  .selector {
+    width: 13em;
+    border-radius: 5em;
+    padding: .2em;
+    border-color: rgb(199, 209, 199);
+    border-style: double;
+  }
 
-    .page-button-shop {
-      color: #000000;
-      text-align: center;
-      display: inline-block;
-      width: 40px;
-      height: 40px;
-      line-height: 40px;
-      border-radius: 50%;
-      border: 1px solid #e6e6e6;
-      background: #fff;
-    }
+  .page-button-shop {
+    color: #000000;
+    text-align: center;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 50%;
+    border: 1px solid #e6e6e6;
+    background: #fff;
+  }
 
-    .page-button-shop:active {
-      background: #000000;
-      color: #fff;
-      border: 1px solid transparent;
-    }
+  .page-button-shop:active, .page-button-shop.active {
+    background: #000000;
+    color: #fff;
+    border: 1px solid transparent;
+  }
 
-    .minmax {
-      margin-bottom: 1em;
-      width: 13em;
-      border-style: solid;
-      border-radius: 5em;
-      padding: .2em;
-      border-color: rgb(199, 209, 199);
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <div class="hero-wrap hero-bread" style="background-image: url('/images/bg_6.jpg');">
-    <div class="container">
-      <div class="row no-gutters slider-text align-items-center justify-content-center">
-        <div class="col-md-9 ftco-animate text-center">
-          <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Shop</span></p>
-          <h1 class="mb-0 bread">Shop</h1>
+  .minmax {
+    margin-bottom: 1em;
+    width: 13em;
+    border-style: solid;
+    border-radius: 5em;
+    padding: .2em;
+    border-color: rgb(199, 209, 199);
+  }
+  
+  .loading-spinner {
+    text-align: center;
+    padding: 50px 0;
+  }
+
+  .ftco-animate {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+
+.product, .img-prod, .text {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="hero-wrap hero-bread">
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-center justify-content-center">
+      <div class="col-md-9 ftco-animate text-center">
+        <p class="breadcrumbs"><span class="mr-2"><a href="/">Home</a></span> <span>Shop</span></p>
+        <h1 class="mb-0 bread">Shop</h1>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="ftco-section bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 col-lg-9 order-md-last">
+        <!-- Products Container -->
+        <div id="productsContainer" class="row">
+          <!-- This will be populated via JavaScript -->
+          <div class="loading-spinner">
+            <div class="spinner-border" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Pagination Container -->
+        <div id="paginationContainer" class="row mt-5">
+          <div class="col text-center">
+            <div class="block-27">
+              <!-- This will be populated via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-lg-3">
+        <div class="sidebar">
+          <h3>Filter Products</h3>
+          <form id="filterForm">
+            <div class="sidebar-box-2">
+              <h6>Search</h6>
+              <input name="search" type="text" class="selector" value="">
+            </div>
+            <div class="sidebar-box-2">
+              <h6>Categories</h6>
+              <select name="categoryf" class="selector">
+                <option value="">Select</option>
+                <% category.forEach((cat) => { %>
+                  <option value="<%= cat._id %>"><%= cat.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="sidebar-box-2">
+              <h6>Brands</h6>
+              <select name="brandf" class="selector">
+                <option value="">Select</option>
+                <% brand.forEach((b) => { %>
+                  <option value="<%= b._id %>"><%= b.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="sidebar-box-2">
+              <h6>Sort By</h6>
+              <select name="sort" class="selector">
+                <option value="">Select</option>
+                <option value="A-Z">A-Z</option>
+                <option value="Z-A">Z-A</option>
+                <option value="Price : low - high">Price : low - high</option>
+                <option value="Price : high - low">Price : high - low</option>
+              </select>
+            </div>
+            <div class="sidebar-box-2">
+              <h6>Price Range</h6>
+              <input type="number" class="minmax" name="minValue" placeholder="Minumum Value">
+              <input type="number" class="minmax" name="maxValue" placeholder="Maximum Value">
+            </div>
+            <button class="btn btn-primary" id="submitbtn" type="submit">Apply filters</button>
+            <button class="btn btn-light" id="clearFilters" type="button">Clear filters</button>
+          </form>
         </div>
       </div>
     </div>
   </div>
+</section>
 
-  <section class="ftco-section bg-light">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-8 col-lg-9 order-md-last">
-          <div class="row">
-            <% products.forEach(product=> { %>
-              <div class="col-sm-12 col-md-12 col-lg-4 ftco-animate d-flex">
-                <div class="product d-flex flex-column">
-                  <a href="/product/<%= product._id %>" class="img-prod">
-                    <img class="img-fluid" src="../uploads/<%= product.productImage[0] %>"
-                      alt="<%= product.productName %>">
-                    <div class="overlay"></div>
-                  </a>
-                  <div class="text py-3 pb-4 px-3">
-                    <div class="d-flex">
-                      <div class="cat">
-                        <span>
-                          <%= product.brand.name %>
-                        </span>
-                      </div>
-                      <div class="rating">
-                        <p class="text-right mb-0">
-                          <span class="ion-ios-star-outline"></span>
-                          <span class="ion-ios-star-outline"></span>
-                          <span class="ion-ios-star-outline"></span>
-                          <span class="ion-ios-star-outline"></span>
-                          <span class="ion-ios-star-outline"></span>
-                        </p>
-                      </div>
-                    </div>
-                    <h3><a href="/product/<%= product._id %>">
-                        <%= product.productName %>
-                      </a></h3>
-                    <div class="pricing">
-                      <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
-                    </div>
-                    <p class="bottom-area d-flex px-3">
-                      <a href="/addtocart?productId=<%= product._id %>&quantity=1" class="add-to-cart text-center py-2 mr-1">
-                        <span>Add to cart <i class="ion-ios-add ml-1"></i></span>
-                      </a>
-                      <a href="/addtowishlist?productId=<%= product._id %>" class="buy-now text-center py-2">
-                        <span>Wishlist<i class="ion-ios-heart ml-1"></i></span>
-                      </a>
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <% }) %>
-          </div>
-          <div class="row mt-5">
-            <div class="col text-center">
-              <div class="block-27">
-                <% for (let j=1; j <=totalPages; j++) { %>
-                  <a href="?page=<%= j %>" style="text-decoration: none;">
-                    <button class="page-button-shop <%= (j === currentPage) ? 'active' : '' %>">
-                      <%= j %>
-                    </button>
-                  </a>
-                  <% } %>
-              </div>
-            </div>
-          </div>
-        </div>
+<input type="hidden" value="<%= message %>" id="err">
 
-        <div class="col-md-4 col-lg-3">
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
 
-          <div class="sidebar">
-            <h3>Filter Products</h3>
-            <form action="/shop" method="get">
-              <div class="sidebar-box-2">
-                <h6>Search</h6>
-                <input name="search" type="text" class="selector" value="<%= search || '' %>">
-              </div>
-              <div class="sidebar-box-2">
-                <h6>Categories</h6>
-                <select name="categoryf" id="" class="selector">
-                  <option value="" <%=category._id==='' ? 'selected' : '' %>>Select</option>
-                  <% category.forEach((category)=>{%>
-                    <option value="<%= category._id %>" <%=category._id==categoryf ? 'selected' : '' %>>
-                      <%= category.name %>
-                    </option>
-                    <%})%>
-                </select>
-              </div>
-              <div class="sidebar-box-2">
-                <h6>Brands</h6>
-                <select name="brandf" id="" class="selector">
-                  <option value="" <%=brand._id==='' ? 'selected' : '' %>>Select</option>
-                  <% brand.forEach((brand)=>{ %>
-                    <option value="<%= brand._id %>" <%=brand._id==brandf ? 'selected' : '' %>>
-                      <%= brand.name %>
-                    </option>
-                    <%})%>
-                </select>
-              </div>
-              <div class="sidebar-box-2">
-                <h6>Sort By</h6>
-                <select name="sort" id="" class="selector">
-                  <option value="" <%=sort==='' ? 'selected' : '' %>>Select</option>
-                  <option value="A-Z" <%=sort==='A-Z' ? 'selected' : '' %>>A-Z</option>
-                  <option value="Z-A" <%=sort==='Z-A' ? 'selected' : '' %>>Z-A</option>
-                  <option value="Price : low - high" <%=sort==='Price : low - high' ? 'selected' : '' %>>Price : low -
-                    high</option>
-                  <option value="Price : high - low" <%=sort==='Price : high - low' ? 'selected' : '' %>>Price : high -
-                    low</option>
-                </select>
-              </div>
-              <div class="sidebar-box-2">
-                <h6>Price Range</h6>
-                <input type="number" class="minmax" value="" name="minValue" placeholder="Minumum Value">
-                <input type="number" class="minmax" value="" name="maxValue" placeholder="Maximum Value">
-              </div>
-              <button class="btn btn-primary" id="submitbtn" type="submit">Apply filters</button>
-              <button class="btn btn-light" onclick="clearFilters()" type="button">Clear filters</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  <input type="hidden" value="<%= message %>" id="err">
-  <script>
-    const message = document.getElementById('err').value
-    if(message){
-      swal.fire(message)
+    const message = document.getElementById('err').value;
+    if (message) {
+      Swal.fire(message);
+    }
+    
+    const filterForm = document.getElementById('filterForm');
+    const productsContainer = document.getElementById('productsContainer');
+    const paginationContainer = document.getElementById('paginationContainer');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+
+    if (!filterForm || !productsContainer || !paginationContainer || !clearFiltersBtn) {
+      console.error('Error: One or more required elements not found', {
+        filterForm: !!filterForm,
+        productsContainer: !!productsContainer,
+        paginationContainer: !!paginationContainer,
+        clearFiltersBtn: !!clearFiltersBtn
+      });
+      Swal.fire('Error', 'Page elements missing', 'error');
+      return;
     }
 
-    function clearFilters() {
-      // For single elements, use querySelector
+    loadProducts();
+
+    filterForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      loadProducts();
+    });
+
+    clearFiltersBtn.addEventListener('click', function() {
       document.querySelector('input[name="search"]').value = '';
       document.querySelector('select[name="categoryf"]').value = '';
       document.querySelector('select[name="brandf"]').value = '';
       document.querySelector('select[name="sort"]').value = '';
       document.querySelector('input[name="minValue"]').value = '';
       document.querySelector('input[name="maxValue"]').value = '';
+      loadProducts();
+    });
 
-      // Submit the form
-      document.getElementById('submitbtn').click();
+    function loadProducts(page = 1) {
+
+      productsContainer.innerHTML = `
+        <div class="loading-spinner">
+          <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+      `;
+
+      const formData = new FormData(filterForm);
+      formData.append('page', page);
+
+      const params = new URLSearchParams(formData);
+
+      fetch('/shop/fetch-products?' + params.toString())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            const productsHtml = renderProducts(data.products);
+            const paginationHtml = renderPagination(data.totalPages, data.currentPage);
+
+            productsContainer.innerHTML = productsHtml;
+            paginationContainer.innerHTML = paginationHtml;
+
+            productsContainer.style.display = 'flex';
+            productsContainer.style.visibility = 'visible';
+
+            document.querySelector('input[name="search"]').value = data.search || '';
+            document.querySelector('select[name="categoryf"]').value = data.categoryf || '';
+            document.querySelector('select[name="brandf"]').value = data.brandf || '';
+            document.querySelector('select[name="sort"]').value = data.sort || '';
+            document.querySelector('input[name="minValue"]').value = data.minValue || '';
+            document.querySelector('input[name="maxValue"]').value = data.maxValue && data.maxValue !== Infinity ? data.maxValue : '';
+
+            window.history.pushState({}, '', '/shop?' + params.toString());
+          } else {
+            console.error('Server error:', data.message || 'Unknown error');
+            productsContainer.innerHTML = '<div class="col-12 text-center"><h3>Failed to load products</h3></div>';
+            Swal.fire('Error', data.message || 'Failed to load products', 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Fetch error:', error);
+          productsContainer.innerHTML = '<div class="col-12 text-center"><h3>Network error occurred</h3></div>';
+          Swal.fire('Error', 'Something went wrong', 'error');
+        });
     }
-  </script>
 
-  <%- include("../../views/partials/user/footer") %>
+    document.addEventListener('click', function(e) {
+      const pageLink = e.target.closest('.page-link');
+      if (pageLink) {
+        e.preventDefault();
+        const page = parseInt(pageLink.getAttribute('data-page'));
+        loadProducts(page);
+      }
+    });
 
-    </html>
+    function renderProducts(products) {
+      if (!Array.isArray(products) || products.length === 0) {
+        return '<div class="col-12 text-center"><h3>No products found</h3></div>';
+      }
+
+      let html = '';
+      products.forEach(product => {
+        const imagePath = product.productImage && product.productImage[0] ? `/uploads/${product.productImage[0]}` : '/images/placeholder.jpg';
+        html += `
+          <div class="col-sm-12 col-md-12 col-lg-4 ftco-animate d-flex">
+            <div class="product d-flex flex-column">
+              <a href="/product/${product._id}" class="img-prod">
+                <img class="img-fluid" src="${imagePath}" alt="${product.productName}">
+                <div class="overlay"></div>
+              </a>
+              <div class="text py-3 pb-4 px-3">
+                <div class="d-flex">
+                  <div class="cat">
+                    <span>${product.brand?.name || 'Unknown Brand'}</span>
+                  </div>
+                  <div class="rating">
+                    <p class="text-right mb-0">
+                      <span class="ion-ios-star-outline"></span>
+                      <span class="ion-ios-star-outline"></span>
+                      <span class="ion-ios-star-outline"></span>
+                      <span class="ion-ios-star-outline"></span>
+                      <span class="ion-ios-star-outline"></span>
+                    </p>
+                  </div>
+                </div>
+                <h3><a href="/product/${product._id}">${product.productName}</a></h3>
+                <div class="pricing">
+                  <p class="price"><span>₹${product.salePrice.toLocaleString()}</span></p>
+                </div>
+                <p class="bottom-area d-flex px-3">
+                  <a href="/addtocart?productId=${product._id}&quantity=1" class="add-to-cart text-center py-2 mr-1">
+                    <span>Add to cart <i class="ion-ios-add ml-1"></i></span>
+                  </a>
+                  <a href="/addtowishlist?productId=${product._id}" class="buy-now text-center py-2">
+                    <span>Wishlist<i class="ion-ios-heart ml-1"></i></span>
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      return html;
+    }
+
+    function renderPagination(totalPages, currentPage) {
+      if (!totalPages || totalPages <= 1) {
+        return '';
+      }
+
+      let html = `
+        <div class="col text-center">
+          <div class="block-27">
+      `;
+
+      for (let j = 1; j <= totalPages; j++) {
+        html += `
+          <a href="javascript:void(0)" class="page-link" data-page="${j}" style="text-decoration: none;">
+            <button class="page-button-shop ${j === parseInt(currentPage) ? 'active' : ''}">
+              ${j}
+            </button>
+          </a>
+        `;
+      }
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      return html;
+    }
+  });
+
+  window.addEventListener('load', function() {
+    setTimeout(() => {
+      const productsContainer = document.getElementById('productsContainer');
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (productsContainer && paginationContainer) {
+        productsContainer.innerHTML = productsContainer.innerHTML;
+        paginationContainer.innerHTML = paginationContainer.innerHTML;
+        productsContainer.style.display = 'flex';
+        productsContainer.style.visibility = 'visible';
+      }
+    }, 500);
+  });
+</script>
+<%- include('../../views/partials/user/footer') %>

@@ -210,7 +210,16 @@ const trackOrder = async (req, res) => {
             return res.redirect('/login');
         }
 
-        const orderId = req.query.orderId
+        const orderId = req.query.orderId;
+
+        const userOrders = await orderModel.find({ userId: findUser._id });
+
+        const orderExists = userOrders.some(order => order.orderId.toString() === orderId.toString());
+
+        if (!orderExists) {
+            req.session.userMsg = 'Oops! The Order ID you entered does not match any of your orders.';
+            return res.redirect('/orders');
+        }
 
         const order = await orderModel
             .findOne({ orderId: orderId })
@@ -222,17 +231,21 @@ const trackOrder = async (req, res) => {
             })
             .lean();
 
+        if (!order) {
+            req.session.userMsg = 'Order not found!';
+            return res.redirect('/orders');
+        }
 
         return res.render('user/trackorder', {
             findUser,
             order
-        })
+        });
 
     } catch (error) {
-        console.error(error)
-        return res.redirect('/pagenotfound')
+        console.error('Error in trackOrder:', error);
+        return res.redirect('/pagenotfound');
     }
-}
+};
 
 const cancelOrder = async (req, res) => {
     try {
@@ -711,7 +724,9 @@ const orderFailed = async (req, res) => {
             return res.redirect('/login');
         }
 
-        return res.render('user/orderfailed', { findUser })
+        const error = req.query.error || ''
+
+        return res.render('user/orderfailed', { findUser,error })
 
     } catch (error) {
         console.error(error)
