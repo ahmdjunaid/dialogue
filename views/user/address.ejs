@@ -8,6 +8,25 @@
     <title>Dialogue Digital - Manage Account</title>
     <link rel="stylesheet" href="/css/user/addressmanagement.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            font-weight: 600;
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
@@ -75,32 +94,63 @@
         <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="/add_address" method="post" onsubmit="return validateForm()">
+                    <form action="/add_address" method="post" id="addAddressForm" onsubmit="return validateForm()">
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="exampleModalLabel">Add new address</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <label for="fullName">Full Name:</label>
-                            <input type="text" name="fullName" id="fullName">
-                            <label for="type">Address type:</label>
-                            <select name="type" id="type">
-                                <option value="" disabled selected>Select</option>
-                                <option value="Home">Home</option>
-                                <option value="Office">Office</option>
-                            </select>
-                            <label for="city">City</label>
-                            <input type="text" name="city" id="city">
-                            <label for="landmark">Landmark:</label>
-                            <input type="text" name="landmark" id="landmark" placeholder="(Optional)">
-                            <label for="state">State:</label>
-                            <input type="text" name="state" id="state">
-                            <label for="pincode">Pincode:</label>
-                            <input type="number" name="pincode" id="pincode">
-                            <label for="mobile">Mobile number:</label>
-                            <input type="text" name="mobile" id="mobile">
-                            <label for="altnum">Alternative Mobile:</label>
-                            <input type="text" name="altnum" id="altnum" placeholder="(Optional)">
+                            <div class="form-group">
+                                <label for="fullName">Full Name:</label>
+                                <input type="text" name="fullName" id="fullName">
+                                <div id="fullNameError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="type">Address type:</label>
+                                <select name="type" id="type">
+                                    <option value="" disabled selected>Select</option>
+                                    <option value="Home">Home</option>
+                                    <option value="Office">Office</option>
+                                </select>
+                                <div id="typeError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="city">City:</label>
+                                <input type="text" name="city" id="city">
+                                <div id="cityError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="landmark">Landmark:</label>
+                                <input type="text" name="landmark" id="landmark" placeholder="(Optional)">
+                                <div id="landmarkError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="state">State:</label>
+                                <input type="text" name="state" id="state">
+                                <div id="stateError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="pincode">Pincode:</label>
+                                <input type="number" name="pincode" id="pincode">
+                                <div id="pincodeError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="mobile">Mobile number:</label>
+                                <input type="text" name="mobile" id="mobile">
+                                <div id="mobileError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="altnum">Alternative Mobile:</label>
+                                <input type="text" name="altnum" id="altnum" placeholder="(Optional)">
+                                <div id="altnumError" class="error-message"></div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -115,32 +165,64 @@
         <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="/edit_address" method="post" onsubmit="return editFormValidate()">
+                    <form action="/edit_address" method="post" id="editAddressForm" onsubmit="return editFormValidate()">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Add new address</h1>
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit address</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <label for="fullName">Full Name:</label>
-                            <input type="text" name="fullName" id="editName">
-                            <label for="type">Address type:</label>
-                            <select name="type" id="editType">
-                                <option value="">Select</option>
-                                <option value="Home">Home</option>
-                                <option value="Office">Office</option>
-                            </select>
-                            <label for="city">City</label>
-                            <input type="text" name="city" id="editCity">
-                            <label for="landmark">Landmark:</label>
-                            <input type="text" name="landmark" id="editLandmark" placeholder="(Optional)">
-                            <label for="state">State:</label>
-                            <input type="text" name="state" id="editState">
-                            <label for="pincode">Pincode:</label>
-                            <input type="number" name="pincode" id="editPincode">
-                            <label for="mobile">Mobile number:</label>
-                            <input type="text" name="mobile" id="editMobile">
-                            <label for="altnum">Alternative Mobile:</label>
-                            <input type="text" name="altnum" id="editaltMobile" placeholder="(Optional)">
+                            <div class="form-group">
+                                <label for="editName">Full Name:</label>
+                                <input type="text" name="fullName" id="editName">
+                                <div id="editNameError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editType">Address type:</label>
+                                <select name="type" id="editType">
+                                    <option value="">Select</option>
+                                    <option value="Home">Home</option>
+                                    <option value="Office">Office</option>
+                                </select>
+                                <div id="editTypeError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editCity">City:</label>
+                                <input type="text" name="city" id="editCity">
+                                <div id="editCityError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editLandmark">Landmark:</label>
+                                <input type="text" name="landmark" id="editLandmark" placeholder="(Optional)">
+                                <div id="editLandmarkError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editState">State:</label>
+                                <input type="text" name="state" id="editState">
+                                <div id="editStateError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editPincode">Pincode:</label>
+                                <input type="number" name="pincode" id="editPincode">
+                                <div id="editPincodeError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editMobile">Mobile number:</label>
+                                <input type="text" name="mobile" id="editMobile">
+                                <div id="editMobileError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editaltMobile">Alternative Mobile:</label>
+                                <input type="text" name="altnum" id="editaltMobile" placeholder="(Optional)">
+                                <div id="editaltMobileError" class="error-message"></div>
+                            </div>
+                            
                             <input type="hidden" id="editId" name="editId">
                         </div>
                         <div class="modal-footer">
@@ -183,13 +265,37 @@
                     document.getElementById('deleteAddressId').value = addressId;
                 }
 
-
                 const message = document.getElementById('err').value
                 if (message) {
                     swal.fire(message)
                 }
 
+                // Helper function to reset all error messages
+                function resetErrorMessages(formPrefix = '') {
+                    const errorElements = document.querySelectorAll(`[id$='Error']`);
+                    errorElements.forEach(element => {
+                        if (!formPrefix || element.id.startsWith(formPrefix)) {
+                            element.style.display = 'none';
+                            element.textContent = '';
+                        }
+                    });
+                }
+                
+                // Helper function to display an error message
+                function showError(fieldId, message) {
+                    const errorElement = document.getElementById(fieldId + 'Error');
+                    if (errorElement) {
+                        errorElement.textContent = message;
+                        errorElement.style.display = 'block';
+                    }
+                }
+
                 function validateForm() {
+                    // Reset all previous error messages
+                    resetErrorMessages();
+                    
+                    let isValid = true;
+                    
                     const fullName = document.getElementById('fullName').value.trim();
                     const type = document.getElementById('type').value.trim();
                     const city = document.getElementById('city').value.trim();
@@ -206,55 +312,69 @@
                     const pincodePattern = /^\d{6}$/;  // Exactly 6 digits
                     const mobilePattern = /^[6789]\d{9}$/; // Starts with 6,7,8,9 & 10 digits
 
-                    if (fullName === '' || city === '' || state === '' || pincode == '' || mobile == '') {
-                        swal.fire('All fields are required.');
-                        return false;
-                    }
-
-                    if (!namePattern.test(fullName)) {
-                        swal.fire('Invalid Full Name! Only letters and spaces are allowed.');
-                        return false;
+                    // Check each field and display specific error messages
+                    if (fullName === '') {
+                        showError('fullName', 'Full Name is required.');
+                        isValid = false;
+                    } else if (!namePattern.test(fullName)) {
+                        showError('fullName', 'Invalid Full Name! Only letters and spaces are allowed.');
+                        isValid = false;
                     }
 
                     if (type === '') {
-                        swal.fire('Please select an address type.');
-                        return false;
+                        showError('type', 'Please select an address type.');
+                        isValid = false;
                     }
 
-                    if (!cityPattern.test(city)) {
-                        swal.fire('Invalid City Name! Only letters and spaces are allowed.');
-                        return false;
+                    if (city === '') {
+                        showError('city', 'City is required.');
+                        isValid = false;
+                    } else if (!cityPattern.test(city)) {
+                        showError('city', 'Invalid City Name! Only letters and spaces are allowed.');
+                        isValid = false;
                     }
 
-                    if (!statePattern.test(state)) {
-                        swal.fire('Invalid State Name! Only letters and spaces are allowed.');
-                        return false;
+                    if (state === '') {
+                        showError('state', 'State is required.');
+                        isValid = false;
+                    } else if (!statePattern.test(state)) {
+                        showError('state', 'Invalid State Name! Only letters and spaces are allowed.');
+                        isValid = false;
                     }
 
-                    if (!pincodePattern.test(pincode)) {
-                        swal.fire('Invalid Pincode! It should be exactly 6 digits.');
-                        return false;
+                    if (pincode === '') {
+                        showError('pincode', 'Pincode is required.');
+                        isValid = false;
+                    } else if (!pincodePattern.test(pincode)) {
+                        showError('pincode', 'Invalid Pincode! It should be exactly 6 digits.');
+                        isValid = false;
                     }
 
-                    if (!mobilePattern.test(mobile)) {
-                        swal.fire('Invalid Mobile Number! It should be 10 digits and start with 6, 7, 8, or 9.');
-                        return false;
+                    if (mobile === '') {
+                        showError('mobile', 'Mobile number is required.');
+                        isValid = false;
+                    } else if (!mobilePattern.test(mobile)) {
+                        showError('mobile', 'Invalid Mobile Number! It should be 10 digits and start with 6, 7, 8, or 9.');
+                        isValid = false;
                     }
 
                     if (landmark !== '' && !landmarkPattern.test(landmark)) {
-                        swal.fire('Invalid Landmark! Only letters, numbers, spaces, commas, and dashes are allowed.');
-                        return false;
+                        showError('landmark', 'Invalid Landmark! Only letters, numbers, spaces, commas, and dashes are allowed.');
+                        isValid = false;
                     }
 
                     if (altnum !== '' && !mobilePattern.test(altnum)) {
-                        swal.fire('Invalid Alternate Number! It should be 10 digits and start with 6, 7, 8, or 9.');
-                        return false;
+                        showError('altnum', 'Invalid Alternate Number! It should be 10 digits and start with 6, 7, 8, or 9.');
+                        isValid = false;
                     }
 
-                    return true;
+                    return isValid;
                 }
 
                 function editForm(button) {
+                    // Reset error messages when opening the edit form
+                    resetErrorMessages('edit');
+                    
                     let addressData = JSON.parse(button.getAttribute("data-address"));
 
                     // Example: Populate form fields with address data
@@ -277,20 +397,22 @@
                     var modalElement = document.getElementById('editModal');
                     var modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
                     modalInstance.show();
-
-
-
                 }
 
                 function editFormValidate() {
-                    const fullName = document.getElementById("editName").value
-                    const city = document.getElementById("editCity").value
-                    const state = document.getElementById("editState").value
-                    const pincode = document.getElementById("editPincode").value
-                    const mobile = document.getElementById("editMobile").value
-                    const type = document.getElementById("editType").value
-                    const altnum = document.getElementById("editaltMobile").value
-                    const landmark = document.getElementById("editLandmark").value
+                    // Reset all previous error messages
+                    resetErrorMessages('edit');
+                    
+                    let isValid = true;
+                    
+                    const fullName = document.getElementById("editName").value.trim();
+                    const city = document.getElementById("editCity").value.trim();
+                    const state = document.getElementById("editState").value.trim();
+                    const pincode = document.getElementById("editPincode").value.trim();
+                    const mobile = document.getElementById("editMobile").value.trim();
+                    const type = document.getElementById("editType").value.trim();
+                    const altnum = document.getElementById("editaltMobile").value.trim();
+                    const landmark = document.getElementById("editLandmark").value.trim();
 
                     const namePattern = /^[A-Za-z\s]+$/;  // Only letters and spaces
                     const cityPattern = /^[A-Za-z\s]+$/;  // Only letters and spaces
@@ -299,53 +421,74 @@
                     const pincodePattern = /^\d{6}$/;  // Exactly 6 digits
                     const mobilePattern = /^[6789]\d{9}$/; // Starts with 6,7,8,9 & 10 digits
 
-                    if (fullName === '' || city === '' || state === '' || pincode == '' || mobile == '') {
-                        swal.fire('All fields are required.');
-                        return false;
-                    }
-
-                    if (!namePattern.test(fullName)) {
-                        swal.fire('Invalid Full Name! Only letters and spaces are allowed.');
-                        return false;
+                    // Check each field and display specific error messages
+                    if (fullName === '') {
+                        showError('editName', 'Full Name is required.');
+                        isValid = false;
+                    } else if (!namePattern.test(fullName)) {
+                        showError('editName', 'Invalid Full Name! Only letters and spaces are allowed.');
+                        isValid = false;
                     }
 
                     if (type === '') {
-                        swal.fire('Please select an address type.');
-                        return false;
+                        showError('editType', 'Please select an address type.');
+                        isValid = false;
                     }
 
-                    if (!cityPattern.test(city)) {
-                        swal.fire('Invalid City Name! Only letters and spaces are allowed.');
-                        return false;
+                    if (city === '') {
+                        showError('editCity', 'City is required.');
+                        isValid = false;
+                    } else if (!cityPattern.test(city)) {
+                        showError('editCity', 'Invalid City Name! Only letters and spaces are allowed.');
+                        isValid = false;
                     }
 
-                    if (!statePattern.test(state)) {
-                        swal.fire('Invalid State Name! Only letters and spaces are allowed.');
-                        return false;
+                    if (state === '') {
+                        showError('editState', 'State is required.');
+                        isValid = false;
+                    } else if (!statePattern.test(state)) {
+                        showError('editState', 'Invalid State Name! Only letters and spaces are allowed.');
+                        isValid = false;
                     }
 
-                    if (!pincodePattern.test(pincode)) {
-                        swal.fire('Invalid Pincode! It should be exactly 6 digits.');
-                        return false;
+                    if (pincode === '') {
+                        showError('editPincode', 'Pincode is required.');
+                        isValid = false;
+                    } else if (!pincodePattern.test(pincode)) {
+                        showError('editPincode', 'Invalid Pincode! It should be exactly 6 digits.');
+                        isValid = false;
                     }
 
-                    if (!mobilePattern.test(mobile)) {
-                        swal.fire('Invalid Mobile Number! It should be 10 digits and start with 6, 7, 8, or 9.');
-                        return false;
+                    if (mobile === '') {
+                        showError('editMobile', 'Mobile number is required.');
+                        isValid = false;
+                    } else if (!mobilePattern.test(mobile)) {
+                        showError('editMobile', 'Invalid Mobile Number! It should be 10 digits and start with 6, 7, 8, or 9.');
+                        isValid = false;
                     }
 
                     if (landmark !== '' && !landmarkPattern.test(landmark)) {
-                        swal.fire('Invalid Landmark! Only letters, numbers, spaces, commas, and dashes are allowed.');
-                        return false;
+                        showError('editLandmark', 'Invalid Landmark! Only letters, numbers, spaces, commas, and dashes are allowed.');
+                        isValid = false;
                     }
 
                     if (altnum !== '' && !mobilePattern.test(altnum)) {
-                        swal.fire('Invalid Alternate Number! It should be 10 digits and start with 6, 7, 8, or 9.');
-                        return false;
+                        showError('editaltMobile', 'Invalid Alternate Number! It should be 10 digits and start with 6, 7, 8, or 9.');
+                        isValid = false;
                     }
 
-                    return true;
+                    return isValid;
                 }
+                
+                // Event listener to reset errors when modal is closed
+                document.getElementById('addModal').addEventListener('hidden.bs.modal', function () {
+                    resetErrorMessages();
+                    document.getElementById('addAddressForm').reset();
+                });
+                
+                document.getElementById('editModal').addEventListener('hidden.bs.modal', function () {
+                    resetErrorMessages('edit');
+                });
             </script>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 

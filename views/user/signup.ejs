@@ -114,15 +114,7 @@
     const signupForm = document.getElementById('signupForm');
 
     signupForm.addEventListener('submit', function () {
-        Swal.fire({
-            title: 'Please wait...',
-            text: 'Processing your signup...',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
+        
     });
 
 
@@ -169,6 +161,19 @@
             cpassworderror.textContent = "Passwords do not match!"
             hasError = true
         }
+        
+        if(!hasError){
+            Swal.fire({
+                title: 'Please wait...',
+                text: 'Processing your signup...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+
         return !hasError
     }
 
