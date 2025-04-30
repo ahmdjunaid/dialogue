@@ -209,6 +209,82 @@
     height: 30px;
   }
 }
+
+/* Add these styles to your existing CSS */
+
+.pagination_container {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px 0;
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination_link {
+  color: #333;
+  text-decoration: none;
+  padding: 8px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.pagination_link:hover {
+  background-color: #f0f0f0;
+  border-color: #ccc;
+}
+
+.pagination_active {
+  background-color: #dbcc8f;
+  color: white;
+  border-color: #dbcc8f;
+  font-weight: 600;
+}
+
+.pagination_active:hover {
+  background-color: #cfc183;
+  border-color: #cfc183;
+}
+
+.pagination_first,
+.pagination_last,
+.pagination_prev,
+.pagination_next {
+  font-weight: 500;
+}
+
+.pagination_info {
+  margin-top: 10px;
+  color: #777;
+  font-size: 13px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .pagination_link {
+    padding: 6px 10px;
+    margin: 0 2px;
+    font-size: 13px;
+  }
+  
+  .pagination_first,
+  .pagination_last {
+    display: none; /* Hide First/Last on small screens */
+  }
+}
     </style>
 </head>
 <body>
@@ -277,6 +353,44 @@
             </div>
           <%}%>
         </div>
+        <% if (orders.length > 0 && pagination.totalPages > 1) { %>
+          <div class="pagination_container">
+            <div class="pagination">
+              <% if (pagination.page > 1) { %>
+                <a href="/orders?page=1" class="pagination_link pagination_first">&laquo; First</a>
+                <a href="/orders?page=<%= pagination.page - 1 %>" class="pagination_link pagination_prev">&lsaquo; Prev</a>
+              <% } %>
+              
+              <% 
+              // Determine which page numbers to show
+              let startPage = Math.max(1, pagination.page - 2);
+              let endPage = Math.min(pagination.totalPages, pagination.page + 2);
+              
+              // Always show 5 pages when possible
+              if (endPage - startPage < 4) {
+                if (startPage === 1) {
+                  endPage = Math.min(5, pagination.totalPages);
+                } else if (endPage === pagination.totalPages) {
+                  startPage = Math.max(1, pagination.totalPages - 4);
+                }
+              }
+              
+              for (let i = startPage; i <= endPage; i++) { %>
+                <a href="/orders?page=<%= i %>" class="pagination_link <%= pagination.page === i ? 'pagination_active' : '' %>">
+                  <%= i %>
+                </a>
+              <% } %>
+              
+              <% if (pagination.page < pagination.totalPages) { %>
+                <a href="/orders?page=<%= pagination.page + 1 %>" class="pagination_link pagination_next">Next &rsaquo;</a>
+                <a href="/orders?page=<%= pagination.totalPages %>" class="pagination_link pagination_last">Last &raquo;</a>
+              <% } %>
+            </div>
+            <div class="pagination_info">
+              Showing <%= orders.length %> of <%= pagination.totalOrders %> orders
+            </div>
+          </div>
+          <% } %>
       </div>
 </div>
 <input type="hidden" value="<%= message %>" id="err">

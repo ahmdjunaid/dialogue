@@ -705,6 +705,8 @@ const verifyPayment = async (req, res) => {
         req.session.lastOrder = savedOrder._id;
         req.session.newOrder = null;
         req.session.couponApplied = null
+        req.session.payment = null
+        req.session.checkOut = null
 
         res.json({ message: "Payment verified successfully" });
 

@@ -87,7 +87,6 @@ const addProduct = async (req, res) => {
     }
 };
 
-
 const loadProduct = async (req, res) => {
 
     try {

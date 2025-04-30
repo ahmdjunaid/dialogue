@@ -179,6 +179,53 @@
         .wallet-transactions__table tr:hover {
             background-color: #f8f9fa;
         }
+
+        /* Pagination styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .pagination li {
+            margin: 0 5px;
+        }
+
+        .pagination a {
+            display: block;
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .pagination a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .pagination .active a {
+            background-color: #dbcc8f;
+            color: white;
+            border-color: #dbcc8f;
+        }
+
+        .pagination .disabled a {
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+        /* Empty state */
+        .empty-transactions {
+            text-align: center;
+            padding: 30px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
     </style>
 </head>
 
@@ -188,7 +235,7 @@
             <%- include('../../views/partials/user/profileaside') %>
                 <main class="wallet-container">
 
-                    <h1 class="wallet-title">Welcome Your Wallet Page</h1>
+                    <h1 class="wallet-title">Welcome to Your Wallet</h1>
                     <div class="wallet-card">
                         <div class="wallet-card__content">
                             <div class="wallet-card__name">
@@ -203,8 +250,8 @@
 
                     <div class="wallet-actions pt-3 pb-3">
                         <div class="wallet-transactions">
-                            <table class="wallet-transactions__table">
-                                <% if (wallet.transactions && wallet.transactions.length> 0) { %>
+                            <% if (hasTransactions) { %>
+                                <table class="wallet-transactions__table">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -218,7 +265,7 @@
                                         <% wallet.transactions.forEach(function(transaction, index) { %>
                                             <tr>
                                                 <td>
-                                                    <%= index + 1 %>
+                                                    <%= (currentPage - 1) * 10 + index + 1 %>
                                                 </td>
                                                 <td>₹ <%= transaction.amount.toFixed(2) %>
                                                 </td>
@@ -232,20 +279,54 @@
                                                     <%= transaction.description %>
                                                 </td>
                                             </tr>
-                                            <%})%>
+                                        <% }) %>
                                     </tbody>
-                                    <%}else{%>
-                                        <p class="text-center">No transactions are Available</p>
-                                        <%}%>
-                            </table>
+                                </table>
+
+                                <!-- Pagination controls -->
+                                <% if (totalPages > 1) { %>
+                                    <ul class="pagination">
+                                        <!-- Previous page link -->
+                                        <li class="<%= currentPage === 1 ? 'disabled' : '' %>">
+                                            <a href="<%= currentPage === 1 ? '#' : '/wallet?page=' + (currentPage - 1) %>">
+                                                &laquo; Prev
+                                            </a>
+                                        </li>
+                                        
+                                        <!-- Page numbers -->
+                                        <% for(let i = 1; i <= totalPages; i++) { %>
+                                            <% if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) { %>
+                                                <li class="<%= currentPage === i ? 'active' : '' %>">
+                                                    <a href="/wallet?page=<%= i %>"><%= i %></a>
+                                                </li>
+                                            <% } else if (i === currentPage - 2 || i === currentPage + 2) { %>
+                                                <li class="disabled">
+                                                    <a href="#">...</a>
+                                                </li>
+                                            <% } %>
+                                        <% } %>
+                                        
+                                        <!-- Next page link -->
+                                        <li class="<%= currentPage === totalPages ? 'disabled' : '' %>">
+                                            <a href="<%= currentPage === totalPages ? '#' : '/wallet?page=' + (currentPage + 1) %>">
+                                                Next &raquo;
+                                            </a>
+                                        </li>
+                                    </ul>
+                                <% } %>
+                            <% } else { %>
+                                <div class="empty-transactions">
+                                    <p>No transactions are available</p>
+                                </div>
+                            <% } %>
                         </div>
                     </div>
+                </main>
         </div>
-        </main>
 
         <%- include('../../views/partials/user/footer') %>
 
-            <script src="wallet.js"></script>
+        <script src="wallet.js"></script>
 </body>
 
 </html>

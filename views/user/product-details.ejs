@@ -37,16 +37,6 @@
           <h3>
             <%= product.productName %>
           </h3>
-          <div class="rating d-flex">
-            <p class="text-left mr-4">
-              <a href="#" class="mr-2">5.0</a>
-              <a href="#"><span class="ion-ios-star-outline"></span></a>
-              <a href="#"><span class="ion-ios-star-outline"></span></a>
-              <a href="#"><span class="ion-ios-star-outline"></span></a>
-              <a href="#"><span class="ion-ios-star-outline"></span></a>
-              <a href="#"><span class="ion-ios-star-outline"></span></a>
-            </p>
-          </div>
           <% const salePrice=Number(product?.salePrice) || 0; const discountAmount=Number(bestOffer?.discountAmount) ||
             0; let discountedPrice=salePrice; if (bestOffer) { if (bestOffer.discountType==='flat' ) {
             discountedPrice=salePrice - discountAmount; } else if (bestOffer.discountType==='percentage' ) {
@@ -260,13 +250,13 @@
                   <div class="col-md-7">
                     <h3 class="mb-4">Reviews</h3>
                     <div class="review">
-                      <div class="user-img" style="background-image: url(/images/person_1.jpg)"></div>
+                      <!-- <div class="user-img" style="background-image: url(/images/person_1.jpg)"></div> -->
                       <div class="desc">
-                        <h4>
-                          <!-- <span class="text-left">Jacob Webb</span>
-                        <span class="text-right">14 March 2018</span> -->
-                        </h4>
-                        <p class="star">
+                        <!-- <h4>
+                          <span class="text-left">Jacob Webb</span>
+                        <span class="text-right">14 March 2018</span>
+                        </h4> -->
+                        <!-- <p class="star">
                           <span>
                             <i class="ion-ios-star-outline"></i>
                             <i class="ion-ios-star-outline"></i>
@@ -275,7 +265,7 @@
                             <i class="ion-ios-star-outline"></i>
                           </span>
                           <span class="text-right"><a href="#" class="reply"><i class="icon-reply"></i></a></span>
-                        </p>
+                        </p> -->
                         <!-- <p>When she reached the first hills of the Italic Mountains...</p> -->
                       </div>
                     </div>
@@ -302,15 +292,6 @@
                         <%= product.brand.name %>
                       </span>
                     </div>
-                    <div class="rating">
-                      <p class="text-right mb-0">
-                        <span class="ion-ios-star-outline"></span>
-                        <span class="ion-ios-star-outline"></span>
-                        <span class="ion-ios-star-outline"></span>
-                        <span class="ion-ios-star-outline"></span>
-                        <span class="ion-ios-star-outline"></span>
-                      </p>
-                    </div>
                   </div>
                   <h3><a href="/product/<%= product._id %>">
                       <%= product.productName %>
@@ -319,11 +300,11 @@
                     <p class="price"><span>₹<%= product.salePrice.toLocaleString() %></span></p>
                   </div>
                   <p class="bottom-area d-flex px-3">
-                    <a href="/cart/add/<%= product._id %>" class="add-to-cart text-center py-2 mr-1">
+                    <a href="/addtocart?productId=<%= product._id %>&quantity=1" class="add-to-cart text-center py-2 mr-1">
                       <span>Add to cart <i class="ion-ios-add ml-1"></i></span>
                     </a>
-                    <a href="/checkout/<%= product._id %>" class="buy-now text-center py-2">
-                      <span>Buy now<i class="ion-ios-cart ml-1"></i></span>
+                    <a href="/addtowishlist?productId=<%= product._id %>" class="buy-now text-center py-2">
+                      <span>Wishlist<i class="ion-ios-heart ml-1"></i></span>
                     </a>
                   </p>
                 </div>

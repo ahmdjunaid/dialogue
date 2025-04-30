@@ -666,6 +666,12 @@ const loadCheckout = async (req, res) => {
             return res.redirect('/login');
         }
 
+        if(!req.session.checkOut){
+            req.session.userMsg = 'No products available. Continue shopping.';
+            return res.redirect('/shop');
+        }
+
+
         if (req.query.error) {
             req.session.userMsg = req.query.error
         }
@@ -685,6 +691,8 @@ const loadCheckout = async (req, res) => {
             validFrom: { $lte: new Date(currentDate.setHours(23, 59, 59, 999)) },
             validUpto: { $gte: new Date(currentDate.setHours(0, 0, 0, 0)) }
         }).populate('applicableTo') || [];
+
+        console.log(selectedProduct)
 
         const result = selectedProduct.map(product => {
             const offers = allOffers
@@ -775,7 +783,7 @@ const proceedToPayment = async (req, res) => {
             });
         }
 
-        req.session.checkOut.selectedProduct = availableProducts
+        req.session.checkOut.finalProducts = availableProducts
 
         res.json({
             success: true,
@@ -802,7 +810,7 @@ const updateCheckout = async (req, res) => {
 
         const { productId, quantity } = req.body
 
-        let selectedProduct = req.session.checkOut.selectedProduct
+        let selectedProduct = req.session.checkOut.finalProducts
 
         selectedProduct.map(items => {
             if (items.productId._id.toString() === productId.toString()) {

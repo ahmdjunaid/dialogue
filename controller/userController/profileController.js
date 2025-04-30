@@ -285,39 +285,55 @@ const deleteaddress = async (req,res)=>{
     }
 }
 
-const loadOrders = async (req,res)=>{
+const loadOrders = async (req, res) => {
     try {
         const findUser = await userModel.findById(req.session.user)
 
-        if(!findUser){
+        if (!findUser) {
             req.session.userMsg = 'Session timeout!'
             return res.redirect('/login')
         }
 
         let message;
-        if(req.session.userMsg){
+        if (req.session.userMsg) {
             message = req.session.userMsg
             req.session.userMsg = null
         }
 
-        const orders = await orderModel.find({userId:findUser._id}).populate({path:'orderedItems.product'}).lean();
-        
+        const page = parseInt(req.query.page) || 1;
+        const limit = 4;
+        const skip = (page - 1) * limit;
 
-        return res.render('user/myorder',{
+        const totalOrders = await orderModel.countDocuments({ userId: findUser._id });
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        const orders = await orderModel.find({ userId: findUser._id })
+            .populate({ path: 'orderedItems.product' })
+            .sort({ createdOn: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        return res.render('user/myorder', {
             findUser,
             orders,
-            message
-        })
+            message,
+            pagination: {
+                page,
+                limit,
+                totalOrders,
+                totalPages
+            }
+        });
 
     } catch (error) {
-        console.error(error)
-        return res.redirect('/pagenotfound')
+        console.error(error);
+        return res.redirect('/pagenotfound');
     }
 }
 
 const loadWallet = async (req, res) => {
     try {
-
         const findUser = await userModel.findById(req.session.user).lean();
 
         if (!findUser) {
@@ -325,9 +341,8 @@ const loadWallet = async (req, res) => {
             return res.redirect('/login');
         }
 
-
-        const wallet = await walletModel.findOne({ userId: findUser._id })
-            .lean()
+        // Get wallet data
+        const wallet = await walletModel.findOne({ userId: findUser._id }).lean();
 
         if (!wallet) {
             const newWallet = new walletModel({
@@ -342,14 +357,35 @@ const loadWallet = async (req, res) => {
                 findUser,
                 wallet: newWallet,
                 message: "A new wallet has been created with zero balance.",
+                currentPage: 1,
+                totalPages: 1,
+                hasTransactions: false
             });
         }
 
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        
         wallet.transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        const totalTransactions = wallet.transactions.length;
+        const totalPages = Math.ceil(totalTransactions / limit);
+        
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedTransactions = wallet.transactions.slice(startIndex, endIndex);
+        
+        const paginatedWallet = {
+            ...wallet,
+            transactions: paginatedTransactions
+        };
 
         return res.render('user/wallet', {
             findUser,
-            wallet: wallet,
+            wallet: paginatedWallet,
+            currentPage: page,
+            totalPages: totalPages,
+            hasTransactions: totalTransactions > 0
         });
 
     } catch (error) {

@@ -105,6 +105,11 @@ const updateStatus = async (req, res) => {
             return res.json({ success: false, message: 'Order not found' });
         }
 
+        
+        if (order.status === 'Delivered') {
+            return res.json({ success: false, message: 'The order status cannot be changed once the order has been delivered.' })
+        }
+
         order.status = status;
 
         if (order.orderedItems && order.orderedItems.length > 0) {

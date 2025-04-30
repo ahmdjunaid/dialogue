@@ -343,16 +343,18 @@
                             <h3 class="section-title">Order Status</h3>
                             <form id="order-status-form" class="status-form" onsubmit="updateOrderStatus(event)">
                                 <input type="hidden" name="orderId" value="<%= order.orderId %>">
-
-                                <select name="status" id="order-status-select" <%=(order.status === "Return Requested" ||
-                                    order.status==="Returned" || order.status === "Return Rejected" || order.status === "Cancelled" ) ? "disabled" : "" %>>
-                                    <% ["Pending", "Processing" , "Shipped" , "Delivered" , "Cancelled" , "Return Requested" , 
-                                   "Returned" , "Return Rejected"].forEach(option=> { %>
-                                        <option value="<%= option %>" <%=order.status===option ? "selected" : "" %>><%=
-                                                option %>
-                                        </option>
-                                        <% }) %>
+                                <% const disabledStatuses = ["Return Requested", "Returned", "Return Rejected", "Cancelled"]; %>
+                                <select name="status" id="order-status-select" <%= disabledStatuses.includes(order.status) ? "disabled" : "" %>>
+                                  <% const allStatuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Return Requested", "Returned", "Return Rejected"]; %>
+                                  <% allStatuses.forEach(statusOption => { %>
+                                    <option value="<%= statusOption %>" 
+                                      <%= order.status === statusOption ? "selected" : "" %> 
+                                      <%= disabledStatuses.includes(statusOption) ? "disabled" : "" %>>
+                                      <%= statusOption %>
+                                    </option>
+                                  <% }) %>
                                 </select>
+                                
 
                                 <button <%=(order.status === "Return Requested" ||
                                 order.status==="Returned" || order.status === "Return Rejected" || order.status === "Cancelled" ) ? "disabled" : "" %> type="submit">Update Status</button>
