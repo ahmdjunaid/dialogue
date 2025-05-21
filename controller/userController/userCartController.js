@@ -692,8 +692,6 @@ const loadCheckout = async (req, res) => {
             validUpto: { $gte: new Date(currentDate.setHours(0, 0, 0, 0)) }
         }).populate('applicableTo') || [];
 
-        console.log(selectedProduct)
-
         const result = selectedProduct.map(product => {
             const offers = allOffers
                 .filter(item => {
